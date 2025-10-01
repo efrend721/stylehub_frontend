@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Responsivo con Tarjetas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            /* Evita el scroll global del body */
+        }
+
+        /* Estilos para el Navbar */
+        .navbar {
+            background-color: #ADD8E6;
+            /* Azul claro */
+            height: 60px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        /* Estilos para el Sidebar */
+        .sidebar {
+            background-color: #D3D3D3;
+            /* Gris claro */
+            width: 200px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            transition: transform 0.3s ease;
+            /* Transición para animación en móvil */
+        }
+
+        /* Estilos para el contenedor principal */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 200px);
+            /* Ancho total menos el ancho del sidebar */
+            margin-left: 200px;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+            /* Altura total menos el alto del navbar */
+            overflow-y: auto;
+            /* Permite el scroll solo en el contenido principal */
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Estilos para el título */
+        .titulo {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        /* Estilos para el contenedor de tarjetas */
+        .cuadro-tarjetas {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            padding: 2rem;
+            flex-wrap: wrap;
+            /* Las tarjetas se ajustarán a la siguiente línea si no caben */
+        }
+
+        /* Estilos para las tarjetas */
+        .card {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 3rem;
+            width: 450px;
+            min-height: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 1.2rem 0;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1.1rem;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .value {
+            color: #333;
+        }
+
+        .total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c5530;
+            background: #f0f8f0;
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        /* ----- Media Queries para responsividad ----- */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                /* Oculta el sidebar por defecto */
+            }
+
+            .main-container {
+                width: 100%;
+                /* Ocupa todo el ancho */
+                margin-left: 0;
+            }
+
+            .cuadro-tarjetas {
+                flex-direction: column;
+                /* Apila las tarjetas verticalmente */
+                align-items: center;
+                /* Centra las tarjetas */
+            }
+
+            .card {
+                width: 90%;
+                /* Ajusta el ancho de la tarjeta para móviles */
+                max-width: 450px;
+                height: auto;
+                /* Altura automática para que se ajuste al contenido */
+            }
+
+            .titulo {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar"></div>
+    <div class="sidebar"></div>
+
+    <div class="main-container">
+        <h1 class="titulo">Informe de ventas</h1>
+
+        <div class="cuadro-tarjetas">
+            <div class="card">
+                <h2>Ventas Q1 2025</h2>
+                <div class="info-item">
+                    <span class="label">Productos vendidos:</span>
+                    <span class="value">1,250 unidades</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Clientes nuevos:</span>
+                    <span class="value">87 clientes</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Ingresos brutos:</span>
+                    <span class="value">$125,000</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Margen promedio:</span>
+                    <span class="value">35%</span>
+                </div>
+                <div class="total">
+                    Total Neto: $81,250
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Ventas Q2 2025</h2>
+                <div class="info-item">
+                    <span class="label">Productos vendidos:</span>
+                    <span class="value">1,580 unidades</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Clientes nuevos:</span>
+                    <span class="value">124 clientes</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Ingresos brutos:</span>
+                    <span class="value">$158,000</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Margen promedio:</span>
+                    <span class="value">42%</span>
+                </div>
+                <div class="total">
+                    Total Neto: $110,360
+                </div>
+            </div>
+            <div class="card">
+                <h2>Ventas Q1 2025</h2>
+                <div class="info-item">
+                    <span class="label">Productos vendidos:</span>
+                    <span class="value">1,250 unidades</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Clientes nuevos:</span>
+                    <span class="value">87 clientes</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Ingresos brutos:</span>
+                    <span class="value">$125,000</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Margen promedio:</span>
+                    <span class="value">35%</span>
+                </div>
+                <div class="total">
+                    Total Neto: $81,250
+                </div>
+
+            </div>
+            <div class="card">
+                <h2>Ventas Q1 2025</h2>
+                <div class="info-item">
+                    <span class="label">Productos vendidos:</span>
+                    <span class="value">1,250 unidades</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Clientes nuevos:</span>
+                    <span class="value">87 clientes</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Ingresos brutos:</span>
+                    <span class="value">$125,000</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Margen promedio:</span>
+                    <span class="value">35%</span>
+                </div>
+                <div class="total">
+                    Total Neto: $81,250
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
