@@ -90,10 +90,10 @@ export const SalesCard: React.FC<SalesCardProps> = ({ data }) => {
           <Box sx={{ mb: 2.5, pb: 2, borderBottom: "1px solid", borderColor: "grey.200" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
               <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
-                Productos vendidos
+                Valor actual
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
-                {data.productos}
+                {data.value}
               </Typography>
             </Box>
           </Box>
@@ -101,21 +101,10 @@ export const SalesCard: React.FC<SalesCardProps> = ({ data }) => {
           <Box sx={{ mb: 2.5, pb: 2, borderBottom: "1px solid", borderColor: "grey.200" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
               <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
-                Clientes nuevos
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "success.main" }}>
-                {data.clientes}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ mb: 2.5, pb: 2, borderBottom: "1px solid", borderColor: "grey.200" }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
-                Ingresos brutos
+                Período
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
-                {data.ingresos}
+                {data.subtitle}
               </Typography>
             </Box>
           </Box>
@@ -123,14 +112,14 @@ export const SalesCard: React.FC<SalesCardProps> = ({ data }) => {
           <Box sx={{ mb: 2.5, pb: 2, borderBottom: "1px solid", borderColor: "grey.200" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
               <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
-                Margen promedio
+                Cambio vs anterior
               </Typography>
               <Chip 
-                label={data.margen}
+                label={data.change}
                 size="small"
                 sx={{
-                  backgroundColor: "grey.100",
-                  color: "text.primary",
+                  backgroundColor: data.positive ? "success.light" : "error.light",
+                  color: data.positive ? "success.contrastText" : "error.contrastText",
                   fontWeight: 600,
                   fontSize: "0.75rem"
                 }}
@@ -170,7 +159,7 @@ export const SalesCard: React.FC<SalesCardProps> = ({ data }) => {
               fontSize: "2rem"
             }}
           >
-            {data.total}
+            {data.value}
           </Typography>
         </Box>
       </CardContent>

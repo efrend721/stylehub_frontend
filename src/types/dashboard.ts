@@ -1,8 +1,7 @@
 export interface CardData {
   title: string;
-  productos: string;
-  clientes: string;
-  ingresos: string;
-  margen: string;
-  total: string;
+  value: string;
+  change: string;
+  positive: boolean;
+  subtitle: string;
 }

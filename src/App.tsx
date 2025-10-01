@@ -1,17 +1,22 @@
 import React from 'react';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { Provider } from 'react-redux';
+import { ThemeProvider } from '@mui/material/styles';
+import { store } from './redux/store';
+import { DashboardLayout, DashboardContent, ModalProvider, NotificationProvider } from './components';
 import { appTheme } from './theme/theme';
-import { DashboardLayout } from './components/layout';
-import { DashboardContent } from './components/dashboard';
+import './App.css';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={appTheme}>
-      <CssBaseline />
-      <DashboardLayout>
-        <DashboardContent />
-      </DashboardLayout>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={appTheme}>
+        <DashboardLayout>
+          <DashboardContent />
+        </DashboardLayout>
+        <ModalProvider />
+        <NotificationProvider />
+      </ThemeProvider>
+    </Provider>
   );
 };
 
