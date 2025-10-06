@@ -24,7 +24,7 @@ Este proyecto implementa **Clean Architecture** con los siguientes patrones:
 
 ## 🛠️ Tecnologías
 
-- **Frontend Framework**: React 18 + TypeScript
+- **Frontend Framework**: React 19 + TypeScript
 - **Build Tool**: Vite
 - **UI Library**: Material-UI (MUI)
 - **Styling**: Styled Components + Emotion
