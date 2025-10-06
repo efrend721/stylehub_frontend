@@ -1,75 +1,137 @@
-# React + TypeScript + Vite
+# 💅 StyleHub - Gestión de Salones de Belleza y Spa
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**StyleHub** es una aplicación web moderna para la gestión integral de salones de belleza y spa, desarrollada con las mejores prácticas de arquitectura y tecnologías de vanguardia.
 
-Currently, two official plugins are available:
+## ✨ Características Principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎨 **Interfaz moderna** con Material-UI y Styled Components
+- 👥 **Gestión de clientes** y sus historiales
+- 📅 **Sistema de citas** inteligente
+- ✂️ **Catálogo de servicios** (cortes, tratamientos, spa)
+- 💰 **Control de ingresos** y métricas en tiempo real
+- 📊 **Dashboard analítico** con estadísticas del negocio
+- 🔐 **Sistema de autenticación** seguro
+- 📱 **Diseño responsive** para todos los dispositivos
 
-## React Compiler
+## 🏗️ Arquitectura
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Este proyecto implementa **Clean Architecture** con los siguientes patrones:
 
-Note: This will impact Vite dev & build performances.
+- ✅ **Barrel Exports** - Imports organizados y limpios
+- ✅ **Custom Hooks** - Lógica reutilizable y separada
+- ✅ **Container Pattern** - Separación de lógica y presentación
+- ✅ **Feature-based Structure** - Organización por dominios de negocio
 
-## Expanding the ESLint configuration
+## 🛠️ Tecnologías
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **UI Library**: Material-UI (MUI)
+- **Styling**: Styled Components + Emotion
+- **Routing**: React Router DOM
+- **State Management**: React Context + Custom Hooks
+- **Icons**: Material-UI Icons
+- **Package Manager**: pnpm
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📁 Estructura del Proyecto
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── app/                    # Configuración de la aplicación
+│   ├── config/            # Configuraciones (MUI theme, etc.)
+│   ├── providers/         # Providers globales (Auth, Theme)
+│   └── routes/            # Configuración de rutas
+├── common/                # Código compartido
+│   ├── components/        # Componentes reutilizables
+│   ├── hooks/            # Custom hooks globales
+│   ├── types/            # Tipos TypeScript globales
+│   └── utils/            # Utilidades y helpers
+└── features/             # Funcionalidades por dominio
+    ├── auth/             # Autenticación
+    │   ├── components/   # Componentes de auth
+    │   ├── hooks/        # Hooks específicos
+    │   ├── pages/        # Páginas de auth
+    │   └── types/        # Tipos de auth
+    └── dashboard/        # Panel principal
+        ├── components/   # Componentes del dashboard
+        ├── hooks/        # Hooks del dashboard
+        └── pages/        # Páginas del dashboard
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Inicio Rápido
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerrequisitos
+- Node.js 18+ 
+- pnpm (recomendado) o npm
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Instalación
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/efrend721/stylehub_frontend.git
+cd stylehub_frontend
+
+# Instalar dependencias
+pnpm install
+
+# Ejecutar en modo desarrollo
+pnpm run dev
 ```
+
+La aplicación estará disponible en `http://localhost:5173`
+
+### Comandos Disponibles
+
+```bash
+pnpm run dev          # Servidor de desarrollo
+pnpm run build        # Build para producción
+pnpm run preview      # Vista previa del build
+pnpm run lint         # Linter
+pnpm run type-check   # Verificación de tipos TypeScript
+```
+
+## 🎨 Características de UI/UX
+
+- **Logo personalizado** con iconos de spa y tijeras
+- **Tema consistente** con gradientes y sombras elegantes
+- **AppBar con búsqueda** integrada
+- **Sidebar persistente** con navegación intuitiva
+- **Cards interactivas** con efectos hover
+- **Formularios estilizados** con validación visual
+- **Responsive design** para móviles y desktop
+
+## 🔐 Autenticación
+
+Sistema de autenticación con:
+- Login/logout seguro
+- Rutas protegidas
+- Context API para estado global
+- Persistencia de sesión
+
+## 📊 Dashboard
+
+Panel de control con métricas específicas para salones:
+- **Clientes registrados**
+- **Servicios disponibles**  
+- **Ingresos diarios**
+- **Citas programadas**
+
+## 🤝 Contribución
+
+1. Fork del proyecto
+2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
+
+## 📝 Licencia
+
+Este proyecto está bajo la licencia MIT. Ver archivo `LICENSE` para más detalles.
+
+## 👨‍💻 Autor
+
+**Efrén** - [@efrend721](https://github.com/efrend721)
+
+---
+
+⭐ ¡Dale una estrella al proyecto si te ha sido útil!
