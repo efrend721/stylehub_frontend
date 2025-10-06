@@ -1,0 +1,1 @@
+export { StyleHubLogo } from './StyleHubLogo';

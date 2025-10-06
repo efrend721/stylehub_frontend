@@ -1,0 +1,1 @@
+export { AppBarWithSearch } from './AppBarWithSearch';
