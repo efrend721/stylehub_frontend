@@ -1,0 +1,76 @@
+src/
+├── features/
+│   ├── auth/
+│   │   ├── components/
+│   │   │   ├── LoginForm.tsx           # views/pages/auth-forms/
+│   │   │   ├── RegisterForm.tsx        # views/pages/auth-forms/
+│   │   │   └── AuthCardWrapper.tsx     # views/pages/authentication/
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts              # Nuevo
+│   │   │   └── useLocalStorage.ts      # hooks/useLocalStorage.ts
+│   │   ├── services/
+│   │   │   └── authService.ts          # Nuevo
+│   │   ├── types/
+│   │   │   └── authTypes.ts            # Nuevo
+│   │   └── index.ts
+│   ├── dashboard/
+│   │   ├── components/
+│   │   │   ├── EarningCard.tsx         # views/dashboard/Default/
+│   │   │   ├── TotalOrderCard.tsx      # views/dashboard/Default/
+│   │   │   ├── PopularCard.tsx         # views/dashboard/Default/
+│   │   │   └── AnalyticsChart.tsx      # views/dashboard/Default/
+│   │   ├── hooks/
+│   │   │   └── useDashboardData.ts     # Nuevo
+│   │   ├── services/
+│   │   │   └── dashboardService.ts     # Nuevo
+│   │   ├── types/
+│   │   │   └── dashboardTypes.ts       # Nuevo
+│   │   └── index.ts
+│   ├── layout/
+│   │   ├── components/
+│   │   │   ├── MainLayout.tsx          # layout/MainLayout/
+│   │   │   ├── Header.tsx              # layout/MainLayout/Header/
+│   │   │   ├── Sidebar.tsx             # layout/MainLayout/Sidebar/
+│   │   │   └── Navigation.tsx          # layout/MainLayout/MenuList/
+│   │   ├── hooks/
+│   │   │   ├── useMenuCollapse.ts      # hooks/useMenuCollapse.ts
+│   │   │   └── useConfig.ts            # hooks/useConfig.ts
+│   │   └── index.ts
+│   └── utilities/
+│       ├── components/
+│       │   ├── ColorPalette.tsx        # views/utilities/Color.tsx
+│       │   ├── Typography.tsx          # views/utilities/Typography.tsx
+│       │   └── Shadow.tsx              # views/utilities/Shadow.tsx
+│       └── index.ts
+├── shared/
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── MainCard.tsx            # ui-component/cards/MainCard.tsx
+│   │   │   ├── SubCard.tsx             # ui-component/cards/SubCard.tsx
+│   │   │   ├── AnimateButton.tsx       # ui-component/extended/AnimateButton.tsx
+│   │   │   └── Avatar.tsx              # ui-component/extended/Avatar.tsx
+│   │   └── common/
+│   │       ├── Logo.tsx                # ui-component/Logo.tsx
+│   │       └── Loader.tsx              # ui-component/Loader.tsx
+│   ├── hooks/
+│   │   └── useScriptRef.ts             # hooks/useScriptRef.ts
+│   ├── utils/
+│   │   ├── password-strength.ts        # utils/password-strength.ts
+│   │   ├── colorUtils.ts               # utils/colorUtils.ts
+│   │   └── getImageUrl.ts              # utils/getImageUrl.ts
+│   ├── types/
+│   │   ├── theme.d.ts                  # types/theme.d.ts
+│   │   └── components.d.ts             # types/components.d.ts
+│   └── constants/
+│       └── index.ts                    # store/constant.ts
+├── theme/
+│   ├── index.tsx                       # themes/index.tsx
+│   ├── palette.tsx                     # themes/palette.tsx
+│   ├── typography.tsx                  # themes/typography.tsx
+│   ├── custom-shadows.tsx              # themes/custom-shadows.tsx
+│   └── overrides/                      # themes/overrides/
+├── assets/                             # assets/ (sin cambios)
+├── App.tsx
+├── main.tsx                            # index.tsx renombrado
+├── routes.tsx                          # routes/index.tsx
+└── vite-env.d.ts

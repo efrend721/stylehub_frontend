@@ -1,0 +1,66 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path mapping - using modern approach */
+    "paths": {
+      "@/*": ["./src/*"],
+      "App": ["./src/App"],
+      "api/*": ["./src/api/*"],
+      "assets/*": ["./src/assets/*"],
+      "components/*": ["./src/components/*"],
+      "config": ["./src/config"],
+      "contexts/*": ["./src/contexts/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "layout/*": ["./src/layout/*"],
+      "menu-items": ["./src/menu-items"],
+      "menu-items/*": ["./src/menu-items/*"],
+      "reportWebVitals": ["./src/reportWebVitals"],
+      "routes": ["./src/routes"],
+      "routes/*": ["./src/routes/*"],
+      "serviceWorker": ["./src/serviceWorker"],
+      "store/*": ["./src/store/*"],
+      "themes": ["./src/themes"],
+      "themes/*": ["./src/themes/*"],
+      "ui-component/*": ["./src/ui-component/*"],
+      "utils/*": ["./src/utils/*"],
+      "views/*": ["./src/views/*"]
+    },
+
+    /* Additional strict checks - disabled for migration */
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "noImplicitReturns": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,  
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "alwaysStrict": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "src",
+    "src/types/**/*"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
