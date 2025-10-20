@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import React from 'react';
+import { useAuthLogin } from './';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
@@ -32,102 +33,19 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 // ===============================|| JWT - LOGIN ||=============================== //
 
 export default function AuthLogin() {
-  const { login, isLoading } = useAuth();
-  const navigate = useNavigate();
-  const [checked, setChecked] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ usuario_acceso?: string; contrasena?: string }>({});
-  // Contenedor imperativo para mostrar alertas sin re-render del componente
-  const alertHostRef = useRef<HTMLDivElement | null>(null);
-  const alertRootRef = useRef<ReturnType<typeof createRoot> | null>(null);
-  // Formulario de datos
-  const [formData, setFormData] = useState({
-    usuario_acceso: '',
-    contrasena: ''
-  });
-
-  const showAlert = (severity: 'error' | 'success', message: string) => {
-    if (!alertHostRef.current) return;
-    if (!alertRootRef.current) {
-      alertRootRef.current = createRoot(alertHostRef.current);
-    }
-    alertRootRef.current.render(
-      <Box sx={{ mt: 2 }}>
-        <Alert severity={severity}>{message}</Alert>
-      </Box>
-    );
-  };
-
-  const clearAlert = () => {
-    if (alertRootRef.current) {
-      alertRootRef.current.unmount();
-      alertRootRef.current = null;
-    }
-    if (alertHostRef.current) {
-      alertHostRef.current.innerHTML = '';
-    }
-  };
-
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    // Limpiar alertas al escribir sin re-render
-    clearAlert();
-    // Limpiar error de campo al escribir
-    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    clearAlert();
-    // Validaciones en cliente antes de llamar al backend
-    const usuario = trim(formData.usuario_acceso);
-    const password = trim(formData.contrasena);
-
-    const nextFieldErrors: { usuario_acceso?: string; contrasena?: string } = {};
-    if (!usuario) nextFieldErrors.usuario_acceso = 'Campo obligatorio';
-    else if (usuario.length < 3) nextFieldErrors.usuario_acceso = 'Mínimo 3 caracteres';
-    if (!password) nextFieldErrors.contrasena = 'Campo obligatorio';
-    else if (password.length < 6) nextFieldErrors.contrasena = 'Mínimo 6 caracteres';
-
-    if (nextFieldErrors.usuario_acceso || nextFieldErrors.contrasena) {
-      setFieldErrors(nextFieldErrors);
-      showAlert('error', 'Por favor, corrige los campos marcados');
-      return;
-    }
-    try {
-      const res = await login({
-        usuario_acceso: usuario,
-        contrasena: password
-      });
-      // Mostrar mensaje de éxito desde el backend si existe; fallback a "Bienvenido, {nombre}!"
-      const backendMsg = (res as any)?.message as string | undefined;
-      const nombre = res?.data?.user?.nombre_usuario ?? 'Usuario';
-      const successMsg = backendMsg || `¡Bienvenido, ${nombre}!`;
-      showAlert('success', successMsg);
-      // Mostrar el toast solo en Login y cerrarlo antes de navegar para que no se vea en el dashboard
-      const toastId = notify.success(successMsg, { duration: 1000 });
-      setTimeout(() => {
-        // Cerrar el toast de forma explícita antes de cambiar de ruta
-        notify.dismiss(toastId);
-        navigate('/dashboard/default');
-      }, 1000);
-    } catch (_err) {
-      // Los errores del backend se muestran como toast.error desde AuthContext.
-      // No duplicamos alerta en pantalla para evitar ruido visual.
-    }
-  };
+  const {
+    isLoading,
+    checked,
+    setChecked,
+    showPassword,
+    handleClickShowPassword,
+    handleMouseDownPassword,
+    fieldErrors,
+    formData,
+    handleInputChange,
+    handleSubmit,
+    alertHostRef
+  } = useAuthLogin();
 
   return (
     <form onSubmit={handleSubmit}>
