@@ -79,7 +79,7 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, setSele
       case 'collapse':
         return <NavCollapse key={menu.id} menu={menu} level={1} parentId={currentItem.id} />;
       case 'item':
-        return <NavItem key={menu.id} item={menu} level={1} />;
+        return <NavItem key={menu.id} item={menu} level={1} setSelectedID={undefined} />;
       default:
         return (
           <Typography key={menu?.id} variant="h6" align="center" sx={{ color: 'error.main' }}>

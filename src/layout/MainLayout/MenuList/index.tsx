@@ -17,31 +17,40 @@ function MenuList() {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
 
-  const [selectedID, setSelectedID] = useState('');
+  const [, setSelectedID] = useState('');
 
   const lastItem = null;
 
   let lastItemIndex = menuItems.items.length - 1;
   let remItems = [];
-  let lastItemId;
+  let lastItemId: any;
 
   if (lastItem && lastItem < menuItems.items.length) {
     lastItemId = menuItems.items[lastItem - 1].id;
     lastItemIndex = lastItem - 1;
-    remItems = menuItems.items.slice(lastItem - 1, menuItems.items.length).map((item) => ({
-      title: item.title,
-      elements: item.children,
-      icon: item.icon,
-      ...(item.url && {
-        url: item.url
-      })
-    }));
+    remItems = menuItems.items.slice(lastItem - 1, menuItems.items.length).map((item) => {
+      if ('title' in item) {
+        const remItem: any = {
+          title: item.title,
+          elements: item.children
+        };
+        if ('icon' in item) {
+          remItem.icon = item.icon;
+        }
+        if ('url' in item && item.url) {
+          remItem.url = item.url;
+        }
+        return remItem;
+      }
+      return null;
+    }).filter(Boolean);
   }
 
   const navItems = menuItems.items.slice(0, lastItemIndex + 1).map((item, index) => {
     switch (item.type) {
-      case 'group':
-        if (item.url && item.id !== lastItemId) {
+      case 'group': {
+        // Proteger acceso a url
+        if ('url' in item && item.url && item.id !== lastItemId) {
           return (
             <List key={item.id}>
               <NavItem item={item} level={1} isParents setSelectedID={() => setSelectedID('')} />
@@ -54,13 +63,13 @@ function MenuList() {
           <NavGroup
             key={item.id}
             setSelectedID={setSelectedID}
-            selectedID={selectedID}
             item={item}
             lastItem={lastItem}
             remItems={remItems}
             lastItemId={lastItemId}
           />
         );
+      }
       default:
         return (
           <Typography key={item.id} variant="h6" align="center" sx={{ color: 'error.main' }}>

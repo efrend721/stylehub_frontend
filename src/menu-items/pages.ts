@@ -2,9 +2,7 @@
 import { IconFiles } from '@tabler/icons-react';
 
 // constant
-const icons = {
-  IconFiles
-};
+const icons = { IconFiles };
 
 // ==============================|| PAGES MENU ITEMS ||============================== //
 

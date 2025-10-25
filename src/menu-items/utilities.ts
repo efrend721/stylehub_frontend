@@ -2,12 +2,8 @@
 import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons-react';
 
 // constant
-const icons = {
-  IconTypography,
-  IconPalette,
-  IconShadow,
-  IconWindmill
-};
+const icons = { IconTypography, IconPalette, IconShadow, IconWindmill };
+  
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
 

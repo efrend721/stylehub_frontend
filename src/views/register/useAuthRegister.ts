@@ -39,9 +39,7 @@ export function useAuthRegister() {
     if (!alertRootRef.current) {
       alertRootRef.current = createRoot(alertHostRef.current);
     }
-    alertRootRef.current.render(
-      React.createElement(AuthRegisterAlerts, { severity, message })
-    );
+    alertRootRef.current.render(React.createElement(AuthRegisterAlerts, { severity, message }));
   };
 
   const clearAlert = () => {
