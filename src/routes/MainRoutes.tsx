@@ -18,7 +18,6 @@ const SamplePage = Loadable(lazy(() => import('views/sample-page')));
 
 // admin routing (new)
 const AdminUsuarios = Loadable(lazy(() => import('views/admin/usuarios')));
-const AdminUsuarioDetalle = Loadable(lazy(() => import('views/admin/usuarios/Detalle')));
 const AdminRoles = Loadable(lazy(() => import('views/admin/roles')));
 const AdminPermisos = Loadable(lazy(() => import('views/admin/permisos')));
 const AdminMenus = Loadable(lazy(() => import('views/admin/menus')));
@@ -68,8 +67,7 @@ const MainRoutes = {
     {
       path: 'admin',
       children: [
-        { path: 'usuarios', element: <AdminUsuarios /> },
-        { path: 'usuarios/:usuario', element: <AdminUsuarioDetalle /> },
+  { path: 'usuarios', element: <AdminUsuarios /> },
         { path: 'roles', element: <AdminRoles /> },
         { path: 'permisos', element: <AdminPermisos /> },
         { path: 'menus', element: <AdminMenus /> },
