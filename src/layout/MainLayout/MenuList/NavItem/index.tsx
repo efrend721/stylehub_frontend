@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, isValidElement } from 'react';
 import { Link, matchPath, useLocation } from 'react-router-dom';
 
 // material-ui
@@ -48,12 +48,33 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
     window.removeEventListener('resize', compareSize);
   }, []);
 
-  const Icon = item?.icon;
-  const itemIcon = item?.icon ? (
-    <Icon stroke={1.5} size={drawerOpen ? '20px' : '24px'} style={{ ...(isParents && { fontSize: 20, stroke: '1.5' }) }} />
-  ) : (
-    <FiberManualRecordIcon sx={{ width: isSelected ? 8 : 6, height: isSelected ? 8 : 6 }} fontSize={level > 0 ? 'inherit' : 'medium'} />
-  );
+  let itemIcon: React.ReactNode;
+  if (item?.icon) {
+    const IconAny: any = item.icon;
+    if (typeof IconAny === 'function') {
+      itemIcon = (
+        <IconAny
+          stroke={1.5}
+          size={drawerOpen ? '20px' : '24px'}
+          style={{ ...(isParents && { fontSize: 20, stroke: '1.5' }) }}
+        />
+      );
+    } else if (isValidElement(IconAny)) {
+      // Already a React element instance; render as-is
+      itemIcon = IconAny;
+    } else {
+      itemIcon = (
+        <FiberManualRecordIcon
+          sx={{ width: isSelected ? 8 : 6, height: isSelected ? 8 : 6 }}
+          fontSize={level > 0 ? 'inherit' : 'medium'}
+        />
+      );
+    }
+  } else {
+    itemIcon = (
+      <FiberManualRecordIcon sx={{ width: isSelected ? 8 : 6, height: isSelected ? 8 : 6 }} fontSize={level > 0 ? 'inherit' : 'medium'} />
+    );
+  }
 
   let itemTarget = '_self';
   if (item.target) {

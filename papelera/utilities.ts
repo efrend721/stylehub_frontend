@@ -1,3 +1,6 @@
+// Deprecated: menú ahora proviene del endpoint /menus.
+// Archivo intencionalmente vacío. Será eliminado posteriormente.
+
 // assets
 import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons-react';
 

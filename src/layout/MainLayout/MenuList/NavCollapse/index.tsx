@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, isValidElement } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // material-ui
@@ -101,7 +101,7 @@ export default function NavCollapse({ menu, level, parentId }) {
       case 'collapse':
         return <NavCollapse key={item.id} menu={item} level={level + 1} parentId={parentId} />;
       case 'item':
-        return <NavItem key={item.id} item={item} level={level + 1} />;
+        return <NavItem key={item.id} item={item} level={level + 1} setSelectedID={undefined} />;
       default:
         return (
           <Typography key={item.id} variant="h6" align="center" sx={{ color: 'error.main' }}>
@@ -113,18 +113,32 @@ export default function NavCollapse({ menu, level, parentId }) {
 
   const isSelected = selected === menu.id;
 
-  const Icon = menu.icon;
-  const menuIcon = menu.icon ? (
-    <Icon strokeWidth={1.5} size={drawerOpen ? '20px' : '24px'} />
-  ) : (
-    <FiberManualRecordIcon
-      sx={{
-        width: isSelected ? 8 : 6,
-        height: isSelected ? 8 : 6
-      }}
-      fontSize={level > 0 ? 'inherit' : 'medium'}
-    />
-  );
+  let menuIcon: React.ReactNode;
+  if (menu.icon) {
+    const IconAny: any = menu.icon;
+    if (typeof IconAny === 'function') {
+      menuIcon = <IconAny strokeWidth={1.5} size={drawerOpen ? '20px' : '24px'} />;
+    } else if (isValidElement(IconAny)) {
+      menuIcon = IconAny;
+    } else {
+      menuIcon = (
+        <FiberManualRecordIcon
+          sx={{ width: isSelected ? 8 : 6, height: isSelected ? 8 : 6 }}
+          fontSize={level > 0 ? 'inherit' : 'medium'}
+        />
+      );
+    }
+  } else {
+    menuIcon = (
+      <FiberManualRecordIcon
+        sx={{
+          width: isSelected ? 8 : 6,
+          height: isSelected ? 8 : 6
+        }}
+        fontSize={level > 0 ? 'inherit' : 'medium'}
+      />
+    );
+  }
 
   const collapseIcon = drawerOpen ? (
     <IconChevronUp stroke={1.5} size="16px" style={{ marginTop: 'auto', marginBottom: 'auto' }} />
@@ -246,7 +260,7 @@ export default function NavCollapse({ menu, level, parentId }) {
             }}
           >
             {({ TransitionProps }) => (
-              <Transitions in={openMini} {...TransitionProps}>
+              <Transitions in={openMini} sx={{}} {...TransitionProps}>
                 <Paper
                   sx={{
                     overflow: 'hidden',

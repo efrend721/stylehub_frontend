@@ -59,7 +59,7 @@ export function useAuthLogin() {
       return;
     }
     try {
-      const res = await login({ usuario_acceso: usuario, contrasena: password });
+  const res = await login({ usuario_acceso: usuario, contrasena: password }, checked);
       const backendMsg = (res as any)?.message as string | undefined;
       const nombre = res?.data?.user?.nombre_usuario ?? 'Usuario';
       const successMsg = backendMsg || `¡Bienvenido, ${nombre}!`;

@@ -16,6 +16,19 @@ const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 // sample page routing
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
 
+// admin routing (new)
+const AdminUsuarios = Loadable(lazy(() => import('views/admin/usuarios')));
+const AdminUsuarioDetalle = Loadable(lazy(() => import('views/admin/usuarios/Detalle')));
+const AdminRoles = Loadable(lazy(() => import('views/admin/roles')));
+const AdminPermisos = Loadable(lazy(() => import('views/admin/permisos')));
+const AdminMenus = Loadable(lazy(() => import('views/admin/menus')));
+const AdminRutasProtegidas = Loadable(lazy(() => import('views/admin/rutas-protegidas')));
+const AdminConfiguracion = Loadable(lazy(() => import('views/admin/configuracion')));
+
+// auditoría y reportes (new)
+const AuditLogs = Loadable(lazy(() => import('views/audit/logs')));
+const Reportes = Loadable(lazy(() => import('views/reportes')));
+
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -50,6 +63,31 @@ const MainRoutes = {
     {
       path: '/sample-page',
       element: <SamplePage />
+    },
+    // admin
+    {
+      path: 'admin',
+      children: [
+        { path: 'usuarios', element: <AdminUsuarios /> },
+        { path: 'usuarios/:usuario', element: <AdminUsuarioDetalle /> },
+        { path: 'roles', element: <AdminRoles /> },
+        { path: 'permisos', element: <AdminPermisos /> },
+        { path: 'menus', element: <AdminMenus /> },
+        { path: 'rutas-protegidas', element: <AdminRutasProtegidas /> },
+        { path: 'configuracion', element: <AdminConfiguracion /> }
+      ]
+    },
+    // auditoría
+    {
+      path: 'audit',
+      children: [
+        { path: 'logs', element: <AuditLogs /> }
+      ]
+    },
+    // reportes
+    {
+      path: 'reportes',
+      element: <Reportes />
     }
   ]
 };

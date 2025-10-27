@@ -12,7 +12,8 @@ import MuiBreadcrumbs from '@mui/material/Breadcrumbs';
 import Box from '@mui/material/Box';
 
 // project imports
-import navigation from 'menu-items';
+import useMenuItems from 'hooks/useMenuItems';
+import type { UIMenuItem } from 'types/menu';
 
 // assets
 import { IconChevronRight, IconTallymark1 } from '@tabler/icons-react';
@@ -50,8 +51,9 @@ export default function Breadcrumbs({
 }) {
   const theme = useTheme();
   const location = useLocation();
-  const [main, setMain] = useState();
-  const [item, setItem] = useState();
+  const [main, setMain] = useState<UIMenuItem | undefined>();
+  const [item, setItem] = useState<UIMenuItem | undefined>();
+  const { items: navItems } = useMenuItems();
 
   const iconSX = {
     marginRight: 6,
@@ -71,6 +73,7 @@ export default function Breadcrumbs({
   let customLocation = location.pathname;
 
   useEffect(() => {
+    const navigation = { items: navItems };
     navigation?.items?.map((menu) => {
       if (menu.type && menu.type === 'group') {
         if (menu?.url && menu.url === customLocation) {
@@ -82,12 +85,12 @@ export default function Breadcrumbs({
       }
       return false;
     });
-  });
+  }, [navItems, customLocation]);
 
   // set active item state
-  const getCollapse = (menu) => {
+  const getCollapse = (menu: UIMenuItem) => {
     if (!custom && menu.children) {
-      menu.children.filter((collapse) => {
+      menu.children.filter((collapse: UIMenuItem) => {
         if (collapse.type && collapse.type === 'collapse') {
           getCollapse(collapse);
           if (collapse.url === customLocation) {

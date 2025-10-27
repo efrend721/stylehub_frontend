@@ -71,7 +71,7 @@ export interface AuthResponse {
 }
 
 interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<AuthResponse>;
+  login: (credentials: LoginCredentials, remember?: boolean) => Promise<AuthResponse>;
   register: (userData: RegisterData) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
   clearAuth: () => void;
@@ -89,10 +89,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: true
   });
 
+  const readStoredAuth = () => {
+    try {
+      // Prefer sessionStorage (no "mantenerme"), fallback to localStorage (remembered)
+      const sToken = sessionStorage.getItem('auth_token');
+      const sUser = sessionStorage.getItem('auth_user');
+      if (sToken && sUser) return { token: sToken, userData: sUser };
+
+      const lToken = localStorage.getItem('auth_token');
+      const lUser = localStorage.getItem('auth_user');
+      if (lToken && lUser) return { token: lToken, userData: lUser };
+    } catch {}
+    return { token: null as string | null, userData: null as string | null };
+  };
+
   // Check for existing auth on app start
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    const userData = localStorage.getItem('auth_user');
+    const { token, userData } = readStoredAuth();
 
     if (token && userData) {
       try {
@@ -112,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
+  const login = async (credentials: LoginCredentials, remember: boolean = true): Promise<AuthResponse> => {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
@@ -180,9 +193,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if ('success' in responseData && responseData.success && 'data' in responseData && responseData.data) {
         const { token, user } = (responseData as AuthResponse).data;
 
-        // Store in localStorage
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('auth_user', JSON.stringify(user));
+        // Store per preference: remember -> localStorage, else sessionStorage
+        try {
+          if (remember) {
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('auth_user', JSON.stringify(user));
+            // ensure session copies are cleared
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('auth_user');
+          } else {
+            sessionStorage.setItem('auth_token', token);
+            sessionStorage.setItem('auth_user', JSON.stringify(user));
+            // ensure local copies are cleared
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+          }
+        } catch {}
 
         // Update state
         setState({
@@ -290,9 +316,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const getAnyToken = (): string | null => {
+    try {
+      return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
+    } catch {
+      return null;
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAnyToken();
       if (token) {
         // Call logout endpoint (optional - semantic only)
         await fetch(`${API_BASE}/auth/logout`, {
@@ -314,8 +348,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const clearAuth = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    try {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      sessionStorage.removeItem('auth_token');
+      sessionStorage.removeItem('auth_user');
+    } catch {}
     setState({
       user: null,
       token: null,

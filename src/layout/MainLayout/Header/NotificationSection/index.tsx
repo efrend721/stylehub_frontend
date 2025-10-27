@@ -117,7 +117,7 @@ export default function NotificationSection() {
       >
         {({ TransitionProps }) => (
           <ClickAwayListener onClickAway={handleClose}>
-            <Transitions position={downMD ? 'top' : 'top-right'} in={open} {...TransitionProps}>
+            <Transitions position={downMD ? 'top' : 'top-right'} in={open} sx={{}} {...TransitionProps}>
               <Paper>
                 {open && (
                   <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]} sx={{ maxWidth: 330 }}>

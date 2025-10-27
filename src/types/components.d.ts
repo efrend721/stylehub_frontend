@@ -13,6 +13,7 @@ export interface MainCardProps {
   headerSX?: SxProps<Theme>;
   darkTitle?: boolean;
   secondary?: ReactNode;
+  elevation?: number;
   shadow?: string;
   sx?: SxProps<Theme>;
   title?: ReactNode;

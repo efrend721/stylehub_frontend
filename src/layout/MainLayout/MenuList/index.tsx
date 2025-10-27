@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 // project imports
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
-import menuItems from 'menu-items';
+import useMenuItems from 'hooks/useMenuItems';
 
 import { useGetMenuMaster } from 'api/menu';
 
@@ -20,15 +20,16 @@ function MenuList() {
   const [, setSelectedID] = useState('');
 
   const lastItem = null;
+  const { items: sourceItems, loading: menuLoading, error: menuError, source } = useMenuItems();
 
-  let lastItemIndex = menuItems.items.length - 1;
-  let remItems = [];
+  let lastItemIndex = sourceItems ? sourceItems.length - 1 : 0;
+  let remItems = [] as any[];
   let lastItemId: any;
 
-  if (lastItem && lastItem < menuItems.items.length) {
-    lastItemId = menuItems.items[lastItem - 1].id;
+  if (lastItem && sourceItems && lastItem < sourceItems.length) {
+    lastItemId = sourceItems[lastItem - 1].id;
     lastItemIndex = lastItem - 1;
-    remItems = menuItems.items.slice(lastItem - 1, menuItems.items.length).map((item) => {
+    remItems = sourceItems.slice(lastItem - 1, sourceItems.length).map((item) => {
       if ('title' in item) {
         const remItem: any = {
           title: item.title,
@@ -46,7 +47,8 @@ function MenuList() {
     }).filter(Boolean);
   }
 
-  const navItems = menuItems.items.slice(0, lastItemIndex + 1).map((item, index) => {
+  const navArray = Array.isArray(sourceItems) ? sourceItems : [];
+  const navItems = navArray.slice(0, lastItemIndex + 1).map((item, index) => {
     switch (item.type) {
       case 'group': {
         // Proteger acceso a url

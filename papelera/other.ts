@@ -1,3 +1,6 @@
+// Deprecated: menú ahora proviene del endpoint /menus.
+// Archivo intencionalmente vacío. Será eliminado posteriormente.
+
 // assets
 import { IconBrandChrome, IconHelp } from '@tabler/icons-react';
 

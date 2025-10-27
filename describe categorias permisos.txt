@@ -1,0 +1,257 @@
+ describe categorias_permisos;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_categoria        | int          | NO   | PRI | NULL              | auto_increment                                |
+| nombre              | varchar(50)  | NO   | MUL | NULL              |                                               |
+| descripcion         | varchar(100) | YES  |     | NULL              |                                               |
+| estado              | tinyint      | YES  | MUL | 1                 |                                               |
+| fecha_creacion      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+6 rows in set (0.00 sec)
+
+mysql> describe menus_items ;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_menu_item        | int          | NO   | PRI | NULL              | auto_increment                                |
+| parent_id           | int          | YES  | MUL | NULL              |                                               |
+| titulo              | varchar(50)  | NO   |     | NULL              |                                               |
+| tipo                | varchar(50)  | NO   |     | NULL              |                                               |
+| url                 | varchar(100) | YES  |     | NULL              |                                               |
+| icono               | varchar(50)  | YES  |     | NULL              |                                               |
+| breadcrumbs         | tinyint(1)   | YES  |     | 1                 |                                               |
+| orden               | tinyint      | YES  |     | NULL              |                                               |
+| estado              | tinyint(1)   | YES  |     | 1                 |                                               |
+| fecha_creacion      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+11 rows in set (0.01 sec)
+
+mysql> describe permisos ;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_permiso          | int          | NO   | PRI | NULL              | auto_increment                                |
+| nombre              | varchar(50)  | NO   | MUL | NULL              |                                               |
+| codigo              | varchar(50)  | NO   | UNI | NULL              |                                               |
+| descripcion         | varchar(100) | YES  |     | NULL              |                                               |
+| estado              | tinyint      | YES  | MUL | 1                 |                                               |
+| id_categoria        | int          | NO   | MUL | NULL              |                                               |
+| fecha_creacion      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+8 rows in set (0.00 sec)
+
+mysql> describe roles ;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_rol              | tinyint      | NO   | PRI | NULL              | auto_increment                                |
+| nombre              | varchar(50)  | NO   | UNI | NULL              |                                               |
+| descripcion         | varchar(100) | YES  |     | NULL              |                                               |
+| estado              | tinyint      | YES  | MUL | 1                 |                                               |
+| fecha_creacion      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+6 rows in set (0.00 sec)
+
+mysql> describe roles_menu_items;
++---------------------+------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type       | Null | Key | Default           | Extra                                         |
++---------------------+------------+------+-----+-------------------+-----------------------------------------------+
+| id_rol              | tinyint    | NO   | PRI | NULL              |                                               |
+| id_menu_item        | int        | NO   | PRI | NULL              |                                               |
+| estado              | tinyint(1) | YES  |     | 1                 |                                               |
+| fecha_creacion      | timestamp  | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp  | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+------------+------+-----+-------------------+-----------------------------------------------+
+5 rows in set (0.01 sec)
+
+mysql> describe roles_permisos ;
++---------------------+-----------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type      | Null | Key | Default           | Extra                                         |
++---------------------+-----------+------+-----+-------------------+-----------------------------------------------+
+| id_rol              | tinyint   | NO   | PRI | NULL              |                                               |
+| id_permiso          | int       | NO   | PRI | NULL              |                                               |
+| estado              | tinyint   | YES  | MUL | 1                 |                                               |
+| fecha_creacion      | timestamp | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+-----------+------+-----+-------------------+-----------------------------------------------+
+5 rows in set (0.01 sec)
+
+mysql> describe rutas_permisos ;
++---------------------+-----------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type      | Null | Key | Default           | Extra                                         |
++---------------------+-----------+------+-----+-------------------+-----------------------------------------------+
+| id_menu_item        | int       | NO   | PRI | NULL              |                                               |
+| id_permiso          | int       | NO   | PRI | NULL              |                                               |
+| estado              | tinyint   | YES  | MUL | 1                 |                                               |
+| fecha_creacion      | timestamp | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+-----------+------+-----+-------------------+-----------------------------------------------+
+5 rows in set (0.01 sec)
+
+mysql> describe rutas_protegidas ;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_ruta             | int          | NO   | PRI | NULL              | auto_increment                                |
+| ruta                | varchar(100) | NO   | UNI | NULL              |                                               |
+| descripcion         | varchar(100) | YES  |     | NULL              |                                               |
+| estado              | tinyint      | YES  | MUL | 1                 |                                               |
+| fecha_creacion      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+6 rows in set (0.00 sec)
+
+mysql> 
+
+mysql> select * from categorias_permisos;
++--------------+-------------------------+---------------------------------------------------+--------+---------------------+---------------------+
+| id_categoria | nombre                  | descripcion                                       | estado | fecha_creacion      | fecha_actualizacion |
++--------------+-------------------------+---------------------------------------------------+--------+---------------------+---------------------+
+|            1 | Administración General  | Permisos generales de administración del sistema  |      1 | 2025-09-25 21:32:21 | 2025-09-29 09:27:08 |
+|            2 | Usuarios                | Permisos para gestión de usuarios                 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|            3 | Productos               | Permisos para gestión de productos                |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|            4 | Ventas                  | Permisos para gestión de ventas                   |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|            5 | Inventario              | Permisos para gestión de inventario               |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|            6 | Reportes                | Permisos para visualización de reportes           |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|            9 | Administración          | Categoría duplicada                               |      1 | 2025-09-29 09:28:32 | 2025-09-29 09:28:32 |
++--------------+-------------------------+---------------------------------------------------+--------+---------------------+---------------------+
+select * from menus_items ;
++--------------+-----------+-------------+-------+--------------------+----------------+-------------+-------+--------+---------------------+---------------------+
+| id_menu_item | parent_id | titulo      | tipo  | url                | icono          | breadcrumbs | orden | estado | fecha_creacion      | fecha_actualizacion |
++--------------+-----------+-------------+-------+--------------------+----------------+-------------+-------+--------+---------------------+---------------------+
+|            1 |      NULL | Dashboard   | group | NULL               | NULL           |           1 |     1 |      1 | 2025-10-25 10:20:05 | 2025-10-25 10:20:05 |
+|            2 |         1 | Dashboard   | item  | /dashboard/default | IconDashboard  |           0 |     1 |      1 | 2025-10-25 10:20:05 | 2025-10-25 10:20:05 |
+|            3 |      NULL | Utilities   | group | NULL               | NULL           |           1 |     2 |      1 | 2025-10-25 10:20:05 | 2025-10-25 10:20:05 |
+|            4 |         3 | Typography  | item  | /typography        | IconTypography |           0 |     1 |      1 | 2025-10-25 10:20:05 | 2025-10-25 10:20:05 |
+|            5 |      NULL | Dashboard   | group | NULL               | NULL           |           1 |     1 |      1 | 2025-10-25 10:24:08 | 2025-10-25 10:24:08 |
+|            6 |      NULL | Pages       | group | NULL               | IconFiles      |           1 |     2 |      1 | 2025-10-25 10:27:23 | 2025-10-25 10:27:23 |
+|            7 |      NULL | Pages       | group | NULL               | IconFiles      |           1 |     2 |      1 | 2025-10-25 10:28:09 | 2025-10-25 10:28:09 |
+|            8 |         7 | Sample Page | item  | /sample-page       | IconFiles      |           0 |     1 |      1 | 2025-10-25 10:29:04 | 2025-10-25 10:29:04 |
+|            9 |      NULL | Pages       | group | NULL               | IconFiles      |           1 |     2 |      1 | 2025-10-25 10:29:45 | 2025-10-25 10:29:45 |
+|           10 |      NULL | Utilities   | group | NULL               | NULL           |           1 |     3 |      1 | 2025-10-25 10:29:53 | 2025-10-25 10:29:53 |
++--------------+-----------+-------------+-------+--------------------+----------------+-------------+-------+--------+---------------------+---------------------+
+10 rows in set (0.00 sec)
+
+ select * from permisos ;
++------------+--------------------------+-------------------------+------------------------------------------------------+--------+--------------+---------------------+---------------------+
+| id_permiso | nombre                   | codigo                  | descripcion                                          | estado | id_categoria | fecha_creacion      | fecha_actualizacion |
++------------+--------------------------+-------------------------+------------------------------------------------------+--------+--------------+---------------------+---------------------+
+|          1 | Gestionar Sistema        | GESTIONAR_SISTEMA       | Gestión completa del sistema                         |      1 |            1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          2 | Configurar Sistema       | CONFIGURAR_SISTEMA      | Configuración del sistema                            |      1 |            1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          3 | Crear Usuarios           | CREAR_USUARIOS          | Crear nuevos usuarios                                |      1 |            2 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          4 | Leer Usuarios            | LEER_USUARIOS           | Visualizar usuarios                                  |      1 |            2 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          5 | Actualizar Usuarios      | ACTUALIZAR_USUARIOS     | Modificar usuarios existentes                        |      1 |            2 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          6 | Eliminar Usuarios        | ELIMINAR_USUARIOS       | Eliminar usuarios                                    |      1 |            2 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          7 | Gestionar Roles          | GESTIONAR_ROLES         | Asignar roles a usuarios                             |      1 |            2 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          8 | Crear Productos          | CREAR_PRODUCTOS         | Crear nuevos productos                               |      1 |            3 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|          9 | Leer Productos           | LEER_PRODUCTOS          | Visualizar productos                                 |      1 |            3 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         10 | Actualizar Productos     | ACTUALIZAR_PRODUCTOS    | Modificar productos existentes                       |      1 |            3 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         11 | Eliminar Productos       | ELIMINAR_PRODUCTOS      | Eliminar productos                                   |      1 |            3 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         12 | Crear Ventas             | CREAR_VENTAS            | Registrar nuevas ventas                              |      1 |            4 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         13 | Leer Ventas              | LEER_VENTAS             | Visualizar ventas                                    |      1 |            4 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         14 | Actualizar Ventas        | ACTUALIZAR_VENTAS       | Modificar ventas existentes                          |      1 |            4 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         15 | Anular Ventas            | ANULAR_VENTAS           | Anular ventas                                        |      1 |            4 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         16 | Gestionar Inventario     | GESTIONAR_INVENTARIO    | Gestión completa del inventario                      |      1 |            5 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         17 | Consultar Inventario     | CONSULTAR_INVENTARIO    | Consultar estado del inventario                      |      1 |            5 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         18 | Ajustar Inventario       | AJUSTAR_INVENTARIO      | Realizar ajustes de inventario                       |      1 |            5 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         19 | Ver Reportes             | VER_REPORTES            | Visualizar reportes del sistema                      |      1 |            6 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         20 | Exportar Reportes        | EXPORTAR_REPORTES       | Exportar reportes                                    |      1 |            6 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|         21 | Gestionar Configuración  | GESTIONAR_CONFIGURACION | Permiso para gestionar la configuración del sistema  |      1 |            1 | 2025-09-29 12:15:21 | 2025-09-29 12:15:21 |
++------------+--------------------------+-------------------------+------------------------------------------------------+--------+--------------+---------------------+---------------------+
+21 rows in set (0.01 sec)
+
+select * from roles ;
++--------+---------------------+----------------------------------------------+--------+---------------------+---------------------+
+| id_rol | nombre              | descripcion                                  | estado | fecha_creacion      | fecha_actualizacion |
++--------+---------------------+----------------------------------------------+--------+---------------------+---------------------+
+|      1 | Super Administrador | Acceso completo al sistema                   |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 | Administrador       | Administrador con permisos limitados         |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      3 | Vendedor            | Usuario con permisos de venta                |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      4 | Usuario             | Usuario básico del sistema                   |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      5 | Supervisor          | Supervisor de área con permisos intermedios  |      1 | 2025-09-28 22:43:35 | 2025-09-28 22:43:35 |
++--------+---------------------+----------------------------------------------+--------+---------------------+---------------------+
+5 rows in set (0.00 sec)
+
+
+mysql> select * from roles_menu_items ;
+Empty set (0.00 sec)
+mysql> select * from roles_permisos ;
++--------+------------+--------+---------------------+---------------------+
+| id_rol | id_permiso | estado | fecha_creacion      | fecha_actualizacion |
++--------+------------+--------+---------------------+---------------------+
+|      1 |          1 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          2 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          3 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          4 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          5 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          6 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          7 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          8 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |          9 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         10 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         11 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         12 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         13 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         14 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         15 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         16 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         17 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         18 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         19 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      1 |         20 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          2 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          3 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          4 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          5 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          6 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          7 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          8 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |          9 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         10 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         11 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         12 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         13 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         14 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         15 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         16 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         17 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         18 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         19 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      2 |         20 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      3 |          9 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      3 |         12 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      3 |         13 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      3 |         14 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      3 |         17 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      4 |          9 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      4 |         17 |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
++--------+------------+--------+---------------------+---------------------+
+46 rows in set (0.00 sec)
+
+mysql> select * from rutas_permisos ;
+Empty set (0.00 sec)
+
+mysql> select * from rutas_protegidas ;
++---------+-------------------+--------------------------+--------+---------------------+---------------------+
+| id_ruta | ruta              | descripcion              | estado | fecha_creacion      | fecha_actualizacion |
++---------+-------------------+--------------------------+--------+---------------------+---------------------+
+|       1 | /admin            | Panel de administración  |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       2 | /admin/usuarios   | Gestión de usuarios      |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       3 | /admin/productos  | Gestión de productos     |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       4 | /admin/ventas     | Gestión de ventas        |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       5 | /admin/inventario | Gestión de inventario    |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       6 | /admin/reportes   | Panel de reportes        |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       7 | /api/usuarios     | API de usuarios          |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       8 | /api/productos    | API de productos         |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|       9 | /api/ventas       | API de ventas            |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
+|      10 | /api/inventario   | API de inventario        |      1 | 2025-09-25 21:32:21 | 2025-09-25 21:32:21 |
++---------+-------------------+--------------------------+--------+---------------------+---------------------+
+10 rows in set (0.00 sec)
+
+
+
