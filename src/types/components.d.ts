@@ -24,14 +24,14 @@ export interface SubCardProps {
   children: ReactNode;
   className?: unknown;
   content?: boolean;
-  contentClass?: unknown;
+  contentClass?: string;
   darkTitle?: unknown;
   secondary?: ReactNode;
   sx?: SxProps<Theme>;
   contentSX?: SxProps<Theme>;
   footerSX?: SxProps<Theme>;
   title?: ReactNode;
-  actions?: unknown;
+  actions?: ReactNode;
 }
 
 export interface TransitionsProps {
@@ -88,12 +88,12 @@ export interface ElevationScrollProps {
 
 export interface ColorBoxProps {
   bgcolor: string;
-  title: string;
-  data: {
+  title?: string;
+  data?: {
     label: string;
     color: string;
   };
-  dark?: unknown;
+  dark?: boolean;
 }
 
 export interface SecondaryActionProps {

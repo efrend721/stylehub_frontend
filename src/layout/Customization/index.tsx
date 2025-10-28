@@ -18,11 +18,11 @@ import Box from '@mui/material/Box';
 import FontFamily from './FontFamily';
 import BorderRadius from './BorderRadius';
 
-import { DEFAULT_THEME_MODE } from 'config';
-import MainCard from 'ui-component/cards/MainCard';
-import AnimateButton from 'ui-component/extended/AnimateButton';
-import SimpleBar from 'ui-component/third-party/SimpleBar';
-import useConfig from 'hooks/useConfig';
+import { DEFAULT_THEME_MODE } from '#/config';
+import MainCard from '#/ui-component/cards/MainCard';
+import AnimateButton from '#/ui-component/extended/AnimateButton';
+import SimpleBar from '#/ui-component/third-party/SimpleBar';
+import useConfig from '#/hooks/useConfig';
 
 // assets
 import { IconSettings, IconPlus } from '@tabler/icons-react';
@@ -83,7 +83,7 @@ export default function Customization() {
       </Tooltip>
       <Drawer anchor="right" onClose={handleToggle} open={open} slotProps={{ paper: { sx: { width: 375 } } }}>
         {open && (
-          <SimpleBar>
+          <SimpleBar sx={{}}>
             <MainCard content={false} border={false}>
               <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2.5, gap: 1.5 }}>
                 <Typography variant="h5">Theme Customization</Typography>

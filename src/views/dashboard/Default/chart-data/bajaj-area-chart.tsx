@@ -1,6 +1,7 @@
 // ==============================|| DASHBOARD - BAJAJ AREA CHART ||============================== //
+import type { ApexOptions } from 'apexcharts';
 
-const chartOptions = {
+const chartOptions: ApexOptions = {
   chart: {
     id: 'support-chart',
     sparkline: { enabled: true },

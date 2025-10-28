@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -20,30 +19,9 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
-    /* Path mapping - using modern approach */
+    /* Path mapping - only Node subpath alias */
     "paths": {
-      "@/*": ["./src/*"],
-      "App": ["./src/App"],
-      "api/*": ["./src/api/*"],
-      "assets/*": ["./src/assets/*"],
-      "components/*": ["./src/components/*"],
-      "config": ["./src/config"],
-      "contexts/*": ["./src/contexts/*"],
-      "hooks/*": ["./src/hooks/*"],
-      "layout/*": ["./src/layout/*"],
-      "menu-items": ["./src/menu-items"],
-      "menu-items/*": ["./src/menu-items/*"],
-      "types/*": ["./src/types/*"],
-      "reportWebVitals": ["./src/reportWebVitals"],
-      "routes": ["./src/routes"],
-      "routes/*": ["./src/routes/*"],
-      "serviceWorker": ["./src/serviceWorker"],
-      "store/*": ["./src/store/*"],
-      "themes": ["./src/themes"],
-      "themes/*": ["./src/themes/*"],
-      "ui-component/*": ["./src/ui-component/*"],
-      "utils/*": ["./src/utils/*"],
-      "views/*": ["./src/views/*"]
+      "#/*": ["./src/*"]
     },
 
     /* Additional strict checks - disabled for migration */

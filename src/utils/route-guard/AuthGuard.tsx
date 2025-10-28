@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from 'contexts/JWTContext';
-import Loader from 'ui-component/Loader';
+import { useAuth } from '#/contexts/JWTContext';
+import Loader from '#/ui-component/Loader';
 
 interface Props { children: React.ReactNode }
 

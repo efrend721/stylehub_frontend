@@ -55,6 +55,17 @@ declare module '@mui/material/styles' {
       dark: Record<string, unknown>;
     };
   }
+
+  interface ThemeOptions {
+    colorSchemes?: {
+      light: Record<string, unknown>;
+      dark?: Record<string, unknown>;
+    };
+    cssVariables?: {
+      cssVarPrefix?: string;
+      colorSchemeSelector?: string;
+    };
+  }
 }
 
 export {};

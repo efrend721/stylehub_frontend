@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import MainCard from 'ui-component/cards/MainCard';
+import MainCard from '#/ui-component/cards/MainCard';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
@@ -17,10 +17,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import { useAuth } from 'contexts/AuthContext';
-import notify from 'utils/notify';
+import { useAuth } from '#/contexts/AuthContext';
+import notify from '#/utils/notify';
 import { DataGrid, GridColDef, Toolbar, QuickFilter } from '@mui/x-data-grid';
-import type { GridRowSelectionModel } from '@mui/x-data-grid';
+import type { GridRowSelectionModel, GridRowId } from '@mui/x-data-grid';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
@@ -39,6 +39,19 @@ type Usuario = {
 };
 
 const API_BASE = import.meta.env.VITE_APP_API_URL || 'http://localhost:1234';
+const EMPTY_SELECTION: GridRowSelectionModel = { type: 'include', ids: new Set<GridRowId>() };
+
+type ApiResponse<T> = {
+  success: boolean;
+  message?: string;
+  data?: T;
+};
+
+function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.success === 'boolean';
+}
 
 export default function AdminUsuariosPage() {
   const { token } = useAuth();
@@ -46,8 +59,8 @@ export default function AdminUsuariosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  // Keep selection model flexible to support both array and object shapes across MUI versions
-  const [selectionModel, setSelectionModel] = useState<any>({ type: 'include', ids: new Set() });
+  // DataGrid v8 selection model object with include/exclude and ids
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>(EMPTY_SELECTION);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [editUser, setEditUser] = useState<Usuario | null>(null);
@@ -60,34 +73,35 @@ export default function AdminUsuariosPage() {
     return h;
   }, [token]);
 
-  const fetchUsuarios = async () => {
+  const fetchUsuarios = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/usuarios`, { headers });
-      const json = await res.json();
-      if (!res.ok || !json?.success) throw new Error(json?.message || `HTTP ${res.status}`);
-      setRows(Array.isArray(json.data) ? (json.data as Usuario[]) : []);
-    } catch (e: any) {
-      setError(e?.message || 'No se pudo cargar usuarios');
+      const raw: unknown = await res.json().catch(() => ({}));
+      if (!res.ok || !isApiResponse<Usuario[]>(raw) || !raw.success) {
+        const msg = isApiResponse<Usuario[]>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      const list = Array.isArray(raw.data) ? raw.data : [];
+      setRows(list);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'No se pudo cargar usuarios';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [headers]);
 
   useEffect(() => {
-    fetchUsuarios();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+    void fetchUsuarios();
+  }, [fetchUsuarios]);
 
-  const selectedIds = useMemo(() => {
-    if (Array.isArray(selectionModel)) return selectionModel as (string | number)[];
-    if (selectionModel && typeof selectionModel === 'object' && 'ids' in selectionModel) {
-      const ids = (selectionModel as any).ids;
-      if (ids instanceof Set) return Array.from(ids);
-      if (Array.isArray(ids)) return ids;
-    }
-    return [] as (string | number)[];
+  const selectedIds = useMemo<GridRowId[]>(() => {
+    const ids = selectionModel.ids as unknown;
+    if (ids instanceof Set) return Array.from(ids) as GridRowId[];
+    if (Array.isArray(ids)) return ids as GridRowId[];
+    return [] as GridRowId[];
   }, [selectionModel]);
 
   const doBulkDelete = async () => {
@@ -105,24 +119,28 @@ export default function AdminUsuariosPage() {
           signal: controller.signal
         });
         clearTimeout(timeout);
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok || !json?.success) throw new Error(json?.message || `HTTP ${res.status}`);
-        const deleted = json?.data?.deleted ?? deleteIds.length;
-        const requested = json?.data?.requested ?? deleteIds.length;
+        const raw: unknown = await res.json().catch(() => ({}));
+        if (!res.ok || !isApiResponse<{ deleted?: number; requested?: number }>(raw) || !raw.success) {
+          const msg = isApiResponse<{ deleted?: number; requested?: number }>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
+          throw new Error(msg);
+        }
+        const deleted = raw.data?.deleted ?? deleteIds.length;
+        const requested = raw.data?.requested ?? deleteIds.length;
         if (deleted === requested) {
-          notify.success(json?.message || `${deleted} usuario(s) eliminados`);
+          notify.success((typeof raw.message === 'string' ? raw.message : undefined) || `${deleted} usuario(s) eliminados`);
         } else {
           notify.error(`Eliminados ${deleted}/${requested}. Revise permisos o estados.`);
         }
-      } catch (bulkErr: any) {
+      } catch {
         // Fallback: eliminar uno por uno si el endpoint masivo falla (CORS/404/etc.)
         notify.info('No se pudo usar bulk-delete. Intentando eliminación individual…');
         const results = await Promise.all(
           deleteIds.map(async (id) => {
             try {
               const res = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(String(id))}`, { method: 'DELETE', headers });
-              const json = await res.json().catch(() => ({}));
-              return { ok: res.ok && json?.success, id };
+              const raw: unknown = await res.json().catch(() => ({}));
+              const ok = res.ok && isApiResponse<unknown>(raw) && !!raw.success;
+              return { ok, id };
             } catch {
               return { ok: false, id };
             }
@@ -134,11 +152,12 @@ export default function AdminUsuariosPage() {
         if (failCount > 0) notify.error(`No se eliminaron ${failCount}`);
       }
       // refrescar y limpiar selección
-      await fetchUsuarios();
-      setSelectionModel([]);
+  await fetchUsuarios();
+  setSelectionModel(EMPTY_SELECTION);
       setDeleteIds([]);
-    } catch (e: any) {
-      notify.error(e?.message || 'Error al eliminar selección');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Error al eliminar selección';
+      notify.error(msg);
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -170,13 +189,17 @@ export default function AdminUsuariosPage() {
         headers,
         body: JSON.stringify(payload)
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json?.success) throw new Error(json?.message || `HTTP ${res.status}`);
-      notify.success(json?.message || 'Usuario actualizado');
+      const raw: unknown = await res.json().catch(() => ({}));
+      if (!res.ok || !isApiResponse<unknown>(raw) || !raw.success) {
+        const msg = isApiResponse<unknown>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+  notify.success((typeof raw.message === 'string' ? raw.message : undefined) || 'Usuario actualizado');
       setEditUser(null);
       await fetchUsuarios();
-    } catch (e: any) {
-      notify.error(e?.message || 'No se pudo actualizar el usuario');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'No se pudo actualizar el usuario';
+      notify.error(msg);
     } finally {
       setSaving(false);
     }
@@ -189,7 +212,7 @@ export default function AdminUsuariosPage() {
         headerName: 'Usuario',
         width: 200,
         sortable: true,
-        renderCell: (params) => (<Typography variant="body2">{params.row.usuario_acceso}</Typography>)
+        renderCell: (params) => <Typography variant="body2">{params.row.usuario_acceso}</Typography>
       },
       { field: 'nombre_usuario', headerName: 'Nombre', flex: 1, minWidth: 160 },
       { field: 'apellido_usuario', headerName: 'Apellido', flex: 1, minWidth: 160 },
@@ -235,26 +258,31 @@ export default function AdminUsuariosPage() {
     []
   );
 
-  const CustomToolbar = useCallback(() => (
-    <Toolbar>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, width: '100%' }}>
-        <QuickFilter parser={(searchText) => searchText.split(/\s+/).filter(Boolean)} />
-        <Box sx={{ flexGrow: 1 }} />
-        {selectedIds.length > 1 && (
-          <Button color="error" variant="contained" onClick={() => openConfirmFor(selectedIds)} disabled={deleting}>
-            {deleting ? 'Eliminando…' : `Eliminar por Grupos (${selectedIds.length})`}
-          </Button>
-        )}
-      </Box>
-    </Toolbar>
-  ), [selectedIds.length, deleting]);
+  const CustomToolbar = useCallback(
+    () => (
+      <Toolbar>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, width: '100%' }}>
+          <QuickFilter parser={(searchText) => searchText.split(/\s+/).filter(Boolean)} />
+          <Box sx={{ flexGrow: 1 }} />
+          {selectedIds.length > 1 && (
+            <Button color="error" variant="contained" onClick={() => openConfirmFor(selectedIds)} disabled={deleting}>
+              {deleting ? 'Eliminando…' : `Eliminar por Grupos (${selectedIds.length})`}
+            </Button>
+          )}
+        </Box>
+      </Toolbar>
+    ),
+    [selectedIds, deleting]
+  );
 
   return (
     <MainCard
       title="Gestión de Usuarios"
       secondary={
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button onClick={fetchUsuarios} disabled={loading}>Refrescar</Button>
+          <Button onClick={() => void fetchUsuarios()} disabled={loading}>
+            Refrescar
+          </Button>
         </Box>
       }
     >
@@ -298,8 +326,10 @@ export default function AdminUsuariosPage() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>Cancelar</Button>
-          <Button color="error" variant="contained" onClick={doBulkDelete} disabled={deleting} autoFocus>
+          <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>
+            Cancelar
+          </Button>
+          <Button color="error" variant="contained" onClick={() => void doBulkDelete()} disabled={deleting} autoFocus>
             {deleting ? 'Eliminando…' : 'Eliminar'}
           </Button>
         </DialogActions>
@@ -343,8 +373,10 @@ export default function AdminUsuariosPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditUser(null)} disabled={saving}>Cancelar</Button>
-          <Button onClick={saveEdit} variant="contained" disabled={saving}>
+          <Button onClick={() => setEditUser(null)} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button onClick={() => void saveEdit()} variant="contained" disabled={saving}>
             {saving ? 'Guardando…' : 'Guardar'}
           </Button>
         </DialogActions>

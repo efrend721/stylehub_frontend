@@ -14,11 +14,11 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import MainContentStyled from './MainContentStyled';
 import Customization from '../Customization';
-import Loader from 'ui-component/Loader';
-import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
+import Loader from '#/ui-component/Loader';
+import Breadcrumbs from '#/ui-component/extended/Breadcrumbs';
 
-import useConfig from 'hooks/useConfig';
-import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import useConfig from '#/hooks/useConfig';
+import { handlerDrawerOpen, useGetMenuMaster } from '#/api/menu';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -60,7 +60,7 @@ export default function MainLayout() {
       <MainContentStyled {...{ borderRadius, open: drawerOpen }}>
         <Box sx={{ ...{ px: { xs: 0 } }, minHeight: 'calc(100vh - 128px)', display: 'flex', flexDirection: 'column' }}>
           {/* breadcrumb */}
-          <Breadcrumbs />
+          <Breadcrumbs card heading="" icons={true} links={[]} maxItems={8} titleBottom={false} sx={{}} />
           <Outlet />
           <Footer />
         </Box>

@@ -12,11 +12,11 @@ import MenuList from '../MenuList';
 import LogoSection from '../LogoSection';
 import MiniDrawerStyled from './MiniDrawerStyled';
 
-import useConfig from 'hooks/useConfig';
-import { drawerWidth } from 'store/constant';
-import SimpleBar from 'ui-component/third-party/SimpleBar';
+import useConfig from '#/hooks/useConfig';
+import { drawerWidth } from '#/store/constant';
+import SimpleBar from '#/ui-component/third-party/SimpleBar';
 
-import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import { handlerDrawerOpen, useGetMenuMaster } from '#/api/menu';
 
 // ==============================|| SIDEBAR DRAWER ||============================== //
 

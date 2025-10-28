@@ -6,9 +6,9 @@ import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/
 import CssBaseline from '@mui/material/CssBaseline';
 
 // project imports
-import { CSS_VAR_PREFIX, DEFAULT_THEME_MODE } from 'config';
+import { CSS_VAR_PREFIX, DEFAULT_THEME_MODE } from '#/config';
 import CustomShadows from './custom-shadows';
-import useConfig from 'hooks/useConfig';
+import useConfig from '#/hooks/useConfig';
 import { buildPalette } from './palette';
 import Typography from './typography';
 import componentsOverrides from './overrides';
@@ -26,7 +26,7 @@ export default function ThemeCustomization({ children }) {
 
   const themeOptions = useMemo(
     () => ({
-      direction: 'ltr',
+      direction: 'ltr' as const,
       mixins: {
         toolbar: {
           minHeight: '48px',

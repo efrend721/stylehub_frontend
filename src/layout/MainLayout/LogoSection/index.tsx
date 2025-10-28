@@ -4,8 +4,8 @@ import { Link as RouterLink } from 'react-router-dom';
 import Link from '@mui/material/Link';
 
 // project imports
-import { DASHBOARD_PATH } from 'config';
-import Logo from 'ui-component/Logo';
+import { DASHBOARD_PATH } from '#/config';
+import Logo from '#/ui-component/Logo';
 
 // ==============================|| MAIN LOGO ||============================== //
 

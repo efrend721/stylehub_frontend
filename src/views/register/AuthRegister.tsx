@@ -18,14 +18,14 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
-import notify from 'utils/notify';
+import notify from '#/utils/notify';
 
 // project imports
-import AnimateButton from 'ui-component/extended/AnimateButton';
-import CustomFormControl from 'ui-component/extended/Form/CustomFormControl';
-import { strengthColor, strengthIndicator } from 'utils/password-strength';
-import { useAuth } from 'contexts/AuthContext';
-import { isEmail, trim, validatePassword, isValidPhone, sanitizeUsername, isValidUsername } from 'utils/validators';
+import AnimateButton from '#/ui-component/extended/AnimateButton';
+import CustomFormControl from '#/ui-component/extended/Form/CustomFormControl';
+import { strengthColor, strengthIndicator } from '#/utils/password-strength';
+import { useAuth } from '#/contexts/AuthContext';
+import { isEmail, trim, validatePassword, isValidPhone, sanitizeUsername, isValidUsername } from '#/utils/validators';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';

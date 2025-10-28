@@ -3,9 +3,9 @@ import { AuthLoginAlerts } from './';
 import { validateLoginFields } from './';
 import { useNavigate } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
-import { trim } from 'utils/validators';
-import { useAuth } from 'contexts/AuthContext';
-import notify from 'utils/notify';
+import { trim } from '#/utils/validators';
+import { useAuth } from '#/contexts/AuthContext';
+import notify from '#/utils/notify';
 
 export function useAuthLogin() {
   const { login, isLoading } = useAuth();

@@ -11,7 +11,8 @@ import Chart from 'react-apexcharts';
 
 // project imports
 import bajajChartOptions from './chart-data/bajaj-area-chart';
-import useConfig from 'hooks/useConfig';
+import type { ApexOptions } from 'apexcharts';
+import useConfig from '#/hooks/useConfig';
 
 // ===========================|| DASHBOARD DEFAULT - BAJAJ AREA CHART CARD ||=========================== //
 
@@ -23,13 +24,13 @@ export default function BajajAreaChartCard() {
 
   const secondary800 = theme.vars.palette.secondary[800];
 
-  const [chartOptions, setChartOptions] = useState(bajajChartOptions);
+  const [chartOptions, setChartOptions] = useState<ApexOptions>(bajajChartOptions as ApexOptions);
   const [series] = useState([{ data: [0, 15, 10, 50, 30, 40, 25] }]);
 
   useEffect(() => {
     setChartOptions({
-      ...bajajChartOptions,
-      chart: { ...bajajChartOptions.chart, fontFamily: fontFamily },
+      ...(bajajChartOptions as ApexOptions),
+      chart: { ...(bajajChartOptions as ApexOptions).chart, fontFamily },
       colors: [secondary800],
       fill: {
         gradient: {

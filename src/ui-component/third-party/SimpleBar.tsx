@@ -5,7 +5,7 @@ import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 
 // project import
-import { withAlpha } from 'utils/colorUtils';
+import { withAlpha } from '#/utils/colorUtils';
 
 // third party
 import { BrowserView, MobileView } from 'react-device-detect';

@@ -18,11 +18,11 @@ import Box from '@mui/material/Box';
 
 // project imports
 import NavItem from '../NavItem';
-import Transitions from 'ui-component/extended/Transitions';
+import Transitions from '#/ui-component/extended/Transitions';
 
-import { useGetMenuMaster } from 'api/menu';
-import useConfig from 'hooks/useConfig';
-import useMenuCollapse from 'hooks/useMenuCollapse';
+import { useGetMenuMaster } from '#/api/menu';
+import useConfig from '#/hooks/useConfig';
+import useMenuCollapse from '#/hooks/useMenuCollapse';
 
 // assets
 import { IconChevronDown, IconChevronRight, IconChevronUp } from '@tabler/icons-react';

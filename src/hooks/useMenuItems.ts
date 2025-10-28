@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getIcon } from 'menu-items/iconMap';
-import type { BackendMenuItem, UIMenuItem } from 'types/menu';
-import { useAuth } from 'contexts/JWTContext';
+import { getIcon } from '#/menu-items/iconMap';
+import type { BackendMenuItem, UIMenuItem } from '#/types/menu';
+import { useAuth } from '#/contexts/JWTContext';
 
 type Source = 'api' | 'static';
 

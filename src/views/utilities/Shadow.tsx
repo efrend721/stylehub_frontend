@@ -6,10 +6,10 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 
 // project imports
-import SubCard from 'ui-component/cards/SubCard';
-import MainCard from 'ui-component/cards/MainCard';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-import { gridSpacing } from 'store/constant';
+import SubCard from '#/ui-component/cards/SubCard';
+import MainCard from '#/ui-component/cards/MainCard';
+import SecondaryAction from '#/ui-component/cards/CardSecondaryAction';
+import { gridSpacing } from '#/store/constant';
 
 // ===============================|| SHADOW BOX ||=============================== //
 

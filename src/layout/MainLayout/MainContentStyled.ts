@@ -2,7 +2,7 @@
 import { styled, Theme } from '@mui/material/styles';
 
 // project imports
-import { drawerWidth } from 'store/constant';
+import { drawerWidth } from '#/store/constant';
 
 // Types
 interface MainContentStyledProps {

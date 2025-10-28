@@ -2,8 +2,23 @@ import PropTypes from 'prop-types';
 
 // material-ui
 import MuiAvatar from '@mui/material/Avatar';
+import type { SxProps, Theme } from '@mui/material/styles';
+import type { ElementType } from 'react';
 
-export default function Avatar({ className, color, outline, size, sx, ...others }) {
+type AvatarColor = 'primary' | 'secondary' | 'error' | 'success' | 'warning' | 'info' | (string & {});
+type AvatarSize = 'badge' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+export interface ExtendedAvatarProps {
+  className?: string;
+  color?: AvatarColor;
+  outline?: boolean;
+  size?: AvatarSize;
+  sx?: SxProps<Theme>;
+  component?: ElementType;
+  [x: string]: any;
+}
+
+export default function Avatar({ className, color, outline, size, sx, ...others }: ExtendedAvatarProps) {
   const colorSX = color && !outline && { color: 'background.paper', bgcolor: `${color}.main` };
   const outlineSX = outline && {
     color: color ? `${color}.main` : `primary.main`,
@@ -36,7 +51,7 @@ export default function Avatar({ className, color, outline, size, sx, ...others 
       sizeSX = {};
   }
 
-  return <MuiAvatar sx={{ ...colorSX, ...outlineSX, ...sizeSX, ...sx }} {...others} />;
+  return <MuiAvatar className={className} sx={{ ...colorSX, ...outlineSX, ...sizeSX, ...(sx as any) }} {...others} />;
 }
 
 Avatar.propTypes = {

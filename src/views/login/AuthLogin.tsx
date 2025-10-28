@@ -3,7 +3,7 @@ import { useAuthLogin } from './';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
-import { trim } from 'utils/validators';
+import { trim } from '#/utils/validators';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -19,12 +19,12 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import FormHelperText from '@mui/material/FormHelperText';
-import notify from 'utils/notify';
+import notify from '#/utils/notify';
 
 // project imports
-import AnimateButton from 'ui-component/extended/AnimateButton';
-import CustomFormControl from 'ui-component/extended/Form/CustomFormControl';
-import { useAuth } from 'contexts/AuthContext';
+import AnimateButton from '#/ui-component/extended/AnimateButton';
+import CustomFormControl from '#/ui-component/extended/Form/CustomFormControl';
+import { useAuth } from '#/contexts/AuthContext';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';

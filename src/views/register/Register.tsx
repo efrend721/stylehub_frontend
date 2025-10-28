@@ -10,8 +10,8 @@ import Box from '@mui/material/Box';
 import AuthWrapper1 from '../auth-ui/AuthWrapper1';
 import AuthCardWrapper from '../auth-ui/AuthCardWrapper';
 
-import Logo from 'ui-component/Logo';
-import AuthFooter from 'ui-component/cards/AuthFooter';
+import Logo from '#/ui-component/Logo';
+import AuthFooter from '#/ui-component/cards/AuthFooter';
 import AuthRegister from './AuthRegister';
 
 export default function Register() {

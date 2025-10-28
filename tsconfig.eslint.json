@@ -4,6 +4,7 @@
     "src",
     "src/types/**/*",
     "vite.config.dev.mjs",
-    "vite.config.mjs"
+    "vite.config.mjs",
+    "vite.config.ts"
   ]
 }

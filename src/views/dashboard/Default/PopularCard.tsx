@@ -16,9 +16,9 @@ import Box from '@mui/material/Box';
 
 // project imports
 import BajajAreaChartCard from './BajajAreaChartCard';
-import MainCard from 'ui-component/cards/MainCard';
-import SkeletonPopularCard from 'ui-component/cards/Skeleton/PopularCard';
-import { gridSpacing } from 'store/constant';
+import MainCard from '#/ui-component/cards/MainCard';
+import SkeletonPopularCard from '#/ui-component/cards/Skeleton/PopularCard';
+import { gridSpacing } from '#/store/constant';
 
 // assets
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';

@@ -1,32 +1,32 @@
 import { lazy } from 'react';
 
 // project imports
-import MainLayout from 'layout/MainLayout';
-import Loadable from 'ui-component/Loadable';
-import AuthGuard from 'utils/route-guard/AuthGuard';
+import MainLayout from '#/layout/MainLayout';
+import Loadable from '#/ui-component/Loadable';
+import AuthGuard from '#/utils/route-guard/AuthGuard';
 
 // dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
+const DashboardDefault = Loadable(lazy(() => import('#/views/dashboard/Default')));
 
 // utilities routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
+const UtilsTypography = Loadable(lazy(() => import('#/views/utilities/Typography')));
+const UtilsColor = Loadable(lazy(() => import('#/views/utilities/Color')));
+const UtilsShadow = Loadable(lazy(() => import('#/views/utilities/Shadow')));
 
 // sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const SamplePage = Loadable(lazy(() => import('#/views/sample-page')));
 
 // admin routing (new)
-const AdminUsuarios = Loadable(lazy(() => import('views/admin/usuarios')));
-const AdminRoles = Loadable(lazy(() => import('views/admin/roles')));
-const AdminPermisos = Loadable(lazy(() => import('views/admin/permisos')));
-const AdminMenus = Loadable(lazy(() => import('views/admin/menus')));
-const AdminRutasProtegidas = Loadable(lazy(() => import('views/admin/rutas-protegidas')));
-const AdminConfiguracion = Loadable(lazy(() => import('views/admin/configuracion')));
+const AdminUsuarios = Loadable(lazy(() => import('#/views/admin/usuarios')));
+const AdminRoles = Loadable(lazy(() => import('#/views/admin/roles')));
+const AdminPermisos = Loadable(lazy(() => import('#/views/admin/permisos')));
+const AdminMenus = Loadable(lazy(() => import('#/views/admin/menus')));
+const AdminRutasProtegidas = Loadable(lazy(() => import('#/views/admin/rutas-protegidas')));
+const AdminConfiguracion = Loadable(lazy(() => import('#/views/admin/configuracion')));
 
 // auditoría y reportes (new)
-const AuditLogs = Loadable(lazy(() => import('views/audit/logs')));
-const Reportes = Loadable(lazy(() => import('views/reportes')));
+const AuditLogs = Loadable(lazy(() => import('#/views/audit/logs')));
+const Reportes = Loadable(lazy(() => import('#/views/reportes')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 

@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import type { SubCardProps } from '#/types/components';
 
 // material-ui
 import Card from '@mui/material/Card';
@@ -23,7 +24,7 @@ export default function SubCard({
   title,
   actions,
   ...others
-}) {
+}: SubCardProps) {
   const defaultShadow = '0 2px 14px 0 rgb(32 40 45 / 8%)';
 
   return (

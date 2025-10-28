@@ -21,13 +21,13 @@ import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 
 // project imports
-import Logo from 'ui-component/Logo';
+import Logo from '#/ui-component/Logo';
 
 // assets
 import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
 import MenuIcon from '@mui/icons-material/Menu';
 
-function ElevationScroll({ children, window }) {
+function ElevationScroll({ children, window }: { children: React.ReactElement; window?: Window }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -41,7 +41,7 @@ function ElevationScroll({ children, window }) {
       backgroundColor: theme.vars.palette.background.default,
       color: theme.vars.palette.text.dark
     }
-  });
+  } as any);
 }
 
 // ==============================|| MINIMAL LAYOUT APP BAR ||============================== //

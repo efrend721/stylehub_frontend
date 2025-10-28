@@ -8,8 +8,9 @@ import Tooltip from '@mui/material/Tooltip';
 
 // project imports
 import Avatar from '../extended/Avatar';
+import type { SecondaryActionProps } from '#/types/components';
 
-export default function CardSecondaryAction({ title, link, icon }) {
+export default function CardSecondaryAction({ title, link, icon }: SecondaryActionProps) {
   const theme = useTheme();
 
   return (

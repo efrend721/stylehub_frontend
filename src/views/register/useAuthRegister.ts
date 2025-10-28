@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
-import { useAuth } from 'contexts/AuthContext';
-import notify from 'utils/notify';
+import { useAuth } from '#/contexts/AuthContext';
+import notify from '#/utils/notify';
 import { AuthRegisterAlerts } from './index';
 import { validateRegisterFields } from './registerUtils';
-import { strengthColor, strengthIndicator } from 'utils/password-strength';
-import { isEmail, trim, validatePassword, isValidPhone, sanitizeUsername, isValidUsername } from 'utils/validators';
+import { strengthColor, strengthIndicator } from '#/utils/password-strength';
+import { isEmail, trim, validatePassword, isValidPhone, sanitizeUsername, isValidUsername } from '#/utils/validators';
 
 export function useAuthRegister() {
   const { register, isLoading } = useAuth();

@@ -1,8 +1,8 @@
 // project imports
-import { extendPaletteWithChannels } from 'utils/colorUtils';
+import { extendPaletteWithChannels } from '#/utils/colorUtils';
 
 // assets
-import defaultColor from 'assets/scss/_themes-vars.module.scss';
+import defaultColor from '#/assets/scss/_themes-vars.module.scss';
 
 // ==============================|| DEFAULT THEME - PALETTE ||============================== //
 

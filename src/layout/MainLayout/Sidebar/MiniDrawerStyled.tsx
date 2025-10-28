@@ -3,7 +3,7 @@ import { styled, Theme } from '@mui/material/styles';
 import Drawer /* , { DrawerProps } */ from '@mui/material/Drawer';
 
 // project imports
-import { drawerWidth } from 'store/constant';
+import { drawerWidth } from '#/store/constant';
 
 // Interface for future use if needed (currently using inline type)
 // interface MiniDrawerStyledProps extends DrawerProps {

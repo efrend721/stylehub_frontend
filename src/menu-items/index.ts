@@ -1,7 +1,7 @@
 // Dynamic menu entrypoint backed by the API endpoint
 // Exposes a small helper to fetch menus outside of React if needed.
 
-import type { BackendMenuItem } from 'types/menu';
+import type { BackendMenuItem } from '#/types/menu';
 
 const API_BASE = import.meta.env.VITE_APP_API_URL || 'http://localhost:1234';
 

@@ -15,8 +15,8 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
-import useConfig from 'hooks/useConfig';
+import { handlerDrawerOpen, useGetMenuMaster } from '#/api/menu';
+import useConfig from '#/hooks/useConfig';
 
 // assets
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';

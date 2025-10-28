@@ -13,13 +13,14 @@ import Box from '@mui/material/Box';
 import Chart from 'react-apexcharts';
 
 // project imports
-import useConfig from 'hooks/useConfig';
-import SkeletonTotalGrowthBarChart from 'ui-component/cards/Skeleton/TotalGrowthBarChart';
-import MainCard from 'ui-component/cards/MainCard';
-import { gridSpacing } from 'store/constant';
+import useConfig from '#/hooks/useConfig';
+import SkeletonTotalGrowthBarChart from '#/ui-component/cards/Skeleton/TotalGrowthBarChart';
+import MainCard from '#/ui-component/cards/MainCard';
+import { gridSpacing } from '#/store/constant';
 
 // chart data
 import barChartOptions from './chart-data/total-growth-bar-chart';
+import type { ApexOptions } from 'apexcharts';
 
 const status = [
   { value: 'today', label: 'Today' },
@@ -41,7 +42,7 @@ export default function TotalGrowthBarChart({ isLoading }) {
   } = useConfig();
 
   const [value, setValue] = useState('today');
-  const [chartOptions, setChartOptions] = useState(barChartOptions);
+  const [chartOptions, setChartOptions] = useState<ApexOptions>(barChartOptions as ApexOptions);
 
   const textPrimary = theme.vars.palette.text.primary;
   const divider = theme.vars.palette.divider;
@@ -54,14 +55,13 @@ export default function TotalGrowthBarChart({ isLoading }) {
 
   useEffect(() => {
     setChartOptions({
-      ...barChartOptions,
-      chart: { ...barChartOptions.chart, fontFamily: fontFamily },
+      ...(barChartOptions as ApexOptions),
+      chart: { ...(barChartOptions as ApexOptions).chart, fontFamily },
       colors: [primary200, primaryDark, secondaryMain, secondaryLight],
-      xaxis: { ...barChartOptions.xaxis, labels: { style: { colors: textPrimary } } },
-      yaxis: { ...barChartOptions.yaxis, labels: { style: { colors: textPrimary } } },
+      xaxis: { ...(barChartOptions as ApexOptions).xaxis, labels: { style: { colors: textPrimary } } },
+      yaxis: { labels: { style: { colors: textPrimary } } },
       grid: { borderColor: divider },
-      tooltip: { theme: 'light' },
-      legend: { ...(barChartOptions.legend ?? {}), labels: { ...(barChartOptions.legend?.labels ?? {}), colors: grey500 } }
+      tooltip: { theme: 'light' }
     });
   }, [fontFamily, primary200, primaryDark, secondaryMain, secondaryLight, textPrimary, grey500, divider]);
 

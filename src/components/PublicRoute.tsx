@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from 'contexts/AuthContext';
-import Loader from 'ui-component/Loader';
+import { useAuth } from '#/contexts/AuthContext';
+import Loader from '#/ui-component/Loader';
 
 interface PublicRouteProps {
   children: React.ReactNode;

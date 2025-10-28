@@ -15,11 +15,11 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // project imports
-import { withAlpha } from 'utils/colorUtils';
+import { withAlpha } from '#/utils/colorUtils';
 
 // assets
 import { IconBrandTelegram, IconBuildingStore, IconMailbox, IconPhoto } from '@tabler/icons-react';
-import User1 from 'assets/images/users/user-round.svg';
+import User1 from '#/assets/images/users/user-round.svg';
 
 function ListItemWrapper({ children }) {
   const theme = useTheme();

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -15,12 +15,12 @@ import Box from '@mui/material/Box';
 import PopupState, { bindPopper, bindToggle } from 'material-ui-popup-state';
 
 // project imports
-import Transitions from 'ui-component/extended/Transitions';
+import Transitions from '#/ui-component/extended/Transitions';
 
 // assets
 import { IconAdjustmentsHorizontal, IconSearch, IconX } from '@tabler/icons-react';
 
-function HeaderAvatar({ children, ref, ...others }) {
+const HeaderAvatar = forwardRef<HTMLDivElement, any>(function HeaderAvatar({ children, ...others }, ref) {
   const theme = useTheme();
 
   return (
@@ -42,7 +42,7 @@ function HeaderAvatar({ children, ref, ...others }) {
       {children}
     </Avatar>
   );
-}
+});
 
 // ==============================|| SEARCH INPUT - MOBILE||============================== //
 
@@ -157,6 +157,6 @@ export default function SearchSection() {
   );
 }
 
-HeaderAvatar.propTypes = { children: PropTypes.node, ref: PropTypes.any, others: PropTypes.any };
+HeaderAvatar.propTypes = { children: PropTypes.node, others: PropTypes.any };
 
 MobileSearch.propTypes = { value: PropTypes.string, setValue: PropTypes.func, popupState: PropTypes.any };

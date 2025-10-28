@@ -8,7 +8,19 @@ import Slide from '@mui/material/Slide';
 import Zoom from '@mui/material/Zoom';
 import Box from '@mui/material/Box';
 
-export default function Transitions({ children, position = 'top-left', sx, type = 'grow', direction = 'up', ...others }) {
+type SlideDirection = 'left' | 'right' | 'up' | 'down';
+type TransitionType = 'grow' | 'collapse' | 'fade' | 'slide' | 'zoom';
+type Position = 'top-left' | 'top-right' | 'top' | 'bottom-left' | 'bottom-right' | 'bottom';
+
+type TransitionsComponentProps = {
+  children: React.ReactNode;
+  position?: Position;
+  sx?: any;
+  type?: TransitionType;
+  direction?: SlideDirection;
+} & Record<string, any>;
+
+export default function Transitions({ children, position = 'top-left', sx, type = 'grow', direction = 'up', ...others }: TransitionsComponentProps) {
   let positionSX = {
     transformOrigin: '0 0 0'
   };

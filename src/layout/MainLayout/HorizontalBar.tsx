@@ -10,9 +10,9 @@ import Box from '@mui/material/Box';
 
 // project imports
 import MenuList from './MenuList';
-import useConfig from 'hooks/useConfig';
+import useConfig from '#/hooks/useConfig';
 
-function ElevationScroll({ children, window }) {
+function ElevationScroll({ children, window }: { children: React.ReactElement; window?: Window }) {
   const theme = useTheme();
 
   /**
@@ -27,9 +27,7 @@ function ElevationScroll({ children, window }) {
 
   theme.shadows[4] = theme.vars.customShadows.z1;
 
-  return cloneElement(children, {
-    elevation: trigger ? 4 : 0
-  });
+  return cloneElement(children, { elevation: trigger ? 4 : 0 } as any);
 }
 
 // ==============================|| HORIZONTAL MENU LIST ||============================== //

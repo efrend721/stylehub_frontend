@@ -15,8 +15,8 @@ import Chart from 'react-apexcharts';
 
 // project imports
 import chartOptions from './chart-data/total-order-line-chart';
-import MainCard from 'ui-component/cards/MainCard';
-import SkeletonTotalOrderCard from 'ui-component/cards/Skeleton/EarningCard';
+import MainCard from '#/ui-component/cards/MainCard';
+import SkeletonTotalOrderCard from '#/ui-component/cards/Skeleton/EarningCard';
 
 // assets
 import LocalMallOutlinedIcon from '@mui/icons-material/LocalMallOutlined';

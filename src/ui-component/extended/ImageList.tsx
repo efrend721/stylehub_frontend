@@ -7,8 +7,8 @@ import MImageList from '@mui/material/ImageList';
 import Box from '@mui/material/Box';
 
 // project imports
-import useConfig from 'hooks/useConfig';
-import { getImageUrl, ImagePath } from 'utils/getImageUrl';
+import useConfig from '#/hooks/useConfig';
+import { getImageUrl, ImagePath } from '#/utils/getImageUrl';
 
 // set image width & height radio
 function srcset(image, width, height, rows = 1, cols = 1) {

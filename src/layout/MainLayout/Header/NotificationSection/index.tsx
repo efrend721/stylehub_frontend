@@ -18,8 +18,8 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // project imports
-import MainCard from 'ui-component/cards/MainCard';
-import Transitions from 'ui-component/extended/Transitions';
+import MainCard from '#/ui-component/cards/MainCard';
+import Transitions from '#/ui-component/extended/Transitions';
 import NotificationList from './NotificationList';
 
 // assets

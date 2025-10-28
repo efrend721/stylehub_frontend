@@ -1,13 +1,13 @@
 import { lazy } from 'react';
 
 // project imports
-import MinimalLayout from 'layout/MinimalLayout';
-import Loadable from 'ui-component/Loadable';
-import GuestGuard from 'utils/route-guard/GuestGuard';
+import MinimalLayout from '#/layout/MinimalLayout';
+import Loadable from '#/ui-component/Loadable';
+import GuestGuard from '#/utils/route-guard/GuestGuard';
 
 // maintenance routing
-const LoginPage = Loadable(lazy(() => import('views/login/Login')));
-const RegisterPage = Loadable(lazy(() => import('views/register/Register')));
+const LoginPage = Loadable(lazy(() => import('#/views/login/Login')));
+const RegisterPage = Loadable(lazy(() => import('#/views/register/Register')));
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 

@@ -1,5 +1,5 @@
 // project imports
-import { withAlpha } from 'utils/colorUtils';
+import { withAlpha } from '#/utils/colorUtils';
 
 // assets
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';

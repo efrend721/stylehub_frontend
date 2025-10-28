@@ -1,5 +1,5 @@
 // project imports
-import { withAlpha } from 'utils/colorUtils';
+import { withAlpha } from '#/utils/colorUtils';
 
 // ===============================||  OVERRIDES - CHIP  ||=============================== //
 

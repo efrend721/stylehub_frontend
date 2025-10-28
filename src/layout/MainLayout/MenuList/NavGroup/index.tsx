@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import NavCollapse from '../NavCollapse';
 import NavItem from '../NavItem';
 
-import { useGetMenuMaster } from 'api/menu';
+import { useGetMenuMaster } from '#/api/menu';
 
 // ==============================|| SIDEBAR MENU LIST GROUP ||============================== //
 

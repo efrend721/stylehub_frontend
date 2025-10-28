@@ -11,7 +11,7 @@ import TotalIncomeDarkCard from '../../../ui-component/cards/TotalIncomeDarkCard
 import TotalIncomeLightCard from '../../../ui-component/cards/TotalIncomeLightCard';
 import TotalGrowthBarChart from './TotalGrowthBarChart';
 
-import { gridSpacing } from 'store/constant';
+import { gridSpacing } from '#/store/constant';
 
 // assets
 import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';

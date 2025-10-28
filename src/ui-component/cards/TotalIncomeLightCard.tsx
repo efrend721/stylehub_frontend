@@ -11,9 +11,9 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // project imports
-import MainCard from 'ui-component/cards/MainCard';
-import TotalIncomeCard from 'ui-component/cards/Skeleton/TotalIncomeCard';
-import { withAlpha } from 'utils/colorUtils';
+import MainCard from '#/ui-component/cards/MainCard';
+import TotalIncomeCard from '#/ui-component/cards/Skeleton/TotalIncomeCard';
+import { withAlpha } from '#/utils/colorUtils';
 
 // styles
 const CardWrapper = styled(MainCard)(({ theme }) => ({

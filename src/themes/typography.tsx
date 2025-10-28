@@ -1,4 +1,11 @@
-export default function Typography(fontFamily) {
+import type { TypographyVariantsOptions } from '@mui/material/styles';
+
+export default function Typography(fontFamily: string): TypographyVariantsOptions & {
+  commonAvatar: React.CSSProperties;
+  smallAvatar: React.CSSProperties;
+  mediumAvatar: React.CSSProperties;
+  largeAvatar: React.CSSProperties;
+} {
   return {
     fontFamily,
     h6: {
@@ -48,7 +55,7 @@ export default function Typography(fontFamily) {
       lineHeight: '1.5em'
     },
     button: {
-      textTransform: 'capitalize'
+      textTransform: 'capitalize' as const
     },
     commonAvatar: {
       cursor: 'pointer',

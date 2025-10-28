@@ -10,7 +10,7 @@ import SearchSection from './SearchSection';
 import ProfileSection from './ProfileSection';
 import NotificationSection from './NotificationSection';
 
-import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import { handlerDrawerOpen, useGetMenuMaster } from '#/api/menu';
 
 // assets
 import { IconMenu2 } from '@tabler/icons-react';

@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   readonly VITE_APP_BASE_NAME: string;
   readonly VITE_APP_VERSION: string;
+  readonly VITE_PUBLIC_URL?: string;
+  readonly VITE_APP_API_URL?: string;
   // más variables de entorno según necesites
 }
 
@@ -22,8 +24,8 @@ declare module '*.css' {
 }
 
 declare module '*.svg' {
-  import React = require('react');
-  export const ReactComponent: React.FC<React.SVGProps<SVGSVGElement>>;
+  import type { FC, SVGProps } from 'react';
+  export const ReactComponent: FC<SVGProps<SVGSVGElement>>;
   const src: string;
   export default src;
 }

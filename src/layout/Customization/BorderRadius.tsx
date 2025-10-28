@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import useConfig from 'hooks/useConfig';
+import useConfig from '#/hooks/useConfig';
 
 // concat 'px'
 function valueText(value) {

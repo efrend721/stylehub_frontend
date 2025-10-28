@@ -23,13 +23,13 @@ import Box from '@mui/material/Box';
 
 // project imports
 import UpgradePlanCard from './UpgradePlanCard';
-import MainCard from 'ui-component/cards/MainCard';
-import Transitions from 'ui-component/extended/Transitions';
-import useConfig from 'hooks/useConfig';
-import { useAuth } from 'contexts/AuthContext';
+import MainCard from '#/ui-component/cards/MainCard';
+import Transitions from '#/ui-component/extended/Transitions';
+import useConfig from '#/hooks/useConfig';
+import { useAuth } from '#/contexts/AuthContext';
 
 // assets
-import User1 from 'assets/images/users/user-round.svg';
+import User1 from '#/assets/images/users/user-round.svg';
 import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-react';
 
 // ==============================|| PROFILE MENU ||============================== //
@@ -132,7 +132,7 @@ export default function ProfileSection() {
                     content={false}
                     boxShadow
                     shadow={theme.shadows[16]}
-                    darkTitle=""
+                    darkTitle={false}
                     secondary=""
                     title=""
                     ref={null}

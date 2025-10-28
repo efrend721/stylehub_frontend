@@ -1,6 +1,7 @@
 // ==============================|| DASHBOARD - TOTAL ORDER LINE CHART ||============================== //
+import type { ApexOptions } from 'apexcharts';
 
-const chartOptions = {
+const chartOptions: ApexOptions = {
   chart: {
     sparkline: {
       enabled: true

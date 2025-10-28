@@ -11,11 +11,15 @@ const endpoints = {
 };
 
 export function useGetMenuMaster() {
-  const { data, isLoading } = useSWR(endpoints.key + endpoints.master, () => initialState, {
+  const { data, isLoading } = useSWR<typeof initialState>(
+    endpoints.key + endpoints.master,
+    () => initialState,
+    {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
-  });
+    }
+  );
 
   const memoizedValue = useMemo(
     () => ({
@@ -28,13 +32,14 @@ export function useGetMenuMaster() {
   return memoizedValue;
 }
 
-export function handlerDrawerOpen(isDashboardDrawerOpened) {
+export function handlerDrawerOpen(isDashboardDrawerOpened: boolean) {
   // to update local state based on key
 
-  mutate(
+  void mutate(
     endpoints.key + endpoints.master,
-    (currentMenuMaster) => {
-      return { ...currentMenuMaster, isDashboardDrawerOpened };
+    (currentMenuMaster?: typeof initialState) => {
+      const base = currentMenuMaster ?? initialState;
+      return { ...base, isDashboardDrawerOpened };
     },
     false
   );

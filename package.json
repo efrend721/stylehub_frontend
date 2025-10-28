@@ -60,6 +60,9 @@
       "last 1 safari version"
     ]
   },
+  "imports": {
+    "#/*": "./src/*"
+  },
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
     "@eslint/eslintrc": "^3.3.1",

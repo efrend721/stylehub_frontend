@@ -12,8 +12,8 @@ import MuiBreadcrumbs from '@mui/material/Breadcrumbs';
 import Box from '@mui/material/Box';
 
 // project imports
-import useMenuItems from 'hooks/useMenuItems';
-import type { UIMenuItem } from 'types/menu';
+import useMenuItems from '#/hooks/useMenuItems';
+import type { UIMenuItem } from '#/types/menu';
 
 // assets
 import { IconChevronRight, IconTallymark1 } from '@tabler/icons-react';

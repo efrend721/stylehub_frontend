@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import notify from 'utils/notify';
+import notify from '#/utils/notify';
 
 // Types
 export interface User {
