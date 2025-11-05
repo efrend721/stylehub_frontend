@@ -17,14 +17,22 @@ import Typography from '@mui/material/Typography';
 // project imports
 import { handlerDrawerOpen, useGetMenuMaster } from '#/api/menu';
 import useConfig from '#/hooks/useConfig';
+import type { UIMenuItem } from '#/types/menu';
 
 // assets
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
-export default function NavItem({ item, level, isParents = false, setSelectedID }) {
+interface NavItemProps {
+  item: UIMenuItem;
+  level: number;
+  isParents?: boolean;
+  setSelectedID?: () => void;
+}
+
+export default function NavItem({ item, level, isParents = false, setSelectedID }: NavItemProps) {
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
-  const ref = useRef(null);
+  const ref = useRef<HTMLSpanElement>(null);
 
   const { pathname } = useLocation();
   const {
@@ -33,7 +41,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
 
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
-  const isSelected = !!matchPath({ path: item?.link ? item.link : item.url, end: false }, pathname);
+  const isSelected = !!matchPath({ path: item?.link || item.url || '', end: false }, pathname);
 
   const [hoverStatus, setHover] = useState(false);
 
@@ -50,18 +58,18 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
 
   let itemIcon: React.ReactNode;
   if (item?.icon) {
-    const IconAny: any = item.icon;
-    if (typeof IconAny === 'function') {
+    const IconComponent = item.icon;
+    if (typeof IconComponent === 'function') {
       itemIcon = (
-        <IconAny
+        <IconComponent
           stroke={1.5}
           size={drawerOpen ? '20px' : '24px'}
           style={{ ...(isParents && { fontSize: 20, stroke: '1.5' }) }}
         />
       );
-    } else if (isValidElement(IconAny)) {
+    } else if (isValidElement(IconComponent)) {
       // Already a React element instance; render as-is
-      itemIcon = IconAny;
+      itemIcon = IconComponent;
     } else {
       itemIcon = (
         <FiberManualRecordIcon
@@ -77,7 +85,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
   }
 
   let itemTarget = '_self';
-  if (item.target) {
+  if (item.target || item.target_blank) {
     itemTarget = '_blank';
   }
 
@@ -93,7 +101,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
     <>
       <ListItemButton
         component={Link}
-        to={item.url}
+        to={item.url || ''}
         target={itemTarget}
         disabled={item.disabled}
         disableRipple={!drawerOpen}
@@ -185,7 +193,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
             variant={item.chip.variant}
             size={item.chip.size}
             label={item.chip.label}
-            avatar={item.chip.avatar && <Avatar>{item.chip.avatar}</Avatar>}
+            avatar={item.chip.avatar ? <Avatar>{item.chip.avatar}</Avatar> : undefined}
           />
         )}
       </ListItemButton>
@@ -193,4 +201,4 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
   );
 }
 
-NavItem.propTypes = { item: PropTypes.any, level: PropTypes.number, isParents: PropTypes.bool, setSelectedID: PropTypes.func };
+NavItem.propTypes = { item: PropTypes.object, level: PropTypes.number, isParents: PropTypes.bool, setSelectedID: PropTypes.func };

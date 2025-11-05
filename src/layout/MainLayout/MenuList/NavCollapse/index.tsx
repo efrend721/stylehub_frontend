@@ -23,14 +23,21 @@ import Transitions from '#/ui-component/extended/Transitions';
 import { useGetMenuMaster } from '#/api/menu';
 import useConfig from '#/hooks/useConfig';
 import useMenuCollapse from '#/hooks/useMenuCollapse';
+import type { UIMenuItem } from '#/types/menu';
 
 // assets
 import { IconChevronDown, IconChevronRight, IconChevronUp } from '@tabler/icons-react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
-export default function NavCollapse({ menu, level, parentId }) {
+interface NavCollapseProps {
+  menu: UIMenuItem;
+  level: number;
+  parentId?: string;
+}
+
+export default function NavCollapse({ menu, level, parentId }: NavCollapseProps) {
   const theme = useTheme();
-  const ref = useRef(null);
+  const ref = useRef<HTMLSpanElement>(null);
 
   const {
     state: { borderRadius }
@@ -40,10 +47,10 @@ export default function NavCollapse({ menu, level, parentId }) {
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
 
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleClickMini = (event) => {
+  const handleClickMini = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(null);
     if (drawerOpen) {
       setOpen(!open);
@@ -115,11 +122,11 @@ export default function NavCollapse({ menu, level, parentId }) {
 
   let menuIcon: React.ReactNode;
   if (menu.icon) {
-    const IconAny: any = menu.icon;
-    if (typeof IconAny === 'function') {
-      menuIcon = <IconAny strokeWidth={1.5} size={drawerOpen ? '20px' : '24px'} />;
-    } else if (isValidElement(IconAny)) {
-      menuIcon = IconAny;
+    const IconComponent = menu.icon;
+    if (typeof IconComponent === 'function') {
+      menuIcon = <IconComponent strokeWidth={1.5} size={drawerOpen ? '20px' : '24px'} />;
+    } else if (isValidElement(IconComponent)) {
+      menuIcon = IconComponent;
     } else {
       menuIcon = (
         <FiberManualRecordIcon
@@ -305,4 +312,4 @@ export default function NavCollapse({ menu, level, parentId }) {
   );
 }
 
-NavCollapse.propTypes = { menu: PropTypes.any, level: PropTypes.number, parentId: PropTypes.string };
+NavCollapse.propTypes = { menu: PropTypes.object, level: PropTypes.number, parentId: PropTypes.string };

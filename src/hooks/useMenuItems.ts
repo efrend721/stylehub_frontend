@@ -14,6 +14,18 @@ type HookState = {
 
 const API_BASE = import.meta.env.VITE_APP_API_URL || 'http://localhost:1234';
 
+type ApiResponse<T> = {
+  success: boolean;
+  message?: string;
+  data?: T;
+};
+
+function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.success === 'boolean';
+}
+
 function toBool(v: unknown, def = false): boolean {
   if (v === true || v === 1 || v === '1') return true;
   if (v === false || v === 0 || v === '0') return false;
@@ -58,13 +70,14 @@ export function useMenuItems(): HookState {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
         const res = await fetch(`${API_BASE}/menus`, { method: 'GET', headers });
-        const json = await res.json().catch(() => ({}));
+        const raw: unknown = await res.json().catch(() => ({}));
 
-        if (!res.ok || !json?.success) {
-          throw new Error(json?.message || `HTTP ${res.status}`);
+        if (!res.ok || !isApiResponse<BackendMenuItem[]>(raw) || !raw.success) {
+          const msg = isApiResponse<BackendMenuItem[]>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
+          throw new Error(msg);
         }
 
-        const data = Array.isArray(json.data) ? (json.data as BackendMenuItem[]) : [];
+        const data = Array.isArray(raw.data) ? raw.data : [];
         const items = data.map(inflate);
         if (!cancelled) {
           setState({ items, loading: false, error: null, source: 'api' });
@@ -73,25 +86,39 @@ export function useMenuItems(): HookState {
             localStorage.setItem('menu_cache', JSON.stringify(items));
           } catch {}
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // fallback: cached or empty
         let items: UIMenuItem[] = [];
         try {
           const cached = localStorage.getItem('menu_cache');
-          if (cached) items = JSON.parse(cached);
+          if (cached) {
+            const parsed: unknown = JSON.parse(cached);
+            if (Array.isArray(parsed)) items = parsed as UIMenuItem[];
+          }
         } catch {}
 
         if (!cancelled) {
           // Log minimal info to help diagnose without spamming UI
           if (import.meta.env.MODE !== 'production') {
-            console.warn('[menu] Falling back to static menu:', err?.message || err);
+            let msg: string;
+            if (err instanceof Error) msg = err.message;
+            else if (typeof err === 'string') msg = err;
+            else {
+              try {
+                msg = JSON.stringify(err);
+              } catch {
+                msg = 'Unknown error';
+              }
+            }
+            console.warn('[menu] Falling back to static menu:', msg);
           }
-          setState({ items, loading: false, error: err?.message || 'Menu load failed', source: 'static' });
+          const msg = err instanceof Error ? err.message : 'Menu load failed';
+          setState({ items, loading: false, error: msg, source: 'static' });
         }
       }
     }
 
-    load();
+    void load();
     return () => {
       cancelled = true;
     };

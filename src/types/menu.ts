@@ -1,4 +1,5 @@
 // Types for menu structures (backend response and UI-consumable)
+import type { IconComponent } from '#/menu-items/iconMap';
 
 export type BackendMenuItem = {
   id: string;
@@ -17,13 +18,24 @@ export type UIMenuItem = {
   id: string;
   title: string | null;
   type: 'group' | 'item' | 'collapse';
-  icon?: any; // Component reference (Tabler Icon component)
+  icon?: IconComponent; // Component reference (Tabler Icon component)
   caption?: string | null;
   url?: string | null;
   breadcrumbs?: boolean;
   external?: boolean;
   target_blank?: boolean;
   children?: UIMenuItem[];
+  // Additional properties used in NavItem
+  link?: string;
+  target?: boolean;
+  disabled?: boolean;
+  chip?: {
+    color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+    variant?: 'filled' | 'outlined';
+    size?: 'small' | 'medium';
+    label?: string;
+    avatar?: string;
+  };
 };
 
 export type UIMenuRoot = {

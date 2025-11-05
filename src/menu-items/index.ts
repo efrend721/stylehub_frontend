@@ -18,12 +18,27 @@ export async function fetchMenuFromAPI(): Promise<BackendMenuItem[]> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}/menus`, { method: 'GET', headers });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || !json?.success) {
-    throw new Error(json?.message || `HTTP ${res.status}`);
+  type ApiResponse<T> = {
+    success: boolean;
+    message?: string;
+    data?: T;
+  };
+
+  function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
+    if (!value || typeof value !== 'object') return false;
+    const v = value as Record<string, unknown>;
+    return typeof v.success === 'boolean';
   }
-  return Array.isArray(json.data) ? (json.data as BackendMenuItem[]) : [];
+
+  const res = await fetch(`${API_BASE}/menus`, { method: 'GET', headers });
+  const raw: unknown = await res.json().catch(() => ({}));
+
+  if (!res.ok || !isApiResponse<BackendMenuItem[]>(raw) || !raw.success) {
+    const msg = isApiResponse<BackendMenuItem[]>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+
+  return Array.isArray(raw.data) ? raw.data : [];
 }
 
 export default { fetchMenuFromAPI };
