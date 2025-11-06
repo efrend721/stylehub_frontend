@@ -10,19 +10,29 @@ import Typography from '@mui/material/Typography';
 // project imports
 import NavCollapse from '../NavCollapse';
 import NavItem from '../NavItem';
+import NavAccordion from './NavAccordion';
 
 import { useGetMenuMaster } from '#/api/menu';
+import type { UIMenuItem } from '#/types/menu';
 
 // ==============================|| SIDEBAR MENU LIST GROUP ||============================== //
 
-export default function NavGroup({ item, lastItem, remItems, lastItemId, setSelectedID }) {
+interface NavGroupProps {
+  item: UIMenuItem;
+  lastItem?: number;
+  remItems?: Array<{ elements: UIMenuItem[] }>;
+  lastItemId?: string;
+  setSelectedID?: (id: string) => void;
+}
+
+export default function NavGroup({ item, lastItem, remItems, lastItemId, setSelectedID }: NavGroupProps) {
   const { pathname } = useLocation();
 
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [currentItem, setCurrentItem] = useState(item);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [currentItem, setCurrentItem] = useState<UIMenuItem>(item);
 
   const openMini = Boolean(anchorEl);
 
@@ -30,39 +40,43 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, setSele
     if (lastItem) {
       if (item.id === lastItemId) {
         const localItem = { ...item };
-        const elements = remItems.map((ele) => ele.elements);
-        localItem.children = elements.flat(1);
+        if (remItems && Array.isArray(remItems)) {
+          const elements = remItems.map((ele) => ele.elements);
+          localItem.children = elements.flat(1);
+        }
         setCurrentItem(localItem);
       } else {
         setCurrentItem(item);
       }
+    } else {
+      setCurrentItem(item);
     }
   }, [item, lastItem, remItems, lastItemId]);
 
-  const checkOpenForParent = (child, id) => {
+  const checkOpenForParent = (child: UIMenuItem[], id: string) => {
     child.forEach((ele) => {
       if (ele.children?.length) {
         checkOpenForParent(ele.children, currentItem.id);
       }
       if (ele?.url && !!matchPath({ path: ele?.link ? ele.link : ele.url, end: true }, pathname)) {
-        setSelectedID(id);
+        setSelectedID?.(id);
       }
     });
   };
 
-  const checkSelectedOnload = (data) => {
+  const checkSelectedOnload = (data: UIMenuItem) => {
     const childrens = data.children ? data.children : [];
     childrens.forEach((itemCheck) => {
       if (itemCheck?.children?.length) {
         checkOpenForParent(itemCheck.children, currentItem.id);
       }
       if (itemCheck?.url && !!matchPath({ path: itemCheck?.link ? itemCheck.link : itemCheck.url, end: true }, pathname)) {
-        setSelectedID(currentItem.id);
+        setSelectedID?.(currentItem.id);
       }
     });
 
     if (data?.url && !!matchPath({ path: data?.link ? data.link : data.url, end: true }, pathname)) {
-      setSelectedID(currentItem.id);
+      setSelectedID?.(currentItem.id);
     }
   };
 
@@ -74,20 +88,32 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, setSele
   }, [pathname, currentItem]);
 
   // menu list collapse & items
-  const items = currentItem.children?.map((menu) => {
-    switch (menu?.type) {
+  const items = currentItem.children?.map((menu: UIMenuItem) => {
+    switch (menu.type) {
       case 'collapse':
         return <NavCollapse key={menu.id} menu={menu} level={1} parentId={currentItem.id} />;
       case 'item':
         return <NavItem key={menu.id} item={menu} level={1} setSelectedID={undefined} />;
+      case 'group':
+        // If it's a group with children, render as accordion
+        if (menu.children && menu.children.length > 0) {
+          return <NavAccordion key={menu.id} item={menu} level={1} setSelectedID={undefined} />;
+        }
+        // If it's a group without children, treat as regular item
+        return <NavItem key={menu.id} item={menu} level={1} setSelectedID={undefined} />;
       default:
         return (
-          <Typography key={menu?.id} variant="h6" align="center" sx={{ color: 'error.main' }}>
+          <Typography key={menu.id} variant="h6" align="center" sx={{ color: 'error.main' }}>
             Menu Items Error
           </Typography>
         );
     }
   });
+
+  // If the item itself is a collapse type, render it directly using NavCollapse
+  if (item.type === 'collapse') {
+    return <NavCollapse key={item.id} menu={item} level={0} parentId={undefined} />;
+  }
 
   return (
     <>

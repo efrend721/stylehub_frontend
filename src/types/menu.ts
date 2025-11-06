@@ -25,6 +25,7 @@ export type UIMenuItem = {
   external?: boolean;
   target_blank?: boolean;
   children?: UIMenuItem[];
+  isExpanded?: boolean; // For accordion functionality
   // Additional properties used in NavItem
   link?: string;
   target?: boolean;

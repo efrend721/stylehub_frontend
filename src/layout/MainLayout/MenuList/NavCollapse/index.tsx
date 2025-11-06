@@ -173,7 +173,7 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
         className={anchorEl ? 'Mui-selected' : ''}
         onClick={handleClickMini}
       >
-        {menuIcon && (
+        {menuIcon && level > 0 && (
           <ListItemIcon
             sx={{
               minWidth: level === 1 ? 36 : 18,

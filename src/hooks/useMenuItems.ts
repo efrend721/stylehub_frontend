@@ -33,7 +33,7 @@ function toBool(v: unknown, def = false): boolean {
 }
 
 function inflate(item: BackendMenuItem): UIMenuItem {
-  return {
+  const uiItem: UIMenuItem = {
     id: item.id,
     title: item.title,
     type: item.type,
@@ -45,6 +45,13 @@ function inflate(item: BackendMenuItem): UIMenuItem {
     target_blank: toBool(item.target_blank, false),
     children: item.children?.map(inflate)
   };
+
+  // Add accordion functionality for groups with children
+  if (item.type === 'group' && item.children && item.children.length > 0) {
+    uiItem.isExpanded = false; // Default closed
+  }
+
+  return uiItem;
 }
 
 export function useMenuItems(): HookState {

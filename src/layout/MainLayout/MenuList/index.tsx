@@ -8,10 +8,18 @@ import Box from '@mui/material/Box';
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
 import useMenuItems from '#/hooks/useMenuItems';
+import type { UIMenuItem } from '#/types/menu';
 
 import { useGetMenuMaster } from '#/api/menu';
 
 // ==============================|| SIDEBAR MENU LIST ||============================== //
+
+interface RemItem {
+  title: string | null;
+  elements: UIMenuItem[];
+  icon?: UIMenuItem['icon'];
+  url?: string;
+}
 
 function MenuList() {
   const { menuMaster } = useGetMenuMaster();
@@ -19,32 +27,34 @@ function MenuList() {
 
   const [, setSelectedID] = useState('');
 
-  const lastItem = null;
-  const { items: sourceItems, loading: menuLoading, error: menuError, source } = useMenuItems();
+  const lastItem: number | null = null;
+  const { items: sourceItems } = useMenuItems();
 
   let lastItemIndex = sourceItems ? sourceItems.length - 1 : 0;
-  let remItems = [] as any[];
-  let lastItemId: any;
+  let remItems: RemItem[] = [];
+  let lastItemId: string | undefined;
 
   if (lastItem && sourceItems && lastItem < sourceItems.length) {
     lastItemId = sourceItems[lastItem - 1].id;
     lastItemIndex = lastItem - 1;
-    remItems = sourceItems.slice(lastItem - 1, sourceItems.length).map((item) => {
-      if ('title' in item) {
-        const remItem: any = {
-          title: item.title,
-          elements: item.children
-        };
-        if ('icon' in item) {
-          remItem.icon = item.icon;
+    remItems = sourceItems.slice(lastItem - 1, sourceItems.length)
+      .map((item): RemItem | null => {
+        if (item.title) {
+          const remItem: RemItem = {
+            title: item.title,
+            elements: item.children || []
+          };
+          if (item.icon) {
+            remItem.icon = item.icon;
+          }
+          if (item.url) {
+            remItem.url = item.url;
+          }
+          return remItem;
         }
-        if ('url' in item && item.url) {
-          remItem.url = item.url;
-        }
-        return remItem;
-      }
-      return null;
-    }).filter(Boolean);
+        return null;
+      })
+      .filter((item): item is RemItem => item !== null);
   }
 
   const navArray = Array.isArray(sourceItems) ? sourceItems : [];
@@ -66,7 +76,19 @@ function MenuList() {
             key={item.id}
             setSelectedID={setSelectedID}
             item={item}
-            lastItem={lastItem}
+            lastItem={lastItem || undefined}
+            remItems={remItems}
+            lastItemId={lastItemId}
+          />
+        );
+      }
+      case 'collapse': {
+        return (
+          <NavGroup
+            key={item.id}
+            setSelectedID={setSelectedID}
+            item={item}
+            lastItem={lastItem || undefined}
             remItems={remItems}
             lastItemId={lastItemId}
           />
