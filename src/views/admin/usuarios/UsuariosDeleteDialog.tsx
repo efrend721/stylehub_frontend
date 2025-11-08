@@ -15,10 +15,18 @@ type Props = {
 
 export function UsuariosDeleteDialog({ open, count, deleting, onCancel, onConfirm }: Props) {
   return (
-    <Dialog open={open} onClose={() => (deleting ? null : onCancel())}>
-      <DialogTitle>Confirmar eliminación</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={() => (deleting ? null : onCancel())}
+      disableRestoreFocus
+      keepMounted={false}
+      disablePortal={false}
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+    >
+      <DialogTitle id="delete-dialog-title">Confirmar eliminación</DialogTitle>
       <DialogContent>
-        <DialogContentText>
+        <DialogContentText id="delete-dialog-description">
           ¿Seguro que deseas eliminar {count} usuario(s)? Esta acción no se puede deshacer.
         </DialogContentText>
       </DialogContent>

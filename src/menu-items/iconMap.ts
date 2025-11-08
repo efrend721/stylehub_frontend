@@ -18,7 +18,8 @@ import {
   IconRoute,
   IconSettings,
   IconActivity,
-  IconReport
+  IconReport,
+  IconArrowRight
 } from '@tabler/icons-react';
 
 // Extend this map as new icon keys appear from backend
@@ -38,7 +39,8 @@ export const iconMap = {
   IconRoute,
   IconSettings,
   IconActivity,
-  IconReport
+  IconReport,
+  IconArrowRight
 } as const;
 
 export type IconKey = keyof typeof iconMap;
@@ -62,7 +64,8 @@ const iconKeyToCSSName: Record<string, string> = {
   IconFiles: 'files',
   IconBrandChrome: 'brand-chrome',
   IconRoute: 'route',
-  IconWindmill: 'windmill'
+  IconWindmill: 'windmill',
+  IconArrowRight: 'keyboard-arrow-right-outlined'
 };
 
 // Fallback to a neutral icon if key unknown or absent

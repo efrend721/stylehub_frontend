@@ -19,8 +19,17 @@ type Props = {
 
 export function RolesEditDialog({ rol, saving, onClose, onChange, onSave }: Props) {
   return (
-    <Dialog open={!!rol} onClose={() => (saving ? null : onClose())} maxWidth="sm" fullWidth>
-      <DialogTitle>Modificar rol</DialogTitle>
+    <Dialog 
+      open={!!rol} 
+      onClose={() => (saving ? null : onClose())} 
+      maxWidth="sm" 
+      fullWidth
+      disableRestoreFocus
+      keepMounted={false}
+      disablePortal={false}
+      aria-labelledby="edit-rol-dialog-title"
+    >
+      <DialogTitle id="edit-rol-dialog-title">Modificar rol</DialogTitle>
       <DialogContent>
         {rol && (
           <Stack spacing={2} sx={{ mt: 1 }}>

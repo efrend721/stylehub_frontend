@@ -51,6 +51,9 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleClickMini = (event: React.MouseEvent<HTMLElement>) => {
+    // Prevent event propagation to avoid conflicts with sidebar toggle
+    event.stopPropagation();
+    
     setAnchorEl(null);
     if (drawerOpen) {
       setOpen(!open);
@@ -62,10 +65,6 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
 
   const openMini = Boolean(anchorEl);
 
-  const handleMiniClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleClosePopper = () => {
     setOpen(false);
     if (!openMini) {
@@ -76,10 +75,26 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
     setAnchorEl(null);
   };
 
+  const handleMiniClose = () => {
+    setAnchorEl(null);
+  };
+
   const { pathname } = useLocation();
 
   // menu collapse for sub-levels
   useMenuCollapse(menu, pathname, openMini, setSelected, setOpen, setAnchorEl);
+
+  // Handle drawer open state changes
+  useEffect(() => {
+    if (!drawerOpen && openMini) {
+      // When sidebar closes, reset mini popper
+      setAnchorEl(null);
+    }
+    if (!drawerOpen && open) {
+      // When sidebar closes while menu is open, close the menu
+      setOpen(false);
+    }
+  }, [drawerOpen, openMini, open]);
 
   const [hoverStatus, setHover] = useState(false);
 
@@ -172,6 +187,7 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
         {...(!drawerOpen && { onMouseEnter: handleClickMini, onMouseLeave: handleMiniClose })}
         className={anchorEl ? 'Mui-selected' : ''}
         onClick={handleClickMini}
+        disableRipple={!drawerOpen}
       >
         {menuIcon && level > 0 && (
           <ListItemIcon

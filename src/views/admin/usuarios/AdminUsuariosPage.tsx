@@ -2,10 +2,12 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import { IconPlus } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import { UsuariosTable } from './UsuariosTable';
 import { UsuariosDeleteDialog } from './UsuariosDeleteDialog';
 import { UsuariosEditDialog } from './UsuariosEditDialog';
+import { UsuariosCreateDialog } from './UsuariosCreateDialog';
 import { useUsuarios } from './useUsuarios';
 import type { GridRowSelectionModel } from '@mui/x-data-grid';
 
@@ -28,6 +30,11 @@ export default function AdminUsuariosPage() {
     openEditFor,
     saveEdit,
     saving,
+    createDialogOpen,
+    openCreateDialog,
+    closeCreateDialog,
+    createUser,
+    creating,
     fetchUsuarios
   } = useUsuarios();
 
@@ -36,6 +43,13 @@ export default function AdminUsuariosPage() {
       title="Gestión de Usuarios"
       secondary={
         <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button 
+            variant="contained" 
+            onClick={openCreateDialog}
+            startIcon={<IconPlus size="18" />}
+          >
+            Agregar Usuario
+          </Button>
           <Button onClick={() => void fetchUsuarios()} disabled={loading}>
             Refrescar
           </Button>
@@ -80,6 +94,13 @@ export default function AdminUsuariosPage() {
         onClose={() => setEditUser(null)}
         onChange={(u) => setEditUser(u)}
         onSave={() => void saveEdit()}
+      />
+
+      <UsuariosCreateDialog
+        open={createDialogOpen}
+        saving={creating}
+        onClose={closeCreateDialog}
+        onSave={(usuario) => void createUser(usuario)}
       />
     </MainCard>
   );

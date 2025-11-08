@@ -15,10 +15,18 @@ type Props = {
 
 export function RolesDeleteDialog({ open, count, deleting, onCancel, onConfirm }: Props) {
   return (
-    <Dialog open={open} onClose={() => (deleting ? null : onCancel())}>
-      <DialogTitle>Confirmar eliminación</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={() => (deleting ? null : onCancel())}
+      disableRestoreFocus
+      keepMounted={false}
+      disablePortal={false}
+      aria-labelledby="delete-roles-dialog-title"
+      aria-describedby="delete-roles-dialog-description"
+    >
+      <DialogTitle id="delete-roles-dialog-title">Confirmar eliminación</DialogTitle>
       <DialogContent>
-        <DialogContentText>
+        <DialogContentText id="delete-roles-dialog-description">
           ¿Seguro que deseas eliminar {count} rol(es)? Esta acción no se puede deshacer.
         </DialogContentText>
       </DialogContent>
