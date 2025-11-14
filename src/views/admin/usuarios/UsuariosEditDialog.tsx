@@ -71,7 +71,6 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
 
   const handleSave = () => {
     if (editData) {
-      console.log('Datos para actualizar usuario:', editData);
       onChange(editData);
     }
     onSave();
@@ -149,18 +148,20 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
                 onChange={(e) => handleFieldChange('contrasena', e.target.value)}
                 fullWidth
                 placeholder="Ingrese nueva contraseña"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handlePasswordToggle}
-                        edge="end"
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handlePasswordToggle}
+                          edge="end"
+                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             )}
@@ -176,16 +177,8 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
                 onChange={(e) => handleFieldChange('id_rol', Number(e.target.value))}
                 label="Rol"
                 disabled={loadingRoles}
-                displayEmpty
-                renderValue={(value) => {
-                  if (!value) {
-                    return <em style={{ color: '#999' }}>Seleccione un rol</em>;
-                  }
-                  const selectedRole = roles.find(rol => rol.id_rol === value);
-                  return selectedRole ? selectedRole.nombre : 'Rol desconocido';
-                }}
               >
-                <MenuItem value="">
+                <MenuItem value="" disabled>
                   <em>
                     {loadingRoles 
                       ? 'Cargando roles...' 
@@ -216,16 +209,8 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
                 onChange={(e) => handleFieldChange('id_establecimiento', String(e.target.value))}
                 label="Establecimiento"
                 disabled={loadingEst}
-                displayEmpty
-                renderValue={(value) => {
-                  if (!value) {
-                    return <em style={{ color: '#999' }}>Seleccione un establecimiento</em>;
-                  }
-                  const selectedEst = establecimientos.find(est => est.id_establecimiento === value);
-                  return selectedEst ? selectedEst.nombre : 'Establecimiento desconocido';
-                }}
               >
-                <MenuItem value="">
+                <MenuItem value="" disabled>
                   <em>
                     {loadingEst 
                       ? 'Cargando establecimientos...' 

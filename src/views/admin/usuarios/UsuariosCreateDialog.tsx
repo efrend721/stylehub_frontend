@@ -69,41 +69,6 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
   };
 
   const handleSave = () => {
-    console.log('=== INICIO handleSave ===');
-    console.log('Datos del usuario a enviar:', JSON.stringify(usuario, null, 2));
-    console.log('Form valid:', isFormValid);
-    
-    // Validaciones básicas
-    if (!usuario.usuario_acceso.trim()) {
-      console.log('Error: usuario_acceso vacío');
-      return;
-    }
-    if (!usuario.contrasena.trim()) {
-      console.log('Error: contrasena vacía');
-      return;
-    }
-    if (!usuario.nombre_usuario.trim()) {
-      console.log('Error: nombre_usuario vacío');
-      return;
-    }
-    if (!usuario.apellido_usuario.trim()) {
-      console.log('Error: apellido_usuario vacío');
-      return;
-    }
-    if (!usuario.correo_electronico.trim()) {
-      console.log('Error: correo_electronico vacío');
-      return;
-    }
-    if (!usuario.id_rol) {
-      console.log('Error: id_rol no válido:', usuario.id_rol);
-      return;
-    }
-    if (!usuario.id_establecimiento.trim()) {
-      console.log('Error: id_establecimiento vacío');
-      return;
-    }
-
-    console.log('Todas las validaciones pasaron. Llamando onSave...');
     onSave(usuario);
   };
 
@@ -120,25 +85,9 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
     usuario.nombre_usuario.trim() &&
     usuario.apellido_usuario.trim() &&
     usuario.correo_electronico.trim() &&
+    usuario.telefono.trim() &&
     usuario.id_rol > 0 &&
     usuario.id_establecimiento.trim();
-
-  // Debug logs (temporal) - para verificar qué datos llegan
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Roles cargados:', roles);
-    console.log('Establecimientos cargados:', establecimientos);
-    console.log('Estado usuario:', usuario);
-    console.log('Form valid:', {
-      usuario_acceso: !!usuario.usuario_acceso.trim(),
-      contrasena: !!usuario.contrasena.trim(),
-      nombre_usuario: !!usuario.nombre_usuario.trim(),
-      apellido_usuario: !!usuario.apellido_usuario.trim(),
-      correo_electronico: !!usuario.correo_electronico.trim(),
-      id_rol: usuario.id_rol > 0,
-      id_establecimiento: !!usuario.id_establecimiento.trim(),
-      overall: isFormValid
-    });
-  }
 
   return (
     <Dialog 
@@ -179,18 +128,20 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
               fullWidth
               required
               autoComplete="new-password"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
-                      {showPassword ? <IconEyeOff size="20" /> : <IconEye size="20" />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <IconEyeOff size="20" /> : <IconEye size="20" />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
           </Stack>
@@ -240,6 +191,7 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
               value={usuario.telefono}
               onChange={(e) => setUsuario({ ...usuario, telefono: e.target.value })}
               fullWidth
+              required
               placeholder="ej: +1234567890"
               autoComplete="tel"
             />
@@ -254,25 +206,12 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 value={usuario.id_rol === 0 ? '' : usuario.id_rol}
                 onChange={(e) => {
                   const newValue = Number(e.target.value) || 0;
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('Cambiando rol a:', newValue, 'de tipo:', typeof newValue);
-                    console.log('Valor del evento:', e.target.value);
-                    console.log('Estado actual usuario:', usuario);
-                  }
                   setUsuario({ ...usuario, id_rol: newValue });
                 }}
                 label="Rol"
                 disabled={loadingRoles}
-                displayEmpty
-                renderValue={(value) => {
-                  if (!value) {
-                    return <em style={{ color: '#999' }}>Seleccione un rol</em>;
-                  }
-                  const selectedRole = roles.find(rol => rol.id_rol === value);
-                  return selectedRole ? selectedRole.nombre : 'Rol desconocido';
-                }}
               >
-                <MenuItem value="">
+                <MenuItem value="" disabled>
                   <em>
                     {loadingRoles 
                       ? 'Cargando roles...' 
@@ -302,25 +241,12 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 value={usuario.id_establecimiento || ''}
                 onChange={(e) => {
                   const newValue = String(e.target.value);
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('Cambiando establecimiento a:', newValue);
-                    console.log('Valor del evento:', e.target.value);
-                    console.log('Estado actual usuario:', usuario);
-                  }
                   setUsuario({ ...usuario, id_establecimiento: newValue });
                 }}
                 label="Establecimiento"
                 disabled={loadingEst}
-                displayEmpty
-                renderValue={(value) => {
-                  if (!value) {
-                    return <em style={{ color: '#999' }}>Seleccione un establecimiento</em>;
-                  }
-                  const selectedEst = establecimientos.find(est => est.id_establecimiento === value);
-                  return selectedEst ? selectedEst.nombre : 'Establecimiento desconocido';
-                }}
               >
-                <MenuItem value="">
+                <MenuItem value="" disabled>
                   <em>
                     {loadingEst 
                       ? 'Cargando establecimientos...' 
@@ -352,8 +278,10 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 name="estado"
                 checked={usuario.estado === 1}
                 onChange={(e) => setUsuario({ ...usuario, estado: e.target.checked ? 1 : 0 })}
-                inputProps={{
-                  'aria-describedby': 'estado-description'
+                slotProps={{
+                  input: {
+                    'aria-describedby': 'estado-description'
+                  }
                 }}
               />
             }

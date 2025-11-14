@@ -1,33 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
+import { RolesService } from '#/services';
 
-const API_BASE = import.meta.env.VITE_APP_API_URL || 'http://localhost:1234';
+// API handled via RolesService
 
 export interface RolSelect {
   id_rol: number;
   nombre: string;
 }
 
-type ApiResponse<T> = {
-  success: boolean;
-  message?: string;
-  data?: T;
-};
-
-function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.success === 'boolean';
-}
+// Response helpers centralizados en services
 
 export function useRoles() {
   const { token } = useAuth();
 
-  const headers = useMemo(() => {
-    const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) h.Authorization = `Bearer ${token}`;
-    return h;
-  }, [token]);
+  // headers gestionados por el servicio
 
   const [roles, setRoles] = useState<RolSelect[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,30 +24,15 @@ export function useRoles() {
     setLoading(true);
     setError(null);
     try {
-      // Primero intentamos con el endpoint específico para select
-      let res = await fetch(`${API_BASE}/roles/select`, { headers });
-      
-      // Si no existe, intentamos con el endpoint general
-      if (!res.ok && res.status === 404) {
-        res = await fetch(`${API_BASE}/roles`, { headers });
-      }
-      
-      const raw: unknown = await res.json().catch(() => ({}));
-      if (!res.ok || !isApiResponse<RolSelect[]>(raw) || !raw.success) {
-        const msg = isApiResponse<RolSelect[]>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
-        throw new Error(msg);
-      }
-      
-      // Manejar la respuesta
-      const list: RolSelect[] = Array.isArray(raw.data) ? raw.data : [];
-      setRoles(list);
+      const list = await RolesService.getForSelect(token || undefined);
+      setRoles(Array.isArray(list) ? list : []);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'No se pudieron cargar roles';
       setError(msg);
     } finally {
       setLoading(false);
     }
-  }, [headers]);
+  }, [token]);
 
   useEffect(() => {
     void fetchRoles();

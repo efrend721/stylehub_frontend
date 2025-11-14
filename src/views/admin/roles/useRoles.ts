@@ -1,33 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
+import { RolesService } from '#/services';
 import notify from '#/utils/notify';
 import type { Rol } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 
-const API_BASE = import.meta.env.VITE_APP_API_URL || 'http://localhost:1234';
+// API gestionada desde RolesService
 
-type ApiResponse<T> = {
-  success: boolean;
-  message?: string;
-  data?: T;
-};
-
-function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.success === 'boolean';
-}
+// Helpers centralizados en services
 
 const EMPTY_SELECTION: GridRowSelectionModel = { type: 'include', ids: new Set<GridRowId>() };
 
 export function useRoles() {
   const { token } = useAuth();
 
-  const headers = useMemo(() => {
-    const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) h.Authorization = `Bearer ${token}`;
-    return h;
-  }, [token]);
+  // headers manejados por el servicio
 
   const [rows, setRows] = useState<Rol[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,21 +39,15 @@ export function useRoles() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/roles`, { headers });
-      const raw: unknown = await res.json().catch(() => ({}));
-      if (!res.ok || !isApiResponse<Rol[]>(raw) || !raw.success) {
-        const msg = isApiResponse<Rol[]>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
-        throw new Error(msg);
-      }
-      const list = Array.isArray(raw.data) ? raw.data : [];
-      setRows(list);
+      const list = await RolesService.getAll(token || undefined);
+      setRows(Array.isArray(list) ? list : []);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'No se pudo cargar roles';
       setError(msg);
     } finally {
       setLoading(false);
     }
-  }, [headers]);
+  }, [token]);
 
   useEffect(() => {
     void fetchRoles();
@@ -84,10 +65,8 @@ export function useRoles() {
       const results = await Promise.all(
         deleteIds.map(async (id) => {
           try {
-            const res = await fetch(`${API_BASE}/roles/${encodeURIComponent(String(id))}`, { method: 'DELETE', headers });
-            const raw: unknown = await res.json().catch(() => ({}));
-            const ok = res.ok && isApiResponse<unknown>(raw) && !!raw.success;
-            return { ok, id };
+            await RolesService.deleteOne(Number(id), token || undefined);
+            return { ok: true, id };
           } catch {
             return { ok: false, id };
           }
@@ -117,22 +96,8 @@ export function useRoles() {
     if (!editRol) return;
     setSaving(true);
     try {
-      const payload = {
-        nombre: editRol.nombre,
-        descripcion: editRol.descripcion,
-        estado: editRol.estado
-      } as Partial<Rol>;
-      const res = await fetch(`${API_BASE}/roles/${encodeURIComponent(String(editRol.id_rol))}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(payload)
-      });
-      const raw: unknown = await res.json().catch(() => ({}));
-      if (!res.ok || !isApiResponse<unknown>(raw) || !raw.success) {
-        const msg = isApiResponse<unknown>(raw) && raw.message ? raw.message : `HTTP ${res.status}`;
-        throw new Error(msg);
-      }
-      notify.success((typeof raw.message === 'string' ? raw.message : undefined) || 'Rol actualizado');
+      await RolesService.update(editRol, token || undefined);
+      notify.success('Rol actualizado');
       setEditRol(null);
       await fetchRoles();
     } catch (e) {
