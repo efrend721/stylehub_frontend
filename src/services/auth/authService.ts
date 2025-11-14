@@ -5,8 +5,8 @@ export interface LoginCredentials {
   contrasena: string; 
 }
 
+// Respuesta del backend: { user: User } - NO incluye token en el body
 export interface AuthResponse { 
-  token: string; 
   user: unknown; 
   [k: string]: unknown; 
 }
@@ -18,8 +18,13 @@ export const AuthService = {
   register(data: Record<string, unknown>) {
     return http<unknown>('/auth/register', { method: 'POST', body: data });
   },
-  logout(token?: string) {
-    // algunas APIs no devuelven cuerpo útil
-    return http<unknown>('/auth/logout', { method: 'POST', token });
+  logout() {
+    // El backend eliminará la cookie httpOnly automáticamente
+    return http<unknown>('/auth/logout', { method: 'POST' });
+  },
+  me() {
+    // Obtener usuario actual usando la cookie httpOnly (credentials: 'include')
+    // silent: true para no mostrar errores en DevTools cuando no hay sesión activa
+    return http<unknown>('/auth/me', { method: 'GET', silent: true });
   }
 };

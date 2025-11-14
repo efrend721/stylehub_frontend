@@ -82,7 +82,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Auth Provider Component
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // const API_BASE = import.meta.env.VITE_APP_API_URL || 'http://localhost:1234';
   const [state, setState] = useState<AuthState>({
     user: null,
     token: null,
@@ -90,74 +89,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: true
   });
 
-  const readStoredAuth = () => {
-    try {
-      // Prefer sessionStorage (no "mantenerme"), fallback to localStorage (remembered)
-      const sToken = sessionStorage.getItem('auth_token');
-      const sUser = sessionStorage.getItem('auth_user');
-      if (sToken && sUser) return { token: sToken, userData: sUser };
-
-      const lToken = localStorage.getItem('auth_token');
-      const lUser = localStorage.getItem('auth_user');
-      if (lToken && lUser) return { token: lToken, userData: lUser };
-    } catch {}
-    return { token: null as string | null, userData: null as string | null };
-  };
-
-  // Check for existing auth on app start
+  // Verificar autenticación al cargar (el backend validará la cookie httpOnly)
   useEffect(() => {
-    const { token, userData } = readStoredAuth();
-
-    if (token && userData) {
+    const checkAuth = async () => {
       try {
-        const user = JSON.parse(userData) as User;
+        // Llamar al endpoint /auth/me que usa la cookie httpOnly automáticamente
+        const user = (await AuthService.me()) as User | null;
+        
+        // Si no hay usuario (sesión no activa), establecer como no autenticado
+        if (!user) {
+          setState({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
+          return;
+        }
+        
         setState({
           user,
-          token,
+          token: null, // El token está en httpOnly cookie, no lo guardamos en el estado
           isAuthenticated: true,
           isLoading: false
         });
-      } catch {
-        notify.error('No se pudo parsear usuario almacenado. Se ha cerrado la sesión.');
-        clearAuth();
+      } catch (error) {
+        // Errores inesperados (no relacionados con autenticación)
+        console.warn('Error inesperado al verificar autenticación:', error);
+        
+        setState({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
       }
-    } else {
-      setState((prev) => ({ ...prev, isLoading: false }));
-    }
+    };
+
+    void checkAuth();
   }, []);
 
-  const login = async (credentials: LoginCredentials, remember: boolean = true): Promise<AuthResponse> => {
+  const login = async (
+    credentials: LoginCredentials, 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _remember: boolean = true
+  ): Promise<AuthResponse> => {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
       const payload = await AuthService.login(credentials);
-      const { token, user } = payload as { token: string; user: User };
+      // El backend envía: { user: User } - NO incluye token en el body
+      const { user } = payload as { user: User };
 
-        // Store per preference: remember -> localStorage, else sessionStorage
-        try {
-          if (remember) {
-            localStorage.setItem('auth_token', token);
-            localStorage.setItem('auth_user', JSON.stringify(user));
-            // ensure session copies are cleared
-            sessionStorage.removeItem('auth_token');
-            sessionStorage.removeItem('auth_user');
-          } else {
-            sessionStorage.setItem('auth_token', token);
-            sessionStorage.setItem('auth_user', JSON.stringify(user));
-            // ensure local copies are cleared
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('auth_user');
-          }
-        } catch {}
+      // El token se guarda automáticamente en httpOnly cookie por el backend
+      // No necesitamos guardarlo en localStorage/sessionStorage
+      // El parámetro 'remember' está disponible para enviar al backend en el futuro
+      // para configurar la expiración de la cookie (ej: 30 días vs 24 horas)
 
-        // Update state
-        setState({
-          user,
-          token,
-          isAuthenticated: true,
-          isLoading: false
-        });
-  const responseData: AuthResponse = { success: true, data: { token, user }, message: 'Login exitoso', total: null, timestamp: new Date().toISOString() };
+      setState({
+        user,
+        token: null, // No guardamos el token en el estado (está en cookie httpOnly)
+        isAuthenticated: true,
+        isLoading: false
+      });
+
+      const responseData: AuthResponse = { 
+        success: true, 
+        data: { token: '', user }, // Token vacío ya que está en cookie
+        message: 'Login exitoso', 
+        total: null, 
+        timestamp: new Date().toISOString() 
+      };
       return responseData;
     } catch (error) {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -221,20 +223,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const getAnyToken = (): string | null => {
-    try {
-      return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
-    } catch {
-      return null;
-    }
-  };
-
   const logout = async (): Promise<void> => {
     try {
-      const token = getAnyToken();
-      if (token) {
-        await AuthService.logout(token);
-      }
+      // Llamar al backend para eliminar la cookie httpOnly
+      await AuthService.logout();
     } catch (error) {
       if (import.meta.env.MODE !== 'production') {
         console.warn('Fallo al llamar logout API (continuando de forma local):', error);
@@ -246,12 +238,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const clearAuth = () => {
+    // Limpiar cualquier dato residual en storage (por migración)
     try {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
       sessionStorage.removeItem('auth_token');
       sessionStorage.removeItem('auth_user');
     } catch {}
+    
     setState({
       user: null,
       token: null,

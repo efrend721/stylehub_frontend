@@ -5,18 +5,11 @@ import type { BackendMenuItem } from '#/types/menu';
 import { MenusService } from '#/services';
 
 // API base gestionado en services
-
-function getAuthToken(): string | null {
-  try {
-    return localStorage.getItem('auth_token');
-  } catch {
-    return null;
-  }
-}
+// El token ahora se envía automáticamente vía httpOnly cookie, no necesitamos localStorage
 
 export async function fetchMenuFromAPI(): Promise<BackendMenuItem[]> {
-  const token = getAuthToken() || undefined;
-  const data = await MenusService.getMenus(token);
+  // La cookie httpOnly se envía automáticamente con credentials: 'include'
+  const data = await MenusService.getMenus();
   return Array.isArray(data) ? data : [];
 }
 

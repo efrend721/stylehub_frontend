@@ -1,9 +1,6 @@
 import React from 'react';
 import { useAuthLogin } from './';
-import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { createRoot } from 'react-dom/client';
-import { trim } from '#/utils/validators';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -17,14 +14,11 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
 import FormHelperText from '@mui/material/FormHelperText';
-import notify from '#/utils/notify';
 
 // project imports
 import AnimateButton from '#/ui-component/extended/AnimateButton';
 import CustomFormControl from '#/ui-component/extended/Form/CustomFormControl';
-import { useAuth } from '#/contexts/AuthContext';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';
@@ -48,7 +42,7 @@ export default function AuthLogin() {
   } = useAuthLogin();
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => { void handleSubmit(e); }}>
       <CustomFormControl fullWidth>
         <InputLabel htmlFor="outlined-adornment-usuario-login">Usuario de Acceso</InputLabel>
         <OutlinedInput
@@ -60,6 +54,7 @@ export default function AuthLogin() {
           label="Usuario de Acceso"
           error={Boolean(fieldErrors.usuario_acceso)}
           disabled={isLoading}
+          autoComplete="username"
         />
         {fieldErrors.usuario_acceso && <FormHelperText error>{fieldErrors.usuario_acceso}</FormHelperText>}
       </CustomFormControl>
@@ -74,6 +69,7 @@ export default function AuthLogin() {
           onChange={handleInputChange}
           error={Boolean(fieldErrors.contrasena)}
           disabled={isLoading}
+          autoComplete="current-password"
           endAdornment={
             <InputAdornment position="end">
               <IconButton
