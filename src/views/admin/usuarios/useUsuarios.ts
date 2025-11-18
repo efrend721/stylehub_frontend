@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { UsuariosService } from '#/services';
 import { notify } from '#/utils/notify';
+import { getErrorMessage } from '#/utils/errorUtils';
 import type { Usuario, NuevoUsuario, UsuarioEdit } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 
@@ -74,8 +75,7 @@ export function useUsuarios() {
       const list = Array.isArray(data) ? data : [];
       setRows(list);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudo cargar usuarios';
-      setError(msg);
+      setError(getErrorMessage(e, 'No se pudo cargar usuarios'));
     } finally {
       setLoading(false);
     }
@@ -126,8 +126,7 @@ export function useUsuarios() {
       setSelectionModel(EMPTY_SELECTION);
       setDeleteIds([]);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Error al eliminar selección';
-      notify.error(msg);
+      notify.error(getErrorMessage(e, 'Error al eliminar selección'));
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -159,8 +158,7 @@ export function useUsuarios() {
       setEditUser(null);
       await fetchUsuarios();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudo actualizar el usuario';
-      notify.error(msg);
+      notify.error(getErrorMessage(e, 'No se pudo actualizar el usuario'));
     } finally {
       setSaving(false);
     }
@@ -181,8 +179,7 @@ export function useUsuarios() {
       setCreateDialogOpen(false);
       await fetchUsuarios();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudo crear el usuario';
-      notify.error(msg);
+      notify.error(getErrorMessage(e, 'No se pudo crear el usuario'));
     } finally {
       setCreating(false);
     }

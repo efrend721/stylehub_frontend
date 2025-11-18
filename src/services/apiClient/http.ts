@@ -27,21 +27,33 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
   ];
   const res = await fetch(input, init);
   const raw = await parseJsonSafe(res);
-  if (!isApiResponse<T>(raw)) {
-    // Si silent: true, retornar null en lugar de lanzar error
-    if (opts.silent) {
-      return null as unknown as T;
+  
+  // Si silent: true y hay error, retornar null
+  if (opts.silent && !res.ok) {
+    return null as unknown as T;
+  }
+  
+  // Manejar respuestas de error del backend (con campo 'error' en lugar de 'success')
+  if (!res.ok && raw && typeof raw === 'object') {
+    const errorObj = raw as { error?: string; message?: string; details?: string };
+    if (errorObj.error || errorObj.message || errorObj.details) {
+      // El backend envió una respuesta estructurada de error
+      const msg = errorObj.message || errorObj.error || `HTTP ${res.status}`;
+      const details = errorObj.details;
+      throw new ApiError(msg, res.status, details);
     }
+  }
+  
+  if (!isApiResponse<T>(raw)) {
     throw new ApiError(`HTTP ${res.status}`, res.status);
   }
-  const api: ApiResponse<T> = raw; // after guard raw is ApiResponse<T>
+  
+  const api: ApiResponse<T> = raw;
   if (!res.ok || !api.success) {
-    // Si silent: true, retornar null en lugar de lanzar error
-    if (opts.silent) {
-      return null as unknown as T;
-    }
     const msg = api.message ? String(api.message) : `HTTP ${res.status}`;
-    throw new ApiError(msg, res.status);
+    const errorResponse = raw as { details?: string };
+    const details = errorResponse.details;
+    throw new ApiError(msg, res.status, details);
   }
   if (typeof api.data === 'undefined') {
     return undefined as unknown as T;

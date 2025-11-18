@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { RolesService } from '#/services';
 import notify from '#/utils/notify';
+import { getErrorMessage } from '#/utils/errorUtils';
 import type { Rol } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 
@@ -42,8 +43,7 @@ export function useRoles() {
       const list = await RolesService.getAll(token || undefined);
       setRows(Array.isArray(list) ? list : []);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudo cargar roles';
-      setError(msg);
+      setError(getErrorMessage(e, 'No se pudo cargar roles'));
     } finally {
       setLoading(false);
     }
@@ -80,8 +80,7 @@ export function useRoles() {
       setSelectionModel(EMPTY_SELECTION);
       setDeleteIds([]);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Error al eliminar selección';
-      notify.error(msg);
+      notify.error(getErrorMessage(e, 'Error al eliminar selección'));
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -101,8 +100,7 @@ export function useRoles() {
       setEditRol(null);
       await fetchRoles();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudo actualizar el rol';
-      notify.error(msg);
+      notify.error(getErrorMessage(e, 'No se pudo actualizar el rol'));
     } finally {
       setSaving(false);
     }

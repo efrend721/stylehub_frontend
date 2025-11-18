@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { RolesService } from '#/services';
+import { getErrorMessage } from '#/utils/errorUtils';
 
 // API handled via RolesService
 
@@ -27,8 +28,7 @@ export function useRoles() {
       const list = await RolesService.getForSelect(token || undefined);
       setRoles(Array.isArray(list) ? list : []);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudieron cargar roles';
-      setError(msg);
+      setError(getErrorMessage(e, 'No se pudieron cargar roles'));
     } finally {
       setLoading(false);
     }

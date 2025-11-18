@@ -140,7 +140,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const payload = await AuthService.login(credentials);
       // El backend envía: { user: User } - NO incluye token en el body
       const { user } = payload as { user: User };
-
       // El token se guarda automáticamente en httpOnly cookie por el backend
       // No necesitamos guardarlo en localStorage/sessionStorage
       // El parámetro 'remember' está disponible para enviar al backend en el futuro
@@ -166,15 +165,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error instanceof Error) {
         // Preservar mensajes por códigos si es ApiError
-  const status = (error as { status?: number }).status;
+        const status = (error as { status?: number }).status;
+        const details = (error as { details?: string }).details;
+        
+        // Priorizar 'details' sobre 'message' para errores de validación
+        const errorMsg = details || error.message;
+        
         if (status === 422) {
-          notify.warning(error.message || 'Los datos proporcionados no son válidos');
+          notify.warning(errorMsg || 'Los datos proporcionados no son válidos');
         } else if (status === 401) {
-          notify.warning(error.message || 'Error de autenticación');
+          notify.warning(errorMsg || 'Error de autenticación');
         } else if (status === 404) {
-          notify.info(error.message || 'Recurso no encontrado');
+          notify.info(errorMsg || 'Recurso no encontrado');
         } else if (status === 500 || status === 503) {
-          notify.error(error.message || 'Error interno del servidor');
+          notify.error(errorMsg || 'Error interno del servidor');
         }
         // Manejar errores de conexión específicamente
         if (error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED') || error.message.includes('fetch')) {
@@ -204,17 +208,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState((prev) => ({ ...prev, isLoading: false }));
       if (error instanceof Error) {
         // Errores esperados en registro
-  const status = (error as { status?: number }).status;
+        const status = (error as { status?: number }).status;
+        const details = (error as { details?: string }).details;
+        
+        // Priorizar 'details' sobre 'message'
+        const errorMsg = details || error.message;
+        
         if (status === 422) {
-          notify.warning(error.message || 'Datos inválidos');
+          notify.warning(errorMsg || 'Datos inválidos');
         } else if (status === 500 || status === 503) {
-          if (error.message && error.message.includes('duplicado')) {
+          if (errorMsg && errorMsg.includes('duplicado')) {
             notify.error('Ya existe un usuario con ese correo electrónico o nombre de usuario');
           } else {
-            notify.error(error.message || 'Error interno del servidor');
+            notify.error(errorMsg || 'Error interno del servidor');
           }
         } else {
-          notify.error(error.message || 'Error en el registro');
+          notify.error(errorMsg || 'Error en el registro');
         }
         throw error; // Re-lanzar para que el componente lo capture
       } else {

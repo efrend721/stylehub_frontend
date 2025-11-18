@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { EstablecimientosService } from '#/services';
+import { getErrorMessage } from '#/utils/errorUtils';
 
 // API base gestionado por servicios
 
@@ -27,8 +28,7 @@ export function useEstablecimientos() {
       const list = await EstablecimientosService.getForSelect(token || undefined);
       setEstablecimientos(Array.isArray(list) ? list : []);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No se pudieron cargar establecimientos';
-      setError(msg);
+      setError(getErrorMessage(e, 'No se pudieron cargar establecimientos'));
     } finally {
       setLoading(false);
     }
