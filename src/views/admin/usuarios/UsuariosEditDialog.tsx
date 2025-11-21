@@ -220,6 +220,12 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
                     }
                   </em>
                 </MenuItem>
+                {!loadingEst && editData.id_establecimiento && 
+                 !establecimientos.find(e => e.id_establecimiento === editData.id_establecimiento) && (
+                  <MenuItem value={editData.id_establecimiento} disabled>
+                    {editData.id_establecimiento} (No disponible)
+                  </MenuItem>
+                )}
                 {!loadingEst && establecimientos.map((est) => (
                   <MenuItem key={est.id_establecimiento} value={est.id_establecimiento}>
                     {est.nombre}
