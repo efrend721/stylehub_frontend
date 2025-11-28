@@ -59,17 +59,17 @@ export function useAuthLogin() {
       return;
     }
     try {
-  const res = await login({ usuario_acceso: usuario, contrasena: password }, checked);
-      const backendMsg = (res as any)?.message as string | undefined;
+      const res = await login({ usuario_acceso: usuario, contrasena: password }, checked);
+      const backendMsg = res.message;
       const nombre = res?.data?.user?.nombre_usuario ?? 'Usuario';
       const successMsg = backendMsg || `¡Bienvenido, ${nombre}!`;
       showAlert('success', successMsg);
       const toastId = notify.success(successMsg, { duration: 1000 });
       setTimeout(() => {
         notify.dismiss(toastId);
-        navigate('/dashboard/default');
+        void navigate('/dashboard/default');
       }, 1000);
-    } catch (_err) {
+    } catch {
       // Los errores del backend se muestran como toast.error desde AuthContext.
     }
   };
