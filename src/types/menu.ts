@@ -14,6 +14,15 @@ export type BackendMenuItem = {
   children?: BackendMenuItem[];
 };
 
+export type RoleMenuItem = {
+  id_menu_item: number;
+  id: string;
+  title: string;
+  type: 'group' | 'item' | 'collapse';
+  asignado: boolean;
+  children?: RoleMenuItem[];
+};
+
 export type UIMenuItem = {
   id: string;
   title: string | null;
