@@ -19,6 +19,7 @@ const SamplePage = Loadable(lazy(() => import('#/views/sample-page')));
 // admin routing (new)
 const AdminUsuarios = Loadable(lazy(() => import('#/views/admin/usuarios')));
 const AdminRoles = Loadable(lazy(() => import('#/views/admin/roles')));
+const AdminRolesEdit = Loadable(lazy(() => import('#/views/admin/roles/RoleEditPage')));
 const AdminPermisos = Loadable(lazy(() => import('#/views/admin/permisos')));
 const AdminMenus = Loadable(lazy(() => import('#/views/admin/menus')));
 const AdminRutasProtegidas = Loadable(lazy(() => import('#/views/admin/rutas-protegidas')));
@@ -69,6 +70,7 @@ const MainRoutes = {
       children: [
   { path: 'usuarios', element: <AdminUsuarios /> },
         { path: 'roles', element: <AdminRoles /> },
+        { path: 'roles/editar/:id', element: <AdminRolesEdit /> },
         { path: 'permisos', element: <AdminPermisos /> },
         { path: 'menus', element: <AdminMenus /> },
         { path: 'rutas-protegidas', element: <AdminRutasProtegidas /> },

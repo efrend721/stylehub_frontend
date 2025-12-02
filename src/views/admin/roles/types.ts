@@ -7,3 +7,8 @@ export interface Rol {
   fecha_creacion: string;
   fecha_actualizacion: string;
 }
+
+export interface RolSelect {
+  id_rol: number;
+  nombre: string;
+}

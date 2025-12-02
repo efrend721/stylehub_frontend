@@ -2,13 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { RolesService } from '#/services';
 import { getErrorMessage } from '#/utils/errorUtils';
+import type { RolSelect } from '#/views/admin/roles/types';
 
 // API handled via RolesService
-
-export interface RolSelect {
-  id_rol: number;
-  nombre: string;
-}
 
 // Response helpers centralizados en services
 

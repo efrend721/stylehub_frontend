@@ -1,28 +1,62 @@
-import { http } from '../apiClient/http';
-import type { Rol } from '../../views/admin/roles/types';
-import type { RolSelect } from '../../views/admin/usuarios/useRoles';
+import { http } from '#/services/apiClient/http';
+import type { Rol, RolSelect } from '#/views/admin/roles/types';
 
-export const RolesService = {
-  getAll(token?: string) {
-    return http<Rol[]>('/roles', { token });
-  },
-  getForSelect(token?: string) {
-    // intento select luego fallback
-    return http<RolSelect[]>('/roles/select', { token }).catch(() => http<RolSelect[]>('/roles', { token }));
-  },
-  update(rol: Rol, token?: string) {
-    const payload = {
-      nombre: rol.nombre,
-      descripcion: rol.descripcion,
-      estado: rol.estado
-    };
-    return http<unknown>(`/roles/${encodeURIComponent(String(rol.id_rol))}`, { method: 'PUT', body: payload, token });
-  },
-  deleteOne(id: number, token?: string) {
-    return http<unknown>(`/roles/${encodeURIComponent(String(id))}`, { method: 'DELETE', token });
-  },
-  deleteMultiple(ids: (string|number)[], token?: string) {
-    // No existe endpoint masivo en código original, se hará uno a uno
-    return Promise.all(ids.map(i => RolesService.deleteOne(Number(i), token)));
-  }
+export interface IRolesService {
+  getAll(token?: string): Promise<Rol[]>;
+  getForSelect(token?: string): Promise<RolSelect[]>;
+  getById(id: number, token?: string): Promise<Rol>;
+  update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
+  deleteOne(id: number, token?: string): Promise<unknown>;
+  deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
+}
+
+import { http } from '#/services/apiClient/http';
+import type { Rol, RolSelect } from '#/views/admin/roles/types';
+
+export interface IRolesService {
+  getAll(token?: string): Promise<Rol[]>;
+  getForSelect(token?: string): Promise<RolSelect[]>;
+  getById(id: number, token?: string): Promise<Rol>;
+  update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
+  deleteOne(id: number, token?: string): Promise<unknown>;
+  deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
+}
+
+const getAll = (token?: string) => {
+  return http<Rol[]>('/roles', { token });
+};
+
+const getForSelect = (token?: string) => {
+  return http<RolSelect[]>('/roles/select', { token }).catch(() => http<RolSelect[]>('/roles', { token }));
+};
+
+const getById = (id: number, token?: string): Promise<Rol> => {
+  return http<Rol>(`/roles/${id}`, { token });
+};
+
+const update = (rol: Rol, menuItems?: number[], token?: string) => {
+  const payload = {
+    nombre: rol.nombre,
+    descripcion: rol.descripcion,
+    estado: rol.estado,
+    menu_items: menuItems
+  };
+  return http<unknown>(`/roles/${encodeURIComponent(String(rol.id_rol))}`, { method: 'PUT', body: payload, token });
+};
+
+const deleteOne = (id: number, token?: string) => {
+  return http<unknown>(`/roles/${encodeURIComponent(String(id))}`, { method: 'DELETE', token });
+};
+
+const deleteMultiple = (ids: (string|number)[], token?: string) => {
+  return Promise.all(ids.map(i => deleteOne(Number(i), token)));
+};
+
+export const RolesService: IRolesService = {
+  getAll,
+  getForSelect,
+  getById,
+  update,
+  deleteOne,
+  deleteMultiple
 };

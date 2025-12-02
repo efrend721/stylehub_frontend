@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
@@ -5,11 +6,11 @@ import Button from '@mui/material/Button';
 import MainCard from '#/ui-component/cards/MainCard';
 import { RolesTable } from './RolesTable';
 import { RolesDeleteDialog } from './RolesDeleteDialog';
-import { RolesEditDialog } from './RolesEditDialog';
 import { useRoles } from './useRoles';
 import type { GridRowSelectionModel } from '@mui/x-data-grid';
 
 export default function AdminRolesPage() {
+  const navigate = useNavigate();
   const {
     rows,
     loading,
@@ -23,11 +24,6 @@ export default function AdminRolesPage() {
     openConfirmFor,
     doDeleteSelected,
     deleting,
-    editRol,
-    setEditRol,
-    openEditFor,
-    saveEdit,
-    saving,
     fetchRoles
   } = useRoles();
 
@@ -62,7 +58,7 @@ export default function AdminRolesPage() {
           selectionModel={selectionModel}
           onSelectionModelChange={(m: GridRowSelectionModel) => setSelectionModel(m)}
           onAskDelete={openConfirmFor}
-          onEdit={openEditFor}
+          onEdit={(rol) => navigate(`/admin/roles/editar/${rol.id_rol}`)}
         />
       )}
 
@@ -72,14 +68,6 @@ export default function AdminRolesPage() {
         deleting={deleting}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => void doDeleteSelected()}
-      />
-
-      <RolesEditDialog
-        rol={editRol}
-        saving={saving}
-        onClose={() => setEditRol(null)}
-        onChange={(r) => setEditRol(r)}
-        onSave={() => void saveEdit()}
       />
     </MainCard>
   );
