@@ -58,7 +58,7 @@ export default function AdminRolesPage() {
           selectionModel={selectionModel}
           onSelectionModelChange={(m: GridRowSelectionModel) => setSelectionModel(m)}
           onAskDelete={openConfirmFor}
-          onEdit={(rol) => navigate(`/admin/roles/editar/${rol.id_rol}`)}
+          onEdit={(rol) => { void navigate(`/admin/roles/editar/${rol.id_rol}`); }}
         />
       )}
 
