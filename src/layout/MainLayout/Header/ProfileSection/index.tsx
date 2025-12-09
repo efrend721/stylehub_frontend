@@ -27,6 +27,7 @@ import MainCard from '#/ui-component/cards/MainCard';
 import Transitions from '#/ui-component/extended/Transitions';
 import useConfig from '#/hooks/useConfig';
 import { useAuth } from '#/contexts/AuthContext';
+import { GreetingByHours } from '#/layout/GreetingByHours';
 
 // assets
 import User1 from '#/assets/images/users/user-round.svg';
@@ -49,14 +50,16 @@ export default function ProfileSection() {
   /**
    * anchorRef is used on different components and specifying one type leads to other components throwing an error
    * */
-  const anchorRef = useRef(null);
+  // Use a typed ref to avoid unsafe calls on `current`
+  const anchorRef = useRef<HTMLDivElement | null>(null);
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+  const handleClose = (event: MouseEvent | TouchEvent) => {
+    const target = event.target as Node | null;
+    if (anchorRef.current && target && anchorRef.current.contains(target)) {
       return;
     }
 
@@ -140,7 +143,7 @@ export default function ProfileSection() {
                     <Box sx={{ p: 2, pb: 0 }}>
                       <Stack>
                         <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-                          <Typography variant="h4">Good Morning,</Typography>
+                          <GreetingByHours variant="h4" />
                           <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
                             {user?.nombre_usuario || 'Usuario'}
                           </Typography>
@@ -227,7 +230,13 @@ export default function ProfileSection() {
                             }
                           />
                         </ListItemButton>
-                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} onClick={handleLogout} disabled={isLoading}>
+                        <ListItemButton
+                          sx={{ borderRadius: `${borderRadius}px` }}
+                          onClick={() => {
+                            void handleLogout();
+                          }}
+                          disabled={isLoading}
+                        >
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="20px" />
                           </ListItemIcon>
