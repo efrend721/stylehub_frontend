@@ -8,3 +8,4 @@ export * from './usuarios/usuariosService';
 export * from './roles/rolesService';
 export * from './establecimientos/establecimientosService';
 export * from './menus/menusService';
+export * from './menus/adminMenusService';

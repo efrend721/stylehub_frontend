@@ -1,4 +1,4 @@
-import { http } from '#/services';
+import { http } from '#/services/apiClient/http';
 
 export interface MenuNode {
   id_menu_item: number;
@@ -13,6 +13,10 @@ export interface MenuNode {
   breadcrumbs?: 0 | 1;
   orden?: number;
   estado?: 0 | 1;
+}
+
+export interface MenuTreeNode extends MenuNode {
+  children?: MenuTreeNode[];
 }
 
 export interface CreateGroupPayload {
@@ -88,11 +92,16 @@ async function removeEdge(body: EdgePayload, token?: string): Promise<{ deleted:
   return await http<{ deleted: boolean }>(`/menus/admin/edges`, { method: 'DELETE', body, token });
 }
 
+async function getTree(token?: string): Promise<MenuTreeNode[]> {
+  return await http<MenuTreeNode[]>(`/menus/admin/tree`, { method: 'GET', token });
+}
+
 export const AdminMenusService = {
   createGroup,
   createItem,
   updateNode,
   deleteNode,
   addEdge,
-  removeEdge
+  removeEdge,
+  getTree
 };
