@@ -4,10 +4,13 @@ import type { SxProps } from '@mui/material/styles';
 type GreetingVariant = 'Good Morning,' | 'Good Afternoon,' | 'Good Evening,' | 'Good Night,';
 
 function getGreetingByHour(hour: number): GreetingVariant {
-  if (hour >= 5 && hour < 12) return 'Good Morning,';
-  if (hour >= 12 && hour < 18) return 'Good Afternoon,';
-  if (hour >= 18 && hour < 23) return 'Good Evening,';
-  return 'Good Night,';
+  const ranges: Array<{ start: number; end: number; label: GreetingVariant }> = [
+    { start: 5, end: 12, label: 'Good Morning,' },
+    { start: 12, end: 18, label: 'Good Afternoon,' },
+    { start: 18, end: 23, label: 'Good Evening,' }
+  ];
+  const match = ranges.find((r) => hour >= r.start && hour < r.end);
+  return match?.label ?? 'Good Night,';
 }
 
 export interface GreetingByHoursProps {
