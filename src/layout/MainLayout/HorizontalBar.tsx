@@ -25,17 +25,13 @@ function ElevationScroll({ children, window }: { children: React.ReactElement; w
     target: window
   });
 
-  theme.shadows[4] = theme.vars.customShadows.z1;
-
   return cloneElement(children, { elevation: trigger ? 4 : 0 } as any);
 }
 
 // ==============================|| HORIZONTAL MENU LIST ||============================== //
 
 export default function HorizontalBar() {
-  const {
-    state: { container }
-  } = useConfig();
+  // Simplify: no container toggle in current config
 
   return (
     <ElevationScroll>
@@ -51,7 +47,7 @@ export default function HorizontalBar() {
           zIndex: 1098
         })}
       >
-        <Container maxWidth={container ? 'lg' : false}>
+        <Container maxWidth={false}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <MenuList />
           </Box>

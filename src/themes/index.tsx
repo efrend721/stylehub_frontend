@@ -17,10 +17,10 @@ import componentsOverrides from './overrides';
 
 export default function ThemeCustomization({ children }) {
   const {
-    state: { borderRadius, fontFamily, outlinedFilled, presetColor }
+    state: { borderRadius, fontFamily }
   } = useConfig();
 
-  const palette = useMemo(() => buildPalette(presetColor), [presetColor]);
+  const palette = useMemo(() => buildPalette('default'), []);
 
   const themeTypography = useMemo(() => Typography(fontFamily), [fontFamily]);
 
@@ -52,11 +52,11 @@ export default function ThemeCustomization({ children }) {
   );
 
   const themes = createTheme(themeOptions);
-  themes.components = useMemo(() => componentsOverrides(themes, borderRadius, outlinedFilled), [themes, borderRadius, outlinedFilled]);
+  themes.components = useMemo(() => componentsOverrides(themes, borderRadius, false), [themes, borderRadius]);
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider disableTransitionOnChange theme={themes} modeStorageKey="theme-mode" defaultMode={DEFAULT_THEME_MODE}>
+      <ThemeProvider disableTransitionOnChange theme={themes}>
         <CssBaseline enableColorScheme />
         {children}
       </ThemeProvider>

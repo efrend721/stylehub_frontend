@@ -10,18 +10,6 @@ export interface IRolesService {
   deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
 }
 
-import { http } from '#/services/apiClient/http';
-import type { Rol, RolSelect } from '#/views/admin/roles/types';
-
-export interface IRolesService {
-  getAll(token?: string): Promise<Rol[]>;
-  getForSelect(token?: string): Promise<RolSelect[]>;
-  getById(id: number, token?: string): Promise<Rol>;
-  update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
-  deleteOne(id: number, token?: string): Promise<unknown>;
-  deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
-}
-
 const getAll = (token?: string) => {
   return http<Rol[]>('/roles', { token });
 };

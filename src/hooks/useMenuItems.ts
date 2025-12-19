@@ -61,7 +61,7 @@ export function useMenuItems(): HookState {
     async function load() {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
-        const data = await MenusService.getMenus(token || undefined);
+        const data = await MenusService.getMenus();
         const items = (Array.isArray(data) ? data : []).map(inflate);
         if (!cancelled) {
           setState({ items, loading: false, error: null, source: 'api' });
