@@ -13,8 +13,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+// Tabs removidos en favor de selector de tipo
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -59,11 +58,11 @@ export default function AdminMenusPage() {
   const [groupIdKey, setGroupIdKey] = useState('');
   const [itemTitulo, setItemTitulo] = useState('');
   const [itemIdKey, setItemIdKey] = useState('');
-  const [itemIdKeyId, setItemIdKeyId] = useState<number | ''>('');
   const [itemUrl, setItemUrl] = useState('/dashboard');
   const [itemIcon, setItemIcon] = useState<string>('');
   const [parentId, setParentId] = useState<number | ''>('');
-  const [tab, setTab] = useState(0);
+  // Tipo de creación: '' | 'group' | 'item'
+  const [creationType, setCreationType] = useState<'' | 'group' | 'item'>('');
   const [editingNode, setEditingNode] = useState<MenuTreeNodeLocal | null>(null);
   const isEditingGroup = editingNode?.tipo === 'group' || editingNode?.tipo === 'collapse';
   const isEditingItem = editingNode?.tipo === 'item';
@@ -115,12 +114,14 @@ export default function AdminMenusPage() {
   // id_key options from backend
   type IdKeyOption = { id_menu_item: number; id_key: string };
   const [idKeyOptions, setIdKeyOptions] = useState<IdKeyOption[]>([]);
+  const [idKeyLoaded, setIdKeyLoaded] = useState(false);
   const fetchIdKeys = useCallback(async (): Promise<void> => {
     try {
       const data = await http<IdKeyOption[]>('/menus/select', { method: 'GET', token: token || undefined });
       const safe = Array.isArray(data) ? data.filter((o): o is IdKeyOption => !!o && typeof o.id_menu_item === 'number' && typeof o.id_key === 'string') : [];
       setIdKeyOptions(safe);
       // No preseleccionar: mantener Select en blanco hasta que el usuario elija
+      setIdKeyLoaded(true);
     } catch (e) {
       notify.error(getErrorMessage(e, 'No se pudo cargar opciones de id_key'));
     }
@@ -145,21 +146,18 @@ export default function AdminMenusPage() {
   const startEdit = (node: MenuTreeNodeLocal) => {
     setEditingNode(node);
     if (node.tipo === 'item') {
-      setTab(1);
+      setCreationType('item');
       setItemTitulo(node.titulo);
       if (node.id_key) {
-        const found = idKeyOptions.find((o) => o.id_key === node.id_key);
         setItemIdKey(node.id_key);
-        setItemIdKeyId(found ? found.id_menu_item : '');
       } else {
         setItemIdKey('');
-        setItemIdKeyId('');
       }
       setItemUrl(node.url ?? '');
       setItemIcon(node.icono ?? '');
       setParentId(typeof node.parent_id === 'number' ? node.parent_id : '');
     } else {
-      setTab(0);
+      setCreationType('group');
       setGroupTitulo(node.titulo);
       if (node.id_key) {
         setGroupIdKey(node.id_key);
@@ -171,15 +169,28 @@ export default function AdminMenusPage() {
 
   const cancelEdit = () => {
     setEditingNode(null);
-    // Opcional: restaurar valores por defecto de create
+    // Restaurar valores por defecto de creación
     setGroupTitulo('');
     setGroupIdKey('');
     setItemTitulo('');
     setItemIdKey('');
-    setItemIdKeyId('');
     setItemUrl('');
     setItemIcon('');
     setParentId('');
+    setCreationType('');
+  };
+
+  // Reset UI to default after successful creation
+  const resetCreateUI = () => {
+    setEditingNode(null);
+    setGroupTitulo('');
+    setGroupIdKey('');
+    setItemTitulo('');
+    setItemIdKey('');
+    setItemUrl('/dashboard');
+    setItemIcon('');
+    setParentId('');
+    setCreationType('');
   };
 
   const saveEditGroup = async () => {
@@ -207,7 +218,7 @@ export default function AdminMenusPage() {
         token: token || undefined
       });
       notify.success('Grupo actualizado');
-      cancelEdit();
+      resetCreateUI();
       void loadTree();
     } catch {
       notify.error('No se pudo actualizar el grupo');
@@ -252,7 +263,7 @@ export default function AdminMenusPage() {
         token: token || undefined
       });
       notify.success('Item actualizado');
-      cancelEdit();
+      resetCreateUI();
       void loadTree();
     } catch {
       notify.error('No se pudo actualizar el item');
@@ -315,16 +326,22 @@ export default function AdminMenusPage() {
 
   useEffect(() => {
     void loadTree();
-    void fetchIdKeys();
-  }, [loadTree, fetchIdKeys]);
+  }, [loadTree]);
+
+  // Lazy loading de grupos: solo cuando se elige tipo "item"
+  useEffect(() => {
+    if (creationType === 'item' && !idKeyLoaded) {
+      void fetchIdKeys();
+    }
+  }, [creationType, idKeyLoaded, fetchIdKeys]);
 
   const handleCreateGroup = async () => {
     try {
       const node = await http<{ titulo: string }>('/menus/admin/groups', { method: 'POST', body: { id_key: groupIdKey, titulo: groupTitulo, tipo: 'group' }, token: token || undefined });
       notify.success(`Grupo creado: ${node?.titulo ?? groupTitulo}`);
       // refrescar vista previa
-      // limpiar solo el título para facilitar creación consecutiva
-      setGroupTitulo('');
+      // limpiar y volver al estado inicial
+      resetCreateUI();
       void loadTree();
     } catch {
       notify.error('Error creando grupo');
@@ -344,8 +361,8 @@ export default function AdminMenusPage() {
       const node = await http<{ titulo: string }>('/menus/admin/items', { method: 'POST', body, token: token || undefined });
       notify.success(`Item creado: ${node?.titulo ?? itemTitulo}`);
       // refrescar vista previa
-      // limpiar solo el título para facilitar creación consecutiva
-      setItemTitulo('');
+      // limpiar y volver al estado inicial
+      resetCreateUI();
       void loadTree();
     } catch {
       notify.error('Error creando item');
@@ -446,6 +463,10 @@ export default function AdminMenusPage() {
     setReorderTarget(null);
   };
 
+  // Habilitación de botones de creación
+  const canCreateGroup = creationType === 'group' && groupIdKey.trim() !== '' && groupTitulo.trim() !== '';
+  const canCreateItem = creationType === 'item' && itemIdKey.trim() !== '' && itemTitulo.trim() !== '' && itemUrl.trim() !== '' && (typeof parentId === 'number');
+
   return (
     <>
     <Grid container spacing={2} alignItems="stretch">
@@ -478,18 +499,42 @@ export default function AdminMenusPage() {
         </MainCard>
       </Grid>
 
-      {/* Right: Tabs for Groups/Items */}
+      {/* Right: Administración (creación/edición) */}
       <Grid size={{ xs: 12, md: 7 }}>
         <MainCard title="Administración de menús" sx={{ height: '100%' }}>
-          <Stack sx={{ height: '100%' }}>
-            <Tabs value={tab} onChange={(_, v: number) => setTab(v)}>
-              <Tab label="Grupos" />
-              <Tab label="Items" />
-            </Tabs>
+          <Stack sx={{ height: '100%', p: 2, gap: 2 }}>
+            <Stack direction="row" sx={{ gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary">
+                Área para la Creación, Edición o Eliminación de Menús
+              </Typography>
+            </Stack>
             <Divider />
-            {/* Tab panels */}
-            {tab === 0 && (
-              <Stack sx={{ p: 2, gap: 2 }}>
+            {/* Selector de tipo de menú */}
+            <FormControl size="small" sx={{ minWidth: 240 }}>
+              <InputLabel id="tipo-menu-label" shrink>Tipo de Menú</InputLabel>
+              <Select
+                labelId="tipo-menu-label"
+                label="Tipo de Menú"
+                value={creationType}
+                displayEmpty
+                onChange={(e) => setCreationType((String(e.target.value) as 'group' | 'item') || '')}
+                renderValue={(v) => {
+                  const val = String(v ?? '');
+                  if (val === '') return <em>Escoge un tipo de menú</em>;
+                  return val === 'group' ? 'Group' : 'Item';
+                }}
+              >
+                <MenuItem value="">
+                  <em>Escoge un tipo de menú</em>
+                </MenuItem>
+                <MenuItem value="group">Group</MenuItem>
+                <MenuItem value="item">Item</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Panel dinámico según tipo */}
+            {creationType === 'group' && (
+              <Stack sx={{ gap: 2 }}>
                 <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}>
                   <TextField
                     label="id_key"
@@ -502,68 +547,68 @@ export default function AdminMenusPage() {
                   <TextField label="título" placeholder="Ingrese título" value={groupTitulo} onChange={(e) => setGroupTitulo(e.target.value)} size="small" />
                 </Stack>
                 <Stack direction="row" sx={{ gap: 1 }}>
-                  <Button
-                    variant="contained"
-                    disabled={isEditingGroup}
-                    onClick={() => { void handleCreateGroup(); }}
-                  >
-                    Crear Grupo
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    disabled={!isEditingGroup || actionLoadingId !== null}
-                    onClick={() => { void saveEditGroup(); }}
-                  >
-                    Guardar cambios
-                  </Button>
+                  {!isEditingGroup && (
+                    <Button
+                      variant="contained"
+                      disabled={!canCreateGroup}
+                      onClick={() => { void handleCreateGroup(); }}
+                    >
+                      Crear Grupo
+                    </Button>
+                  )}
+                  {!isEditingGroup && (
+                    <Button variant="outlined" onClick={resetCreateUI}>Cancelar</Button>
+                  )}
                   {isEditingGroup && (
-                    <Button onClick={cancelEdit}>Cancelar</Button>
+                    <>
+                      <Button
+                        variant="outlined"
+                        disabled={actionLoadingId !== null}
+                        onClick={() => { void saveEditGroup(); }}
+                      >
+                        Guardar cambios
+                      </Button>
+                      <Button variant="outlined" onClick={cancelEdit}>Cancelar</Button>
+                    </>
                   )}
                 </Stack>
               </Stack>
             )}
-            {tab === 1 && (
-              <Stack sx={{ p: 2, gap: 2 }}>
+
+            {creationType === 'item' && (
+              <Stack sx={{ gap: 2 }}>
                 <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}>
-                  {isEditingItem ? (
-                    <TextField
-                      label="id_key"
-                      value={editingNode?.id_key ?? itemIdKey}
-                      size="small"
-                      disabled
-                    />
-                  ) : (
+                  <TextField
+                    label="id_key"
+                    placeholder="nuevo id_key"
+                    value={isEditingItem ? (editingNode?.id_key ?? itemIdKey) : itemIdKey}
+                    onChange={(e) => setItemIdKey(e.target.value)}
+                    size="small"
+                    disabled={isEditingItem}
+                  />
+                  <TextField label="título" placeholder="Ingrese título" value={itemTitulo} onChange={(e) => setItemTitulo(e.target.value)} size="small" />
+                  <TextField label="url" placeholder="/ruta" value={itemUrl} onChange={(e) => setItemUrl(e.target.value)} size="small" />
+                  <FormControl size="small" sx={{ minWidth: 220 }}>
+                    <InputLabel id="grupo-item-label" shrink>Grupo</InputLabel>
                     <Select
-                      size="small"
-                      value={itemIdKeyId}
+                      labelId="grupo-item-label"
+                      label="Grupo"
+                      value={parentId}
                       displayEmpty
                       onChange={(e) => {
-                        const valRaw = String(e.target.value);
-                        if (valRaw === '') {
-                          setItemIdKeyId('');
-                          setItemIdKey('');
-                          setItemTitulo('');
-                          return;
-                        }
-                        const selected = idKeyOptions.find((o) => o.id_menu_item === Number(valRaw));
-                        setItemIdKeyId(Number(valRaw));
-                        setItemIdKey(selected ? selected.id_key : '');
-                        const id = Number(valRaw);
-                        const titulo = tituloById[id] ?? (selected ? selected.id_key : '');
-                        setItemTitulo(titulo ?? '');
+                        const raw = String(e.target.value);
+                        setParentId(raw === '' ? '' : Number(raw));
                       }}
-                      sx={{ minWidth: 220 }}
                       renderValue={(v) => {
-                        const vs = String(v ?? '');
-                        if (vs === '') return <em>Seleccione id_key</em>;
-                        const id = Number(vs);
+                        const val = String(v ?? '');
+                        if (val === '') return <em>Seleccione un grupo</em>;
+                        const id = Number(val);
                         const opt = idKeyOptions.find((o) => o.id_menu_item === id);
-                        if (!opt) return <em>Seleccione id_key</em>;
-                        return tituloById[id] ?? opt.id_key;
+                        return tituloById[id] ?? opt?.id_key ?? `#${id}`;
                       }}
                     >
                       <MenuItem value="">
-                        <em>Seleccione id_key</em>
+                        <em>Seleccione un grupo</em>
                       </MenuItem>
                       {idKeyOptions.map((opt) => (
                         <MenuItem key={opt.id_menu_item} value={opt.id_menu_item}>
@@ -571,54 +616,57 @@ export default function AdminMenusPage() {
                         </MenuItem>
                       ))}
                     </Select>
-                  )}
-                  <TextField label="título" placeholder="Ingrese título" value={itemTitulo} onChange={(e) => setItemTitulo(e.target.value)} size="small" />
-                  <TextField label="url" placeholder="/ruta" value={itemUrl} onChange={(e) => setItemUrl(e.target.value)} size="small" />
-                  <Select
-                    displayEmpty
-                    value={itemIcon}
-                    onChange={(e) => setItemIcon(String(e.target.value))}
-                    size="small"
-                    sx={{ minWidth: 220 }}
-                    renderValue={(value) => (
-                      value ? (
-                        <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                          {renderIconPreview(String(value))}
-                          <span>{String(value)}</span>
-                        </Stack>
-                      ) : (
+                  </FormControl>
+                  <FormControl size="small" sx={{ minWidth: 220 }}>
+                    <InputLabel id="icono-item-label" shrink>Icono</InputLabel>
+                    <Select
+                      labelId="icono-item-label"
+                      label="Icono"
+                      displayEmpty
+                      value={itemIcon}
+                      onChange={(e) => setItemIcon(String(e.target.value))}
+                      renderValue={(value) => (
+                        value ? (
+                          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+                            {renderIconPreview(String(value))}
+                            <span>{String(value)}</span>
+                          </Stack>
+                        ) : (
+                          <em>Sin icono</em>
+                        )
+                      )}
+                    >
+                      <MenuItem value="">
                         <em>Sin icono</em>
-                      )
-                    )}
-                  >
-                    <MenuItem value="">
-                      <em>Sin icono</em>
-                    </MenuItem>
-                    {ICON_OPTIONS.filter((v) => v !== '').map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                          {renderIconPreview(opt)}
-                          <span>{opt}</span>
-                        </Stack>
                       </MenuItem>
-                    ))}
-                  </Select>
-                  <TextField label="parent_id (opcional)" value={parentId} onChange={(e) => setParentId(e.target.value === '' ? '' : Number(e.target.value))} size="small" />
+                      {ICON_OPTIONS.filter((v) => v !== '').map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+                            {renderIconPreview(opt)}
+                            <span>{opt}</span>
+                          </Stack>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Stack>
                 <Stack direction="row" sx={{ gap: 1 }}>
                   {isEditingItem ? (
                     <>
                       <Button disabled={actionLoadingId !== null} variant="contained" onClick={() => { void saveEditItem(); }}>Guardar cambios</Button>
-                      <Button onClick={cancelEdit}>Cancelar</Button>
+                      <Button variant="outlined" onClick={cancelEdit}>Cancelar</Button>
                     </>
                   ) : (
                     <Button
                       variant="contained"
-                      disabled={(itemIdKey.trim() === '' || itemTitulo.trim() === '')}
+                      disabled={!canCreateItem}
                       onClick={() => { void handleCreateItem(); }}
                     >
                       Crear Item
                     </Button>
+                  )}
+                  {!isEditingItem && (
+                    <Button variant="outlined" onClick={resetCreateUI}>Cancelar</Button>
                   )}
                 </Stack>
               </Stack>
@@ -636,7 +684,7 @@ export default function AdminMenusPage() {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancelDelete}>Cancelar</Button>
+        <Button variant="outlined" onClick={handleCancelDelete}>Cancelar</Button>
         <Button color="error" variant="contained" onClick={() => { void handleConfirmDelete(); }} autoFocus>
           Eliminar
         </Button>
@@ -675,7 +723,7 @@ export default function AdminMenusPage() {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={cancelMove}>Cancelar</Button>
+        <Button variant="outlined" onClick={cancelMove}>Cancelar</Button>
         <Button variant="contained" onClick={() => { void applyMove(); }}>Mover</Button>
       </DialogActions>
     </Dialog>
@@ -710,7 +758,7 @@ export default function AdminMenusPage() {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setReorderOpen(false)}>Cancelar</Button>
+        <Button variant="outlined" onClick={() => setReorderOpen(false)}>Cancelar</Button>
         <Button variant="contained" onClick={() => { void applyReorder(); }}>Aplicar</Button>
       </DialogActions>
     </Dialog>
