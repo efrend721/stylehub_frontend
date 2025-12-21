@@ -13,6 +13,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import FormHelperText from '@mui/material/FormHelperText';
 // Tabs removidos en favor de selector de tipo
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -306,13 +307,14 @@ export default function AdminMenusPage() {
 
   // moveNode fue reemplazado por diálogos; se mantiene requestMove
 
-  const reorderNode = async (node: MenuTreeNodeLocal, parentId: number | null | undefined, newOrden: number | null) => {
-    if (typeof parentId !== 'number' || newOrden === null) return;
+  // Reordenar con endpoint PUT /menus/admin/edges/order (new_order es 1-based)
+  const reorderNode = async (node: MenuTreeNodeLocal, parentId: number | null | undefined, newOrderOneBased: number | null) => {
+    if (typeof parentId !== 'number' || newOrderOneBased === null) return;
     setActionLoadingId(node.id_menu_item);
     try {
-      await http<unknown>(`/menus/admin/edges`, {
-        method: 'POST',
-        body: { parent_id: parentId, child_id: node.id_menu_item, orden: newOrden },
+      await http<{ updated: boolean }>(`/menus/admin/edges/order`, {
+        method: 'PUT',
+        body: { parent_id: parentId, child_id: node.id_menu_item, new_order: newOrderOneBased },
         token: token || undefined
       });
       notify.success('Orden actualizado');
@@ -334,6 +336,22 @@ export default function AdminMenusPage() {
       void fetchIdKeys();
     }
   }, [creationType, idKeyLoaded, fetchIdKeys]);
+
+  // id_key del grupo seleccionado (para construir URL dinámica)
+  const selectedGroupKey = useMemo(() => {
+    if (typeof parentId !== 'number') return '';
+    const opt = idKeyOptions.find((o) => o.id_menu_item === parentId);
+    return opt?.id_key ?? '';
+  }, [parentId, idKeyOptions]);
+
+  // Actualizar URL automáticamente en creación de Item (no en edición)
+  useEffect(() => {
+    if (creationType !== 'item' || isEditingItem) return;
+    const groupKey = selectedGroupKey.trim();
+    const itemKey = itemIdKey.trim();
+    const next = groupKey ? (itemKey ? `/${groupKey}/${itemKey}` : `/${groupKey}`) : '';
+    setItemUrl(next);
+  }, [creationType, isEditingItem, selectedGroupKey, itemIdKey]);
 
   const handleCreateGroup = async () => {
     try {
@@ -445,9 +463,11 @@ export default function AdminMenusPage() {
     const currentIndex = siblings.findIndex((s) => s.id_menu_item === node.id_menu_item);
     setReorderTarget(node);
     setReorderParentId(parentId);
-    const safeIndex = currentIndex >= 0 ? currentIndex : 0;
-    const maxIndex = Math.max(siblings.length - 1, 0);
-    setReorderIndex(Math.min(safeIndex, maxIndex));
+    const safeIndexZero = currentIndex >= 0 ? currentIndex : 0;
+    const maxIndexZero = Math.max(siblings.length - 1, 0);
+    // Dialog usa índice 1-based
+    const initialOneBased = Math.min(safeIndexZero, maxIndexZero) + 1;
+    setReorderIndex(initialOneBased);
     setReorderOpen(true);
   }
 
@@ -456,10 +476,10 @@ export default function AdminMenusPage() {
     const node = reorderTarget;
     const pid = reorderParentId;
     const siblings = getSiblings(pid);
-    const maxIndex = Math.max(siblings.length - 1, 0);
-    const idx = Math.min(Math.max(0, reorderIndex), maxIndex);
+    const maxIndexOne = Math.max(siblings.length, 1);
+    const idxOne = Math.min(Math.max(1, reorderIndex), maxIndexOne);
     setReorderOpen(false);
-    await reorderNode(node, pid, idx);
+    await reorderNode(node, pid, idxOne);
     setReorderTarget(null);
   };
 
@@ -540,7 +560,15 @@ export default function AdminMenusPage() {
                     label="id_key"
                     placeholder={isEditingGroup ? undefined : 'nuevo id_key'}
                     value={isEditingGroup ? (editingNode?.id_key ?? '') : groupIdKey}
-                    onChange={(e) => setGroupIdKey(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value.toLowerCase().replace(/\s+/g, '');
+                      setGroupIdKey(v);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === ' ' || e.code === 'Space') {
+                        e.preventDefault();
+                      }
+                    }}
                     size="small"
                     disabled={isEditingGroup}
                   />
@@ -577,79 +605,146 @@ export default function AdminMenusPage() {
 
             {creationType === 'item' && (
               <Stack sx={{ gap: 2 }}>
-                <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}>
-                  <TextField
-                    label="id_key"
-                    placeholder="nuevo id_key"
-                    value={isEditingItem ? (editingNode?.id_key ?? itemIdKey) : itemIdKey}
-                    onChange={(e) => setItemIdKey(e.target.value)}
-                    size="small"
-                    disabled={isEditingItem}
-                  />
-                  <TextField label="título" placeholder="Ingrese título" value={itemTitulo} onChange={(e) => setItemTitulo(e.target.value)} size="small" />
-                  <TextField label="url" placeholder="/ruta" value={itemUrl} onChange={(e) => setItemUrl(e.target.value)} size="small" />
-                  <FormControl size="small" sx={{ minWidth: 220 }}>
-                    <InputLabel id="grupo-item-label" shrink>Grupo</InputLabel>
-                    <Select
-                      labelId="grupo-item-label"
-                      label="Grupo"
-                      value={parentId}
-                      displayEmpty
+                {/* Fila a ancho completo usando Grid 12 columnas */}
+                <Grid container spacing={1} alignItems="center">
+                  {/* 1. Grupo (Select) */}
+                  <Grid size={{ xs: 2, md: 2 }}>
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="grupo-item-label" shrink>Grupo</InputLabel>
+                      <Select
+                        labelId="grupo-item-label"
+                        label="Grupo"
+                        value={
+                          // En edición, asegurar que se muestre el grupo actual incluso si el estado aún no resolvió
+                          isEditingItem && typeof parentId !== 'number'
+                            ? (typeof editingNode?.parent_id === 'number' ? editingNode.parent_id : '')
+                            : parentId
+                        }
+                        displayEmpty={!isEditingItem || typeof parentId !== 'number'}
+                        onChange={(e) => {
+                          const raw = String(e.target.value);
+                          setParentId(raw === '' ? '' : Number(raw));
+                        }}
+                        renderValue={(v) => {
+                          // Si está vacío pero estamos editando y el nodo tiene padre, renderizar ese valor
+                          const valStr = String(v ?? '');
+                          const effectiveId = valStr === '' && isEditingItem && typeof editingNode?.parent_id === 'number'
+                            ? editingNode.parent_id
+                            : Number(valStr);
+                          if (!effectiveId) return <em>Seleccione un grupo</em>;
+                          const opt = idKeyOptions.find((o) => o.id_menu_item === effectiveId);
+                          return tituloById[effectiveId] ?? opt?.id_key ?? `#${effectiveId}`;
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Seleccione un grupo</em>
+                        </MenuItem>
+                        {idKeyOptions.map((opt) => (
+                          <MenuItem key={opt.id_menu_item} value={opt.id_menu_item}>
+                            {tituloById[opt.id_menu_item] ?? opt.id_key}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* 2. id_key (Input) */}
+                  <Grid size={{ xs: 2, md: 2 }}>
+                    <TextField
+                      label="id_key"
+                      placeholder={isEditingItem ? undefined : "nuevo id_key"}
+                      value={isEditingItem ? (editingNode?.id_key ?? '') : itemIdKey}
                       onChange={(e) => {
-                        const raw = String(e.target.value);
-                        setParentId(raw === '' ? '' : Number(raw));
+                        const v = e.target.value.toLowerCase().replace(/\s+/g, '');
+                        setItemIdKey(v);
                       }}
-                      renderValue={(v) => {
-                        const val = String(v ?? '');
-                        if (val === '') return <em>Seleccione un grupo</em>;
-                        const id = Number(val);
-                        const opt = idKeyOptions.find((o) => o.id_menu_item === id);
-                        return tituloById[id] ?? opt?.id_key ?? `#${id}`;
+                      onKeyDown={(e) => {
+                        if (e.key === ' ' || e.code === 'Space') {
+                          e.preventDefault();
+                        }
                       }}
-                    >
-                      <MenuItem value="">
-                        <em>Seleccione un grupo</em>
-                      </MenuItem>
-                      {idKeyOptions.map((opt) => (
-                        <MenuItem key={opt.id_menu_item} value={opt.id_menu_item}>
-                          {tituloById[opt.id_menu_item] ?? opt.id_key}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl size="small" sx={{ minWidth: 220 }}>
-                    <InputLabel id="icono-item-label" shrink>Icono</InputLabel>
-                    <Select
-                      labelId="icono-item-label"
-                      label="Icono"
-                      displayEmpty
-                      value={itemIcon}
-                      onChange={(e) => setItemIcon(String(e.target.value))}
-                      renderValue={(value) => (
-                        value ? (
-                          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                            {renderIconPreview(String(value))}
-                            <span>{String(value)}</span>
-                          </Stack>
-                        ) : (
+                      size="small"
+                      disabled={isEditingItem}
+                      fullWidth
+                    />
+                  </Grid>
+
+                  {/* 3. Title (Input) */}
+                  <Grid size={{ xs: 2, md: 2 }}>
+                    <TextField
+                      label="título"
+                      placeholder="Ingrese título"
+                      value={itemTitulo}
+                      onChange={(e) => setItemTitulo(e.target.value)}
+                      size="small"
+                      fullWidth
+                    />
+                  </Grid>
+
+                  {/* 4. Icon (Select) */}
+                  <Grid size={{ xs: 2, md: 2 }}>
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="icono-item-label" shrink>Icono</InputLabel>
+                      <Select
+                        labelId="icono-item-label"
+                        label="Icono"
+                        displayEmpty
+                        value={itemIcon}
+                        onChange={(e) => setItemIcon(String(e.target.value))}
+                        renderValue={(value) => (
+                          value ? (
+                            <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+                              {renderIconPreview(String(value))}
+                              <span>{String(value)}</span>
+                            </Stack>
+                          ) : (
+                            <em>Sin icono</em>
+                          )
+                        )}
+                      >
+                        <MenuItem value="">
                           <em>Sin icono</em>
-                        )
-                      )}
-                    >
-                      <MenuItem value="">
-                        <em>Sin icono</em>
-                      </MenuItem>
-                      {ICON_OPTIONS.filter((v) => v !== '').map((opt) => (
-                        <MenuItem key={opt} value={opt}>
-                          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                            {renderIconPreview(opt)}
-                            <span>{opt}</span>
-                          </Stack>
                         </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Stack>
+                        {ICON_OPTIONS.filter((v) => v !== '').map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+                              {renderIconPreview(opt)}
+                              <span>{opt}</span>
+                            </Stack>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* 5. URL (Input - Disabled) */}
+                  <Grid size={{ xs: 4, md: 4 }}>
+                    <TextField
+                      label="url"
+                      placeholder="/ruta"
+                      value={
+                        isEditingItem
+                          ? ((editingNode?.url && editingNode.url.trim() !== '')
+                              ? String(editingNode.url)
+                              : (() => {
+                                  const effParentId = (typeof editingNode?.parent_id === 'number')
+                                    ? editingNode.parent_id
+                                    : (typeof parentId === 'number' ? parentId : null);
+                                  const opt = (typeof effParentId === 'number')
+                                    ? idKeyOptions.find((o) => o.id_menu_item === effParentId)
+                                    : undefined;
+                                  const groupKey = (opt?.id_key ?? '').trim();
+                                  const itemKey = (editingNode?.id_key ?? '').trim();
+                                  return groupKey ? (itemKey ? `/${groupKey}/${itemKey}` : `/${groupKey}`) : '';
+                                })())
+                          : itemUrl
+                      }
+                      size="small"
+                      disabled
+                      fullWidth
+                    />
+                  </Grid>
+                </Grid>
                 <Stack direction="row" sx={{ gap: 1 }}>
                   {isEditingItem ? (
                     <>
@@ -738,7 +833,8 @@ export default function AdminMenusPage() {
         <Stack sx={{ gap: 2 }}>
           {(() => {
             const siblings = getSiblings(reorderParentId);
-            const options = Array.from({ length: Math.max(siblings.length, 1) }, (_, i) => i);
+            // Usar posiciones 1-based para coincidir con el backend
+            const options = Array.from({ length: Math.max(siblings.length, 1) }, (_, i) => i + 1);
             return (
               <FormControl size="small">
                 <InputLabel id="reorder-index-label">Posición</InputLabel>
@@ -749,9 +845,10 @@ export default function AdminMenusPage() {
                   onChange={(e) => setReorderIndex(Number(e.target.value))}
                 >
                   {options.map((i) => (
-                    <MenuItem key={i} value={i}>{i === 0 ? '0 (primero)' : i}</MenuItem>
+                    <MenuItem key={i} value={i}>{i === 1 ? '1 (primero)' : i}</MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>Posición dentro del grupo</FormHelperText>
               </FormControl>
             );
           })()}
@@ -832,10 +929,18 @@ function renderTree(
                 <IconButton size="small" onClick={() => { void h?.onMove(node); }}>
                   <IconArrowRight size={16} />
                 </IconButton>
-                <IconButton size="small" disabled={!canReorder || isFirst} onClick={() => { void h?.onReorder(node, parentId, (node.orden ?? index) - 1); }}>
+                <IconButton size="small" disabled={!canReorder || isFirst} onClick={() => {
+                  // mover hacia arriba: target position = (index - 1) -> new_order = (index - 1) + 1 = index
+                  const newOrderOne = index; // 1-based
+                  void h?.onReorder(node, parentId, newOrderOne);
+                }}>
                   <IconArrowUp size={16} />
                 </IconButton>
-                <IconButton size="small" disabled={!canReorder || isLast} onClick={() => { void h?.onReorder(node, parentId, (node.orden ?? index) + 1); }}>
+                <IconButton size="small" disabled={!canReorder || isLast} onClick={() => {
+                  // mover hacia abajo: target position = (index + 1) -> new_order = (index + 1) + 1 = index + 2
+                  const newOrderOne = index + 2; // 1-based
+                  void h?.onReorder(node, parentId, newOrderOne);
+                }}>
                   <IconArrowDown size={16} />
                 </IconButton>
               </Stack>
