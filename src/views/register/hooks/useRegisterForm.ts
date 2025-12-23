@@ -3,29 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 import { useAuth } from '#/contexts/AuthContext';
 import notify from '#/utils/notify';
-import { AuthRegisterAlerts } from './index';
-import { validateRegisterFields } from './registerUtils';
+import { AuthRegisterAlerts } from '../components';
+import { validateRegisterFields } from '../utils';
 import { strengthColor, strengthIndicator } from '#/utils/password-strength';
 import { isEmail, trim, validatePassword, isValidPhone, sanitizeUsername, isValidUsername } from '#/utils/validators';
+import { type Level, type RegisterFormData, type RegisterFieldErrors } from '../types';
 
-export function useAuthRegister() {
+export function useRegisterForm() {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [strength, setStrength] = useState(0);
-  const [level, setLevel] = useState<{ label: string; color: string } | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{
-    nombre_usuario?: string;
-    apellido_usuario?: string;
-    correo_electronico?: string;
-    telefono?: string;
-    usuario_acceso?: string;
-    contrasena?: string;
-  }>({});
+  const [level, setLevel] = useState<Level>(null);
+  const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
   const alertHostRef = useRef<HTMLDivElement | null>(null);
   const alertRootRef = useRef<ReturnType<typeof createRoot> | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     nombre_usuario: '',
     apellido_usuario: '',
     correo_electronico: '',
@@ -55,11 +49,16 @@ export function useAuthRegister() {
   const handleClickShowPassword = () => setShowPassword((prev) => !prev);
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault();
 
-  // Genera usuario_acceso a partir del email
   const generateUsuarioAcceso = (email: string): string => {
     if (!email) return '';
     const emailParts = email.split('@');
     return emailParts[0] || '';
+  };
+
+  const changePassword = (value: string) => {
+    const temp = strengthIndicator(value);
+    setStrength(temp);
+    setLevel(strengthColor(temp));
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,20 +77,9 @@ export function useAuthRegister() {
     }
   };
 
-  const changePassword = (value: string) => {
-    // strengthIndicator y strengthColor deben importarse en el archivo
-    // @ts-ignore
-    const temp = strengthIndicator(value);
-    // @ts-ignore
-    setStrength(temp);
-    // @ts-ignore
-    setLevel(strengthColor(temp));
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearAlert();
-    // Validaciones básicas
     const nombre = trim(formData.nombre_usuario);
     const apellido = trim(formData.apellido_usuario);
     const correo = trim(formData.correo_electronico);
@@ -99,42 +87,24 @@ export function useAuthRegister() {
     const usuarioAcceso = trim(formData.usuario_acceso);
     const contrasena = trim(formData.contrasena);
 
-    const nextFieldErrors: {
-      nombre_usuario?: string;
-      apellido_usuario?: string;
-      correo_electronico?: string;
-      telefono?: string;
-      usuario_acceso?: string;
-      contrasena?: string;
-    } = {};
+    const nextFieldErrors: RegisterFieldErrors = {};
 
     if (!nombre) nextFieldErrors.nombre_usuario = 'Campo obligatorio';
     if (!apellido) nextFieldErrors.apellido_usuario = 'Campo obligatorio';
     if (!correo) nextFieldErrors.correo_electronico = 'Campo obligatorio';
-    // isEmail debe importarse
-    // @ts-ignore
     else if (!isEmail(correo)) nextFieldErrors.correo_electronico = 'Correo inválido';
 
     if (!contrasena) nextFieldErrors.contrasena = 'Campo obligatorio';
-    // validatePassword debe importarse
-    // @ts-ignore
     else {
-      // @ts-ignore
       const pwdError = validatePassword(contrasena);
       if (pwdError) nextFieldErrors.contrasena = pwdError;
     }
 
-    // isValidPhone debe importarse
-    // @ts-ignore
     if (telefono && !isValidPhone(telefono)) {
       nextFieldErrors.telefono = 'Formato de teléfono inválido';
     }
 
-    // Normaliza usuario_acceso y valida patrón
-    // sanitizeUsername, isValidUsername deben importarse
-    // @ts-ignore
     const usuarioNormalizado = sanitizeUsername(usuarioAcceso);
-    // @ts-ignore
     if (!usuarioNormalizado || !isValidUsername(usuarioNormalizado)) {
       setFieldErrors(nextFieldErrors);
       showAlert('error', 'El usuario de acceso no se generó correctamente');
@@ -198,5 +168,5 @@ export function useAuthRegister() {
     alertHostRef,
     strength,
     level
-  };
+  } as const;
 }

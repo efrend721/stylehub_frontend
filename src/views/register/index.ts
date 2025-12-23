@@ -1,5 +1,5 @@
-export { default as Register } from './Register';
-export { default as AuthRegister } from './AuthRegister';
-export * from './AuthRegisterAlerts';
-export * from './useAuthRegister';
-export * from './registerUtils';
+export { default } from './index.tsx';
+export * from './components';
+export * from './hooks';
+export * from './types';
+export * from './utils';

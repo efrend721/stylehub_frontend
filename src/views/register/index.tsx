@@ -1,20 +1,18 @@
 import { Link } from 'react-router-dom';
-
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
-// project imports
 import AuthWrapper1 from '../auth-ui/AuthWrapper1';
 import AuthCardWrapper from '../auth-ui/AuthCardWrapper';
 
 import Logo from '#/ui-component/Logo';
 import AuthFooter from '#/ui-component/cards/AuthFooter';
-import AuthRegister from './AuthRegister';
+import { RegisterHeader, RegisterForm } from './components';
 
-export default function Register() {
+export default function RegisterOrchestrator() {
   const downMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   return (
@@ -29,16 +27,9 @@ export default function Register() {
                     <Logo />
                   </Link>
                 </Box>
-                <Stack sx={{ alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                  <Typography gutterBottom variant={downMD ? 'h3' : 'h2'} sx={{ color: 'secondary.main', mb: 0 }}>
-                    Registro
-                  </Typography>
-                  <Typography variant="caption" sx={{ fontSize: '16px', textAlign: { xs: 'center', md: 'inherit' } }}>
-                    Ingresa tus datos para continuar
-                  </Typography>
-                </Stack>
+                <RegisterHeader downMD={Boolean(downMD)} />
                 <Box>
-                  <AuthRegister />
+                  <RegisterForm />
                 </Box>
                 <Divider sx={{ width: 1 }} />
                 <Stack sx={{ alignItems: 'center' }}>

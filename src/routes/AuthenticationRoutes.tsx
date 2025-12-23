@@ -7,7 +7,7 @@ import GuestGuard from '#/utils/route-guard/GuestGuard';
 
 // maintenance routing
 const LoginPage = Loadable(lazy(() => import('#/views/login/Login')));
-const RegisterPage = Loadable(lazy(() => import('#/views/register/Register')));
+const RegisterPage = Loadable(lazy(() => import('#/views/register')));
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
