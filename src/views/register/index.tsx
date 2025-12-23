@@ -12,7 +12,7 @@ import Logo from '#/ui-component/Logo';
 import AuthFooter from '#/ui-component/cards/AuthFooter';
 import { RegisterHeader, RegisterForm } from './components';
 
-export default function RegisterOrchestrator() {
+export default function RegisterPage() {
   const downMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   return (
