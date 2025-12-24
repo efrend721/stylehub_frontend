@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "include": [
-    "src",
-    "src/types/**/*",
+    "src/**/*",
     "vite.config.dev.mjs",
     "vite.config.mjs",
     "vite.config.ts"
-  ]
+  ],
+  "references": []
 }

@@ -1,30 +1,29 @@
 import React, { useRef, useState } from 'react';
-import { AuthLoginAlerts } from './';
-import { validateLoginFields } from './';
+import { AuthLoginAlerts } from '../components/AuthLoginAlerts.tsx';
+import { validateLoginFields } from '../utils/index.ts';
 import { useNavigate } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 import { trim } from '#/utils/validators';
 import { useAuth } from '#/contexts/AuthContext';
 import notify from '#/utils/notify';
+import { type LoginFormData, type LoginFieldErrors } from '../types/index.ts';
 
-export function useAuthLogin() {
+export function useLoginForm() {
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ usuario_acceso?: string; contrasena?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const alertHostRef = useRef<HTMLDivElement | null>(null);
   const alertRootRef = useRef<ReturnType<typeof createRoot> | null>(null);
-  const [formData, setFormData] = useState({ usuario_acceso: '', contrasena: '' });
+  const [formData, setFormData] = useState<LoginFormData>({ usuario_acceso: '', contrasena: '' });
 
   const showAlert = (severity: 'error' | 'success', message: string) => {
     if (!alertHostRef.current) return;
     if (!alertRootRef.current) {
       alertRootRef.current = createRoot(alertHostRef.current);
     }
-    alertRootRef.current.render(
-      React.createElement(AuthLoginAlerts, { severity, message })
-    );
+    alertRootRef.current.render(React.createElement(AuthLoginAlerts, { severity, message }));
   };
 
   const clearAlert = () => {
@@ -88,5 +87,5 @@ export function useAuthLogin() {
     handleInputChange,
     handleSubmit,
     alertHostRef
-  };
+  } as const;
 }

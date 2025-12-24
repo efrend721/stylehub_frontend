@@ -1,8 +1,6 @@
-import React from 'react';
-import { useAuthLogin } from './';
+import { useLoginForm } from '../hooks/useLoginForm.ts';
 import { Link } from 'react-router-dom';
 
-// material-ui
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -16,17 +14,13 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormHelperText from '@mui/material/FormHelperText';
 
-// project imports
 import AnimateButton from '#/ui-component/extended/AnimateButton';
 import CustomFormControl from '#/ui-component/extended/Form/CustomFormControl';
 
-// assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// ===============================|| JWT - LOGIN ||=============================== //
-
-export default function AuthLogin() {
+export function LoginForm() {
   const {
     isLoading,
     checked,
@@ -39,7 +33,7 @@ export default function AuthLogin() {
     handleInputChange,
     handleSubmit,
     alertHostRef
-  } = useAuthLogin();
+  } = useLoginForm();
 
   return (
     <form onSubmit={(e) => { void handleSubmit(e); }}>
@@ -111,7 +105,6 @@ export default function AuthLogin() {
         </Grid>
       </Grid>
 
-      {/* Contenedor para alertas (renderizadas imperativamente) */}
       <div ref={alertHostRef} />
 
       <Box sx={{ mt: 2 }}>

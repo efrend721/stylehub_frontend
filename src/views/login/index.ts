@@ -1,5 +1,5 @@
-export { default as Login } from './Login';
-export { default as AuthLogin } from './AuthLogin';
-export * from './AuthLoginAlerts';
-export * from './useAuthLogin';
-export * from './authLoginUtils';
+export { default } from './index.tsx';
+export * from './components';
+export * from './hooks';
+export * from './types';
+export * from './utils';

@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 import { useAuth } from '#/contexts/AuthContext';
 import notify from '#/utils/notify';
-import { AuthRegisterAlerts } from '../components';
-import { validateRegisterFields } from '../utils';
+import { AuthRegisterAlerts } from '../components/AuthRegisterAlerts.tsx';
 import { strengthColor, strengthIndicator } from '#/utils/password-strength';
 import { isEmail, trim, validatePassword, isValidPhone, sanitizeUsername, isValidUsername } from '#/utils/validators';
 import { type Level, type RegisterFormData, type RegisterFieldErrors } from '../types';
@@ -147,7 +146,7 @@ export function useRegisterForm() {
           navigate('/login');
         }, 2000);
       }
-    } catch (_err) {
+    } catch {
       // Los errores del backend se muestran como toast.error desde AuthContext.
     }
   };

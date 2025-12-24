@@ -1,4 +1,4 @@
-import { useRegisterForm } from '../hooks';
+import { useRegisterForm } from '../hooks/useRegisterForm.ts';
 import { Link } from 'react-router-dom';
 
 import Button from '@mui/material/Button';

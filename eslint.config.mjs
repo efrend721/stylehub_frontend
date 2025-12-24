@@ -22,6 +22,7 @@ export default [
   ...fixupConfigRules(compat.extends('prettier')),
 
   {
+    files: ['src/**/*.{ts,tsx}'],
     plugins: {
       prettier,
       react,
@@ -35,10 +36,12 @@ export default [
       ecmaVersion: 2020,
       sourceType: 'module',
       parserOptions: {
+        tsconfigRootDir: __dirname,
         ecmaFeatures: {
           jsx: true
         },
-        project: './tsconfig.json'
+        project: ['./tsconfig.eslint.json', './tsconfig.json'],
+        projectService: true
       }
     },
 
