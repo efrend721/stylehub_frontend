@@ -15,22 +15,22 @@ export const notify = {
   success: (message: string, opts?: ToastOpts) =>
     toast.success(message, {
       ...withStyle(opts),
-      className: 'berry-toast-success',
+      className: 'berry-toast-success'
     }),
   error: (message: string, opts?: ToastOpts) =>
     toast.error(message, {
       ...withStyle(opts),
-      className: 'berry-toast-error',
+      className: 'berry-toast-error'
     }),
   info: (message: string, opts?: ToastOpts) =>
     toast.info(message, {
       ...withStyle(opts),
-      className: 'berry-toast-info',
+      className: 'berry-toast-info'
     }),
   warning: (message: string, opts?: ToastOpts) =>
     toast.warning(message, {
       ...withStyle(opts),
-      className: 'berry-toast-warning',
+      className: 'berry-toast-warning'
     }),
   dismiss: toast.dismiss
 };

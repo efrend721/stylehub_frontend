@@ -36,7 +36,11 @@ export function LoginForm() {
   } = useLoginForm();
 
   return (
-    <form onSubmit={(e) => { void handleSubmit(e); }}>
+    <form
+      onSubmit={(e) => {
+        void handleSubmit(e);
+      }}
+    >
       <CustomFormControl fullWidth>
         <InputLabel htmlFor="outlined-adornment-usuario-login">Usuario de Acceso</InputLabel>
         <OutlinedInput
