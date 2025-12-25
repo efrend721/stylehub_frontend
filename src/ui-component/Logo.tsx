@@ -45,18 +45,18 @@ export default function Logo() {
       <g transform="translate(54, 11)">
         {/* Style */}
         <text x="0" y="22" 
-              fontSize="24" 
-              fontWeight="700" 
-              fontFamily="system-ui, -apple-system, sans-serif" 
-              fill={theme.vars.palette.primary.main}>
+          fontSize="24" 
+          fontWeight="700" 
+          fontFamily="system-ui, -apple-system, sans-serif" 
+          fill={theme.vars.palette.primary.main}>
           Style
         </text>
         {/* Hub */}
         <text x="58" y="22" 
-              fontSize="24" 
-              fontWeight="700" 
-              fontFamily="system-ui, -apple-system, sans-serif" 
-              fill={theme.vars.palette.secondary.main}>
+          fontSize="24" 
+          fontWeight="700" 
+          fontFamily="system-ui, -apple-system, sans-serif" 
+          fill={theme.vars.palette.secondary.main}>
           Hub
         </text>
       </g>

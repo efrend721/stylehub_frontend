@@ -12,3 +12,10 @@ export interface RolSelect {
   id_rol: number;
   nombre: string;
 }
+
+// Payload para creación de rol (POST /roles)
+export interface CreateRolPayload {
+  nombre: string; // 2 - 50 caracteres
+  descripcion?: string; // Máx. 100 caracteres
+  estado?: 0 | 1; // Por defecto 1
+}

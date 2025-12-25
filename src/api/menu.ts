@@ -15,9 +15,9 @@ export function useGetMenuMaster() {
     endpoints.key + endpoints.master,
     () => initialState,
     {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
     }
   );
 

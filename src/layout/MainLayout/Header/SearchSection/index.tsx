@@ -4,6 +4,7 @@ import { forwardRef, useState } from 'react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
+import type { AvatarProps } from '@mui/material/Avatar';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -20,7 +21,7 @@ import Transitions from '#/ui-component/extended/Transitions';
 // assets
 import { IconAdjustmentsHorizontal, IconSearch, IconX } from '@tabler/icons-react';
 
-const HeaderAvatar = forwardRef<HTMLDivElement, any>(function HeaderAvatar({ children, ...others }, ref) {
+const HeaderAvatar = forwardRef<HTMLDivElement, AvatarProps>(function HeaderAvatar({ children, ...others }, ref) {
   const theme = useTheme();
 
   return (

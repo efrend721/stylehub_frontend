@@ -1,5 +1,4 @@
 // project imports
-import { withAlpha } from '#/utils/colorUtils';
 
 // assets
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -11,14 +10,8 @@ export default function Alert(theme) {
 
   const getPaletteColor = (severity) => (severity ? vars.palette[severity] : vars.palette.info);
 
-  const getCommonStyles = (ownerState) => {
-    const isWarningOrSuccess = ownerState.severity === 'warning' || ownerState.severity === 'success';
-    return { isWarningOrSuccess };
-  };
-
   const standardVariant = ({ ownerState }) => {
     const paletteColor = getPaletteColor(ownerState.severity);
-    const { isWarningOrSuccess } = getCommonStyles(ownerState);
 
     return {
       // Use light background with dark/main foreground for readability
@@ -30,7 +23,6 @@ export default function Alert(theme) {
 
   const outlinedVariant = ({ ownerState }) => {
     const paletteColor = getPaletteColor(ownerState.severity);
-    const { isWarningOrSuccess } = getCommonStyles(ownerState);
 
     return {
       color: paletteColor.dark,
@@ -41,7 +33,6 @@ export default function Alert(theme) {
 
   const filledVariant = ({ ownerState }) => {
     const paletteColor = getPaletteColor(ownerState.severity);
-    const { isWarningOrSuccess } = getCommonStyles(ownerState);
 
     return {
       // Align filled variant with light scheme for alerts/messages

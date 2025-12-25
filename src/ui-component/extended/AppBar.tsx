@@ -6,6 +6,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import MuiAppBar from '@mui/material/AppBar';
+import type { AppBarProps } from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
@@ -27,7 +28,7 @@ import Logo from '#/ui-component/Logo';
 import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
 import MenuIcon from '@mui/icons-material/Menu';
 
-function ElevationScroll({ children, window }: { children: React.ReactElement; window?: Window }) {
+function ElevationScroll({ children, window }: { children: React.ReactElement<AppBarProps>; window?: Window }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -41,7 +42,7 @@ function ElevationScroll({ children, window }: { children: React.ReactElement; w
       backgroundColor: theme.vars.palette.background.default,
       color: theme.vars.palette.text.dark
     }
-  } as any);
+  });
 }
 
 // ==============================|| MINIMAL LAYOUT APP BAR ||============================== //
@@ -60,7 +61,7 @@ export default function AppBar({ ...others }) {
     <ElevationScroll {...others}>
       <MuiAppBar>
         <Container>
-          <Toolbar sx={{ py: 2.5, px: `0 !important` }}>
+          <Toolbar sx={{ py: 2.5, px: '0 !important' }}>
             <Typography component={RouterLink} to="/" sx={{ flexGrow: 1, textAlign: 'left' }}>
               <Logo />
             </Typography>

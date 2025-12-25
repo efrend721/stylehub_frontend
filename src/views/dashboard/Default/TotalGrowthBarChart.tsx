@@ -89,7 +89,7 @@ export default function TotalGrowthBarChart({ isLoading }) {
               sx={{
                 ...theme.applyStyles('light', {
                   '& .apexcharts-series:nth-of-type(4) path:hover': {
-                    filter: `brightness(0.95)`,
+                    filter: 'brightness(0.95)',
                     transition: 'all 0.3s ease'
                   }
                 })

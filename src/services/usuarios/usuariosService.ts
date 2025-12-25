@@ -42,7 +42,7 @@ export const UsuariosService = {
     return http<unknown>(`/usuarios/${encodeURIComponent(usuarioAcceso)}`, { method: 'DELETE', token });
   },
   deleteMultiple(usernames: string[], token?: string) {
-    return http<{ deleted?: number; requested?: number }>(`/usuarios/bulk-delete`, {
+    return http<{ deleted?: number; requested?: number }>('/usuarios/bulk-delete', {
       method: 'DELETE',
       body: { usernames },
       token

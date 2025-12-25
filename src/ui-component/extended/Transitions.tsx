@@ -7,6 +7,7 @@ import Grow from '@mui/material/Grow';
 import Slide from '@mui/material/Slide';
 import Zoom from '@mui/material/Zoom';
 import Box from '@mui/material/Box';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 type SlideDirection = 'left' | 'right' | 'up' | 'down';
 type TransitionType = 'grow' | 'collapse' | 'fade' | 'slide' | 'zoom';
@@ -15,10 +16,10 @@ type Position = 'top-left' | 'top-right' | 'top' | 'bottom-left' | 'bottom-right
 type TransitionsComponentProps = {
   children: React.ReactNode;
   position?: Position;
-  sx?: any;
+  sx?: SxProps<Theme>;
   type?: TransitionType;
   direction?: SlideDirection;
-} & Record<string, any>;
+} & Record<string, unknown>;
 
 export default function Transitions({ children, position = 'top-left', sx, type = 'grow', direction = 'up', ...others }: TransitionsComponentProps) {
   let positionSX = {

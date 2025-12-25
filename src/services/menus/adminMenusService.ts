@@ -85,15 +85,15 @@ async function deleteNode(id: number, opts?: DeleteOptions, token?: string): Pro
 }
 
 async function addEdge(body: EdgePayload, token?: string): Promise<{ created: boolean }> {
-  return await http<{ created: boolean }>(`/menus/admin/edges`, { method: 'POST', body, token });
+  return await http<{ created: boolean }>('/menus/admin/edges', { method: 'POST', body, token });
 }
 
 async function removeEdge(body: EdgePayload, token?: string): Promise<{ deleted: boolean }> {
-  return await http<{ deleted: boolean }>(`/menus/admin/edges`, { method: 'DELETE', body, token });
+  return await http<{ deleted: boolean }>('/menus/admin/edges', { method: 'DELETE', body, token });
 }
 
 async function getTree(token?: string): Promise<MenuTreeNode[]> {
-  return await http<MenuTreeNode[]>(`/menus/admin/tree`, { method: 'GET', token });
+  return await http<MenuTreeNode[]>('/menus/admin/tree', { method: 'GET', token });
 }
 
 export const AdminMenusService = {

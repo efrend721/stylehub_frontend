@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 // material-ui
@@ -72,6 +72,29 @@ export default function Breadcrumbs({
 
   let customLocation = location.pathname;
 
+  const getCollapse = useCallback(
+    (menu: UIMenuItem) => {
+      if (!custom && menu.children) {
+        menu.children.filter((collapse: UIMenuItem) => {
+          if (collapse.type && collapse.type === 'collapse') {
+            getCollapse(collapse);
+            if (collapse.url === customLocation) {
+              setMain(collapse);
+              setItem(collapse);
+            }
+          } else if (collapse.type && collapse.type === 'item') {
+            if (customLocation === collapse.url) {
+              setMain(menu);
+              setItem(collapse);
+            }
+          }
+          return false;
+        });
+      }
+    },
+    [custom, customLocation]
+  );
+
   useEffect(() => {
     const navigation = { items: navItems };
     navigation?.items?.map((menu) => {
@@ -85,28 +108,10 @@ export default function Breadcrumbs({
       }
       return false;
     });
-  }, [navItems, customLocation]);
+  }, [navItems, customLocation, getCollapse]);
 
   // set active item state
-  const getCollapse = (menu: UIMenuItem) => {
-    if (!custom && menu.children) {
-      menu.children.filter((collapse: UIMenuItem) => {
-        if (collapse.type && collapse.type === 'collapse') {
-          getCollapse(collapse);
-          if (collapse.url === customLocation) {
-            setMain(collapse);
-            setItem(collapse);
-          }
-        } else if (collapse.type && collapse.type === 'item') {
-          if (customLocation === collapse.url) {
-            setMain(menu);
-            setItem(collapse);
-          }
-        }
-        return false;
-      });
-    }
-  };
+  // getCollapse is defined above via useCallback
 
   // item separator
   const SeparatorIcon = separator;
@@ -254,10 +259,10 @@ export default function Breadcrumbs({
             card === false
               ? { mb: 3, bgcolor: 'transparent', ...sx }
               : {
-                  mb: 3,
-                  bgcolor: 'background.default',
-                  ...sx
-                }
+                mb: 3,
+                bgcolor: 'background.default',
+                ...sx
+              }
           }
           {...others}
         >

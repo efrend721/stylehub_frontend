@@ -15,16 +15,16 @@ export interface ExtendedAvatarProps {
   size?: AvatarSize;
   sx?: SxProps<Theme>;
   component?: ElementType;
-  [x: string]: any;
+  [x: string]: unknown;
 }
 
 export default function Avatar({ className, color, outline, size, sx, ...others }: ExtendedAvatarProps) {
   const colorSX = color && !outline && { color: 'background.paper', bgcolor: `${color}.main` };
   const outlineSX = outline && {
-    color: color ? `${color}.main` : `primary.main`,
+    color: color ? `${color}.main` : 'primary.main',
     bgcolor: 'background.paper',
     border: '2px solid',
-    borderColor: color ? `${color}.main` : `primary.main`
+    borderColor: color ? `${color}.main` : 'primary.main'
   };
   let sizeSX = {};
 
@@ -51,7 +51,7 @@ export default function Avatar({ className, color, outline, size, sx, ...others 
       sizeSX = {};
   }
 
-  return <MuiAvatar className={className} sx={{ ...colorSX, ...outlineSX, ...sizeSX, ...(sx as any) }} {...others} />;
+  return <MuiAvatar className={className} sx={[colorSX, outlineSX, sizeSX, sx]} {...others} />;
 }
 
 Avatar.propTypes = {

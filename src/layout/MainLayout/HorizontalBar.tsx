@@ -2,18 +2,16 @@ import PropTypes from 'prop-types';
 import { cloneElement } from 'react';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import AppBar from '@mui/material/AppBar';
+import type { AppBarProps } from '@mui/material/AppBar';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 
 // project imports
 import MenuList from './MenuList';
-import useConfig from '#/hooks/useConfig';
 
-function ElevationScroll({ children, window }: { children: React.ReactElement; window?: Window }) {
-  const theme = useTheme();
+function ElevationScroll({ children, window }: { children: React.ReactElement<AppBarProps>; window?: Window }) {
 
   /**
    * Note that you normally won't need to set the window ref as useScrollTrigger will default to window.
@@ -25,7 +23,7 @@ function ElevationScroll({ children, window }: { children: React.ReactElement; w
     target: window
   });
 
-  return cloneElement(children, { elevation: trigger ? 4 : 0 } as any);
+  return cloneElement(children, { elevation: trigger ? 4 : 0 });
 }
 
 // ==============================|| HORIZONTAL MENU LIST ||============================== //

@@ -4,3 +4,5 @@ export { useRoles } from './useRoles';
 export { RolesTable } from './RolesTable';
 export { RolesDeleteDialog } from './RolesDeleteDialog';
 export { RolesEditDialog } from './RolesEditDialog';
+export { useCreateRole } from './useCreateRole';
+export { RolesCreateDialog } from './RolesCreateDialog';

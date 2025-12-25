@@ -1,11 +1,11 @@
 import { fixupConfigRules } from '@eslint/compat';
-import prettier from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import js from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import stylistic from '@stylistic/eslint-plugin';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FlatCompat } from '@eslint/eslintrc';
@@ -20,16 +20,15 @@ const compat = new FlatCompat({
 
 export default [
   { ignores: ['node_modules/**', 'dist/**', 'build/**', 'vite.config*.mjs'] },
-  ...fixupConfigRules(compat.extends('prettier')),
 
   {
     files: ['src/**/*.{ts,tsx}'],
     plugins: {
-      prettier,
       react,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
-      '@typescript-eslint': tseslint
+      '@typescript-eslint': tseslint,
+      '@stylistic': stylistic
     },
 
     languageOptions: {
@@ -85,6 +84,11 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
 
+      // ESLint Stylistic formatting rules (replaces deprecated core/prettier formatting)
+      '@stylistic/indent': ['error', 2, { SwitchCase: 1 }],
+      '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
+      '@stylistic/semi': ['error', 'always'],
+
       'no-restricted-imports': [
         'error',
         {
@@ -92,17 +96,7 @@ export default [
         }
       ],
 
-      'prettier/prettier': [
-        'warn',
-        {
-          bracketSpacing: true,
-          printWidth: 140,
-          singleQuote: true,
-          trailingComma: 'none',
-          tabWidth: 2,
-          useTabs: false
-        }
-      ]
+      
     }
   },
   {

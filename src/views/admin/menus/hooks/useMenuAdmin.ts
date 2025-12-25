@@ -229,7 +229,7 @@ export function useMenuAdmin() {
     if (typeof parentIdArg !== 'number' || newOrderOneBased === null) return;
     setActionLoadingId(node.id_menu_item);
     try {
-      await http<{ updated: boolean }>(`/menus/admin/edges/order`, { method: 'PUT', body: { parent_id: parentIdArg, child_id: node.id_menu_item, new_order: newOrderOneBased }, token: token || undefined });
+      await http<{ updated: boolean }>('/menus/admin/edges/order', { method: 'PUT', body: { parent_id: parentIdArg, child_id: node.id_menu_item, new_order: newOrderOneBased }, token: token || undefined });
       notify.success('Orden actualizado');
       void loadTree();
     } catch { notify.error('No se pudo reordenar'); } finally { setActionLoadingId(null); }
@@ -270,10 +270,10 @@ export function useMenuAdmin() {
     setActionLoadingId(node.id_menu_item);
     try {
       if (typeof node.parent_id === 'number') {
-        await http<unknown>(`/menus/admin/edges`, { method: 'DELETE', body: { parent_id: node.parent_id, child_id: node.id_menu_item }, token: token || undefined }).catch(() => undefined);
+        await http<unknown>('/menus/admin/edges', { method: 'DELETE', body: { parent_id: node.parent_id, child_id: node.id_menu_item }, token: token || undefined }).catch(() => undefined);
       }
       if (typeof newParent === 'number') {
-        await http<unknown>(`/menus/admin/edges`, { method: 'POST', body: { parent_id: newParent, child_id: node.id_menu_item }, token: token || undefined });
+        await http<unknown>('/menus/admin/edges', { method: 'POST', body: { parent_id: newParent, child_id: node.id_menu_item }, token: token || undefined });
       }
       notify.success('Nodo movido');
       void loadTree();

@@ -5,6 +5,7 @@ export interface IRolesService {
   getAll(token?: string): Promise<Rol[]>;
   getForSelect(token?: string): Promise<RolSelect[]>;
   getById(id: number, token?: string): Promise<Rol>;
+  create(payload: import('#/views/admin/roles/types').CreateRolPayload, token?: string): Promise<Rol>;
   update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
   deleteOne(id: number, token?: string): Promise<unknown>;
   deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
@@ -20,6 +21,10 @@ const getForSelect = (token?: string) => {
 
 const getById = (id: number, token?: string): Promise<Rol> => {
   return http<Rol>(`/roles/${id}`, { token });
+};
+
+const create = (payload: import('#/views/admin/roles/types').CreateRolPayload, token?: string): Promise<Rol> => {
+  return http<Rol>('/roles', { method: 'POST', body: payload, token });
 };
 
 const update = (rol: Rol, menuItems?: number[], token?: string) => {
@@ -44,6 +49,7 @@ export const RolesService: IRolesService = {
   getAll,
   getForSelect,
   getById,
+  create,
   update,
   deleteOne,
   deleteMultiple

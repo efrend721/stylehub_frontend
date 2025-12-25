@@ -130,17 +130,17 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
               color: isSelected ? 'secondary.main' : 'text.primary',
               ...(!drawerOpen &&
                 level === 1 && {
-                  borderRadius: `${borderRadius}px`,
-                  width: 46,
-                  height: 46,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  '&:hover': { bgcolor: 'secondary.light' },
-                  ...(isSelected && {
-                    bgcolor: 'secondary.light',
-                    '&:hover': { bgcolor: 'secondary.light' }
-                  })
+                borderRadius: `${borderRadius}px`,
+                width: 46,
+                height: 46,
+                alignItems: 'center',
+                justifyContent: 'center',
+                '&:hover': { bgcolor: 'secondary.light' },
+                ...(isSelected && {
+                  bgcolor: 'secondary.light',
+                  '&:hover': { bgcolor: 'secondary.light' }
                 })
+              })
             }}
           >
             {itemIcon}

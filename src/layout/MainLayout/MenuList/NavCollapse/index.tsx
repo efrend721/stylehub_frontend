@@ -196,18 +196,18 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
               color: isSelected ? 'secondary.main' : 'text.primary',
               ...(!drawerOpen &&
                 level === 1 && {
-                  borderRadius: `${borderRadius}px`,
-                  width: 46,
-                  height: 46,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  '&:hover': { bgcolor: 'secondary.light' },
+                borderRadius: `${borderRadius}px`,
+                width: 46,
+                height: 46,
+                alignItems: 'center',
+                justifyContent: 'center',
+                '&:hover': { bgcolor: 'secondary.light' },
 
-                  ...((isSelected || anchorEl) && {
-                    bgcolor: 'secondary.light',
-                    '&:hover': { bgcolor: 'secondary.light' }
-                  })
+                ...((isSelected || anchorEl) && {
+                  bgcolor: 'secondary.light',
+                  '&:hover': { bgcolor: 'secondary.light' }
                 })
+              })
             }}
           >
             {menuIcon}
@@ -276,8 +276,8 @@ export default function NavCollapse({ menu, level, parentId }: NavCollapseProps)
                 bgcolor: 'background.paper',
                 transform: 'translateY(-50%) rotate(45deg)',
                 zIndex: 120,
-                borderLeft: `1px solid`,
-                borderBottom: `1px solid`,
+                borderLeft: '1px solid',
+                borderBottom: '1px solid',
                 borderColor: 'divider'
               }
             }}

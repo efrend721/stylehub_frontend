@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
@@ -6,11 +9,13 @@ import Button from '@mui/material/Button';
 import MainCard from '#/ui-component/cards/MainCard';
 import { RolesTable } from './RolesTable';
 import { RolesDeleteDialog } from './RolesDeleteDialog';
+import { RolesCreateDialog } from './RolesCreateDialog';
 import { useRoles } from './useRoles';
 import type { GridRowSelectionModel } from '@mui/x-data-grid';
 
 export default function AdminRolesPage() {
   const navigate = useNavigate();
+  const [createOpen, setCreateOpen] = useState(false);
   const {
     rows,
     loading,
@@ -34,6 +39,9 @@ export default function AdminRolesPage() {
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button onClick={() => void fetchRoles()} disabled={loading}>
             Refrescar
+          </Button>
+          <Button onClick={() => setCreateOpen(true)} variant="contained" disabled={loading}>
+            Crear rol
           </Button>
         </Box>
       }
@@ -69,6 +77,22 @@ export default function AdminRolesPage() {
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => void doDeleteSelected()}
       />
+
+      <RolesCreateDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={() => { void fetchRoles(); }}
+      />
+
+      {/* FAB solo en pantallas móviles */}
+      <Fab
+        color="primary"
+        aria-label="crear rol"
+        onClick={() => setCreateOpen(true)}
+        sx={{ position: 'fixed', bottom: 16, right: 16, display: { xs: 'flex', md: 'none' }, zIndex: (t) => t.zIndex.tooltip }}
+      >
+        <AddIcon />
+      </Fab>
     </MainCard>
   );
 }

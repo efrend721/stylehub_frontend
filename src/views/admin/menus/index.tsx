@@ -50,14 +50,14 @@ export default function AdminMenusPage() {
           ICON_OPTIONS={ctx.ICON_OPTIONS}
           itemUrl={ctx.isEditingItem
             ? ((ctx.editingNode?.url && ctx.editingNode.url.trim() !== '')
-                ? String(ctx.editingNode.url)
-                : (() => {
-                    const effParentId = (typeof ctx.editingNode?.parent_id === 'number') ? ctx.editingNode.parent_id : (typeof ctx.parentId === 'number' ? ctx.parentId : null);
-                    const opt = (typeof effParentId === 'number') ? ctx.idKeyOptions.find((o) => o.id_menu_item === effParentId) : undefined;
-                    const groupKey = (opt?.id_key ?? '').trim();
-                    const itemKey = (ctx.editingNode?.id_key ?? '').trim();
-                    return groupKey ? (itemKey ? `/${groupKey}/${itemKey}` : `/${groupKey}`) : '';
-                  })())
+              ? String(ctx.editingNode.url)
+              : (() => {
+                const effParentId = (typeof ctx.editingNode?.parent_id === 'number') ? ctx.editingNode.parent_id : (typeof ctx.parentId === 'number' ? ctx.parentId : null);
+                const opt = (typeof effParentId === 'number') ? ctx.idKeyOptions.find((o) => o.id_menu_item === effParentId) : undefined;
+                const groupKey = (opt?.id_key ?? '').trim();
+                const itemKey = (ctx.editingNode?.id_key ?? '').trim();
+                return groupKey ? (itemKey ? `/${groupKey}/${itemKey}` : `/${groupKey}`) : '';
+              })())
             : ctx.itemUrl}
           canCreateItem={ctx.canCreateItem}
           onCreateItem={() => { void ctx.handleCreateItem(); }}

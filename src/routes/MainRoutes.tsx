@@ -67,7 +67,7 @@ const MainRoutes = {
     {
       path: 'admin',
       children: [
-  { path: 'usuarios', element: <AdminUsuarios /> },
+        { path: 'usuarios', element: <AdminUsuarios /> },
         { path: 'roles', element: <AdminRoles /> },
         { path: 'roles/editar/:id', element: <AdminRolesEdit /> },
         { path: 'menus', element: <AdminMenus /> },
