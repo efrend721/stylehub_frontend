@@ -13,7 +13,7 @@ const EMPTY_SELECTION: GridRowSelectionModel = { type: 'include', ids: new Set<G
 // Función para validar datos de usuario antes de enviar
 function validateUserData(usuario: NuevoUsuario): string[] {
   const errors: string[] = [];
-  
+
   if (!usuario.usuario_acceso?.trim()) errors.push('Usuario de acceso requerido');
   if (!usuario.contrasena?.trim()) errors.push('Contraseña requerida');
   if (!usuario.nombre_usuario?.trim()) errors.push('Nombre requerido');
@@ -21,21 +21,21 @@ function validateUserData(usuario: NuevoUsuario): string[] {
   if (!usuario.correo_electronico?.trim()) errors.push('Email requerido');
   if (!usuario.telefono?.trim()) errors.push('Teléfono requerido');
   if (!usuario.id_establecimiento?.trim()) errors.push('Establecimiento requerido');
-  
+
   if (typeof usuario.id_rol !== 'number' || usuario.id_rol <= 0) {
     errors.push('Rol inválido');
   }
-  
+
   if (typeof usuario.estado !== 'number' || (usuario.estado !== 0 && usuario.estado !== 1)) {
     errors.push('Estado inválido (debe ser 0 o 1)');
   }
-  
+
   // Validar formato de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (usuario.correo_electronico && !emailRegex.test(usuario.correo_electronico.trim())) {
     errors.push('Formato de email inválido');
   }
-  
+
   return errors;
 }
 
@@ -96,7 +96,10 @@ export function useUsuarios() {
     try {
       // Intento 1: endpoint de eliminación masiva vía servicio
       try {
-        const { deleted = deleteIds.length, requested = deleteIds.length } = await UsuariosService.deleteMultiple(deleteIds, token || undefined).catch(() => ({ deleted: 0, requested: deleteIds.length }));
+        const { deleted = deleteIds.length, requested = deleteIds.length } = await UsuariosService.deleteMultiple(
+          deleteIds,
+          token || undefined
+        ).catch(() => ({ deleted: 0, requested: deleteIds.length }));
         if (deleted === requested) {
           notify.success(`${deleted} usuario(s) eliminados`);
         } else {
@@ -173,7 +176,7 @@ export function useUsuarios() {
       if (validationErrors.length > 0) {
         throw new Error(`Datos inválidos: ${validationErrors.join(', ')}`);
       }
-      
+
       await UsuariosService.create(nuevoUsuario, token || undefined);
       notify.success('Usuario creado exitosamente');
       setCreateDialogOpen(false);

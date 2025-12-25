@@ -95,7 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // Llamar al endpoint /auth/me que usa la cookie httpOnly automáticamente
         const user = (await AuthService.me()) as User | null;
-        
         // Si no hay usuario (sesión no activa), establecer como no autenticado
         if (!user) {
           setState({
@@ -106,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           return;
         }
-        
+
         setState({
           user,
           token: null, // El token está en httpOnly cookie, no lo guardamos en el estado
@@ -116,7 +115,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         // Errores inesperados (no relacionados con autenticación)
         console.warn('Error inesperado al verificar autenticación:', error);
-        
         setState({
           user: null,
           token: null,
@@ -129,11 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void checkAuth();
   }, []);
 
-  const login = async (
-    credentials: LoginCredentials, 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _remember: boolean = true
-  ): Promise<AuthResponse> => {
+  const login = async (credentials: LoginCredentials, _remember: boolean = true): Promise<AuthResponse> => {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
@@ -152,12 +146,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading: false
       });
 
-      const responseData: AuthResponse = { 
-        success: true, 
+      const responseData: AuthResponse = {
+        success: true,
         data: { token: '', user }, // Token vacío ya que está en cookie
-        message: 'Login exitoso', 
-        total: null, 
-        timestamp: new Date().toISOString() 
+        message: 'Login exitoso',
+        total: null,
+        timestamp: new Date().toISOString()
       };
       return responseData;
     } catch (error) {
@@ -167,10 +161,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Preservar mensajes por códigos si es ApiError
         const status = (error as { status?: number }).status;
         const details = (error as { details?: string }).details;
-        
-        // Priorizar 'details' sobre 'message' para errores de validación
-        const errorMsg = details || error.message;
-        
+
+        // Extraer mensaje(s) legibles desde 'details' si viene estructura JSON (422)
+        const extractMessageFromDetails = (raw?: string): string | null => {
+          if (!raw) return null;
+          const text = raw.trim();
+          try {
+            const parsed = JSON.parse(text) as unknown;
+            const collectFromArray = (arr: unknown[]): string[] => {
+              const msgs: string[] = [];
+              for (const it of arr) {
+                if (it && typeof it === 'object') {
+                  const obj = it as { message?: string; path?: unknown };
+                  if (typeof obj.message === 'string') msgs.push(obj.message);
+                }
+              }
+              return msgs;
+            };
+            if (Array.isArray(parsed)) {
+              // Preferir mensajes de 'usuario_acceso' si existen, si no, todos
+              const uaMsgs = (parsed as Array<{ message?: string; path?: unknown }>)
+                .filter((e) => (Array.isArray(e.path) ? e.path.includes('usuario_acceso') : e.path === 'usuario_acceso'))
+                .map((e) => e.message)
+                .filter((m): m is string => typeof m === 'string');
+              const allMsgs = collectFromArray(parsed);
+              const chosen = uaMsgs.length > 0 ? uaMsgs : allMsgs;
+              return chosen.length > 0 ? chosen.join('\n') : null;
+            }
+            if (parsed && typeof parsed === 'object') {
+              const obj = parsed as { message?: string; errors?: unknown };
+              if (typeof obj.message === 'string') return obj.message;
+              if (Array.isArray(obj.errors)) {
+                const msgs = collectFromArray(obj.errors as unknown[]);
+                return msgs.length > 0 ? msgs.join('\n') : null;
+              }
+            }
+          } catch {
+            // no-op si no es JSON
+          }
+          return null;
+        };
+
+        // Priorizar mensajes legibles extraídos de details, luego details, luego message
+        const parsedMsg = extractMessageFromDetails(details);
+        const errorMsg = parsedMsg || details || error.message;
         if (status === 422) {
           notify.warning(errorMsg || 'Los datos proporcionados no son válidos');
         } else if (status === 401) {
@@ -202,7 +236,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await AuthService.register(userData as unknown as Record<string, unknown>);
       setState((prev) => ({ ...prev, isLoading: false }));
-      const ok: RegisterResponse = { success: true, data: { insertId: 0, usuario_acceso: userData.usuario_acceso }, message: 'Registro exitoso' } as RegisterResponse;
+      const ok: RegisterResponse = {
+        success: true,
+        data: { insertId: 0, usuario_acceso: userData.usuario_acceso },
+        message: 'Registro exitoso'
+      } as RegisterResponse;
       return ok;
     } catch (error) {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -210,10 +248,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Errores esperados en registro
         const status = (error as { status?: number }).status;
         const details = (error as { details?: string }).details;
-        
         // Priorizar 'details' sobre 'message'
         const errorMsg = details || error.message;
-        
         if (status === 422) {
           notify.warning(errorMsg || 'Datos inválidos');
         } else if (status === 500 || status === 503) {
@@ -254,7 +290,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionStorage.removeItem('auth_token');
       sessionStorage.removeItem('auth_user');
     } catch {}
-    
     setState({
       user: null,
       token: null,

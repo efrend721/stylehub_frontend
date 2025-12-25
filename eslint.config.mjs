@@ -19,6 +19,7 @@ const compat = new FlatCompat({
 });
 
 export default [
+  { ignores: ['node_modules/**', 'dist/**', 'build/**', 'vite.config*.mjs'] },
   ...fixupConfigRules(compat.extends('prettier')),
 
   {
@@ -105,7 +106,6 @@ export default [
     }
   },
   {
-    ignores: ['node_modules/**', 'dist/**', 'build/**'],
     files: ['src/**/*.{js,jsx,ts,tsx}']
   },
   {
