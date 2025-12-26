@@ -3,6 +3,7 @@ export * from './types';
 export { useUsuarios } from './useUsuarios';
 export { useEstablecimientos } from './useEstablecimientos';
 export { useRoles } from './useRoles';
+export { useUserManagement } from './hooks/useUserManagement';
 export { UsuariosTable } from './UsuariosTable';
 export { UsuariosDeleteDialog } from './UsuariosDeleteDialog';
 export { UsuariosEditDialog } from './UsuariosEditDialog';

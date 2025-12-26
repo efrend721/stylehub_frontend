@@ -16,6 +16,7 @@ export default function AdminUsuariosPage() {
     rows,
     loading,
     error,
+    emptyHint,
     selectionModel,
     setSelectionModel,
     selectedIds,
@@ -66,7 +67,7 @@ export default function AdminUsuariosPage() {
         </Box>
       ) : rows.length === 0 ? (
         <Box sx={{ p: 2 }}>
-          <Typography>No hay usuarios.</Typography>
+          <Typography>{emptyHint ?? 'No hay usuarios.'}</Typography>
         </Box>
       ) : (
         <UsuariosTable

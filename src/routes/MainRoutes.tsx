@@ -23,6 +23,8 @@ const AdminRolesEdit = Loadable(lazy(() => import('#/views/admin/roles/RoleEditP
 const AdminMenus = Loadable(lazy(() => import('#/views/admin/menus')));
 const AdminRutasProtegidas = Loadable(lazy(() => import('#/views/admin/rutas-protegidas')));
 const AdminConfiguracion = Loadable(lazy(() => import('#/views/admin/configuracion')));
+// sys config routing
+const SysConfigEstablecimientos = Loadable(lazy(() => import('#/views/sysConfig/establecimientos')));
 
 // auditoría y reportes (new)
 const AuditLogs = Loadable(lazy(() => import('#/views/audit/logs')));
@@ -72,7 +74,8 @@ const MainRoutes = {
         { path: 'roles/editar/:id', element: <AdminRolesEdit /> },
         { path: 'menus', element: <AdminMenus /> },
         { path: 'rutas-protegidas', element: <AdminRutasProtegidas /> },
-        { path: 'configuracion', element: <AdminConfiguracion /> }
+        { path: 'configuracion', element: <AdminConfiguracion /> },
+        { path: 'configuracion/establecimientos', element: <SysConfigEstablecimientos /> }
       ]
     },
     // auditoría
@@ -86,6 +89,14 @@ const MainRoutes = {
     {
       path: 'reportes',
       element: <Reportes />
+    }
+    ,
+    // sysConfig (alias direct access)
+    {
+      path: 'sysConfig',
+      children: [
+        { path: 'establecimientos', element: <SysConfigEstablecimientos /> }
+      ]
     }
   ]
 };

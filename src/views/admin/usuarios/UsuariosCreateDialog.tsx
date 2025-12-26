@@ -13,12 +13,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Skeleton from '@mui/material/Skeleton';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 import { NuevoUsuario } from './types';
-import { useEstablecimientos } from './useEstablecimientos';
+// Establecimiento se asigna automáticamente según el perfil del administrador
 import { useRoles } from './useRoles';
 import { useFocusManagement, useInertBackground } from '../../../hooks/useFocusManagement';
 
@@ -51,7 +52,6 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
   
   const [usuario, setUsuario] = useState<NuevoUsuario>(initialUsuario);
   
-  const { establecimientos, loading: loadingEst, error: errorEst } = useEstablecimientos();
   const { roles, loading: loadingRoles, error: errorRoles } = useRoles();
 
   // Reset form when dialog opens
@@ -86,8 +86,7 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
     usuario.apellido_usuario.trim() &&
     usuario.correo_electronico.trim() &&
     usuario.telefono.trim() &&
-    usuario.id_rol > 0 &&
-    usuario.id_establecimiento.trim();
+    usuario.id_rol > 0;
 
   return (
     <Dialog 
@@ -197,7 +196,7 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
               />
             </Stack>
 
-            {/* Fila 4: Rol y Establecimiento */}
+            {/* Fila 4: Rol */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               {/* Rol */}
               <FormControl fullWidth required error={!!errorRoles}>
@@ -227,6 +226,12 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                     </MenuItem>
                   ))}
                 </Select>
+                {loadingRoles && (
+                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                    <Skeleton variant="rectangular" width={100} height={20} />
+                    <Skeleton variant="rectangular" width={140} height={20} />
+                  </Stack>
+                )}
                 {errorRoles && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                     {errorRoles}
@@ -234,40 +239,7 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 )}
               </FormControl>
 
-              {/* Establecimiento */}
-              <FormControl fullWidth required error={!!errorEst}>
-                <InputLabel>Establecimiento</InputLabel>
-                <Select
-                  value={usuario.id_establecimiento || ''}
-                  onChange={(e) => {
-                    const newValue = String(e.target.value);
-                    setUsuario({ ...usuario, id_establecimiento: newValue });
-                  }}
-                  label="Establecimiento"
-                  disabled={loadingEst}
-                >
-                  <MenuItem value="" disabled>
-                    <em>
-                      {loadingEst 
-                        ? 'Cargando establecimientos...' 
-                        : establecimientos.length === 0 
-                          ? 'No hay establecimientos disponibles'
-                          : 'Seleccione un establecimiento'
-                      }
-                    </em>
-                  </MenuItem>
-                  {!loadingEst && establecimientos.map((est) => (
-                    <MenuItem key={est.id_establecimiento} value={est.id_establecimiento}>
-                      {est.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errorEst && (
-                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                    {errorEst}
-                  </Typography>
-                )}
-              </FormControl>
+              
             </Stack>
 
             {/* Estado */}

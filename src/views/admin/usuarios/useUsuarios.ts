@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
+import { useUserManagement } from './hooks/useUserManagement';
 import { UsuariosService } from '#/services';
 import { notify } from '#/utils/notify';
-import { getErrorMessage } from '#/utils/errorUtils';
+import { getErrorMessage, getErrorStatus } from '#/utils/errorUtils';
 import type { Usuario, NuevoUsuario, UsuarioEdit } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 
@@ -40,13 +41,16 @@ function validateUserData(usuario: NuevoUsuario): string[] {
 }
 
 export function useUsuarios() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const scope: 'global' | 'mine' = user?.id_rol === 2 ? 'mine' : 'global';
+  const { attachEstablecimiento } = useUserManagement();
 
   // headers handled by services layer
 
   const [rows, setRows] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [emptyHint, setEmptyHint] = useState<string | null>(null);
 
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>(EMPTY_SELECTION);
   const selectedIds = useMemo<GridRowId[]>(() => {
@@ -71,19 +75,36 @@ export function useUsuarios() {
     setLoading(true);
     setError(null);
     try {
-      const data = await UsuariosService.getAll(token || undefined);
+      const data = await UsuariosService.getAll(scope, token || undefined);
       const list = Array.isArray(data) ? data : [];
       setRows(list);
+      setEmptyHint(null);
     } catch (e) {
-      setError(getErrorMessage(e, 'No se pudo cargar usuarios'));
+      const status = getErrorStatus(e);
+      const msg = getErrorMessage(e, 'No se pudo cargar usuarios');
+      if (status === 404) {
+        // Superficial 404: mostrar notificación pero mantener UI estable
+        notify.info(msg || 'No se encontraron usuarios para tu establecimiento');
+        setRows([]);
+        setError(null);
+        setEmptyHint('No se encontraron usuarios para tu establecimiento');
+      } else {
+        setError(msg);
+        setEmptyHint(null);
+      }
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, scope]);
 
   useEffect(() => {
     void fetchUsuarios();
   }, [fetchUsuarios]);
+
+  // Limpiar selección si cambia el alcance (scope)
+  useEffect(() => {
+    setSelectionModel({ type: 'include', ids: new Set<GridRowId>() });
+  }, [scope]);
 
   const openConfirmFor = (ids: (string | number)[]) => {
     setDeleteIds(ids.map(String));
@@ -98,6 +119,7 @@ export function useUsuarios() {
       try {
         const { deleted = deleteIds.length, requested = deleteIds.length } = await UsuariosService.deleteMultiple(
           deleteIds,
+          scope,
           token || undefined
         ).catch(() => ({ deleted: 0, requested: deleteIds.length }));
         if (deleted === requested) {
@@ -111,7 +133,7 @@ export function useUsuarios() {
         const results = await Promise.all(
           deleteIds.map(async (id) => {
             try {
-              await UsuariosService.deleteOne(String(id), token || undefined);
+              await UsuariosService.deleteOne(String(id), scope, token || undefined);
               const ok = true;
               return { ok, id };
             } catch {
@@ -129,7 +151,13 @@ export function useUsuarios() {
       setSelectionModel(EMPTY_SELECTION);
       setDeleteIds([]);
     } catch (e) {
-      notify.error(getErrorMessage(e, 'Error al eliminar selección'));
+      const status = getErrorStatus(e);
+      const msg = getErrorMessage(e, 'Error al eliminar selección');
+      if (status === 404) {
+        notify.info(msg || 'No puedes eliminar usuarios de otros establecimientos');
+      } else {
+        notify.error(msg);
+      }
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -156,12 +184,20 @@ export function useUsuarios() {
     if (!editUser) return;
     setSaving(true);
     try {
-      await UsuariosService.update(editUser, token || undefined);
+      // Forzar id_establecimiento del admin autenticado
+      const payload = attachEstablecimiento(editUser);
+      await UsuariosService.update(payload, scope, token || undefined);
       notify.success('Usuario actualizado');
       setEditUser(null);
       await fetchUsuarios();
     } catch (e) {
-      notify.error(getErrorMessage(e, 'No se pudo actualizar el usuario'));
+      const status = getErrorStatus(e);
+      const msg = getErrorMessage(e, 'No se pudo actualizar el usuario');
+      if (status === 404) {
+        notify.info(msg || 'El usuario no pertenece a tu establecimiento');
+      } else {
+        notify.error(msg);
+      }
     } finally {
       setSaving(false);
     }
@@ -171,18 +207,26 @@ export function useUsuarios() {
   const createUser = async (nuevoUsuario: NuevoUsuario) => {
     setCreating(true);
     try {
+      // Adjuntar id_establecimiento automáticamente antes de validar
+      const payload = attachEstablecimiento(nuevoUsuario);
       // Validar datos antes de enviar
-      const validationErrors = validateUserData(nuevoUsuario);
+      const validationErrors = validateUserData(payload);
       if (validationErrors.length > 0) {
         throw new Error(`Datos inválidos: ${validationErrors.join(', ')}`);
       }
 
-      await UsuariosService.create(nuevoUsuario, token || undefined);
+      await UsuariosService.create(payload, scope, token || undefined);
       notify.success('Usuario creado exitosamente');
       setCreateDialogOpen(false);
       await fetchUsuarios();
     } catch (e) {
-      notify.error(getErrorMessage(e, 'No se pudo crear el usuario'));
+      const status = getErrorStatus(e);
+      const msg = getErrorMessage(e, 'No se pudo crear el usuario');
+      if (status === 404) {
+        notify.info(msg || 'Acción no permitida para tu establecimiento');
+      } else {
+        notify.error(msg);
+      }
     } finally {
       setCreating(false);
     }
@@ -201,6 +245,7 @@ export function useUsuarios() {
     rows,
     loading,
     error,
+    emptyHint,
 
     // selection
     selectionModel,

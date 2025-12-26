@@ -28,14 +28,13 @@ export function UsuariosTable({ rows, selectedIds, deleting, selectionModel, onS
       {
         field: 'usuario_acceso',
         headerName: 'Usuario',
-        width: 200,
+        width: 130,
         sortable: true,
         renderCell: (params) => <Typography variant="body2">{params.row.usuario_acceso}</Typography>
       },
-      { field: 'nombre_usuario', headerName: 'Nombre', flex: 1, minWidth: 160 },
-      { field: 'apellido_usuario', headerName: 'Apellido', flex: 1, minWidth: 160 },
-      { field: 'correo_electronico', headerName: 'Correo', flex: 1.2, minWidth: 200 },
-      { field: 'id_establecimiento', headerName: 'Establecimiento', width: 160 },
+      { field: 'nombre_usuario', headerName: 'Nombre', minWidth: 160, flex: 1, renderCell: (p) => <Typography variant="body2">{p.row.nombre_usuario}</Typography> },
+      { field: 'apellido_usuario', headerName: 'Apellido', minWidth: 160, flex: 1, renderCell: (p) => <Typography variant="body2">{p.row.apellido_usuario}</Typography> },
+      { field: 'correo_electronico', headerName: 'Correo', minWidth: 220, flex: 1.4 },
       {
         field: 'estado',
         headerName: 'Estado',
@@ -52,13 +51,14 @@ export function UsuariosTable({ rows, selectedIds, deleting, selectionModel, onS
       {
         field: 'acciones',
         headerName: 'Acciones',
-        width: 120,
+        minWidth: 150,
+        flex: 1,
         sortable: false,
         filterable: false,
         align: 'center',
         headerAlign: 'center',
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', width: '100%' }}>
             <Tooltip title="Modificar">
               <IconButton size="small" onClick={() => onEdit(params.row)} aria-label="Modificar">
                 <EditOutlinedIcon fontSize="small" />

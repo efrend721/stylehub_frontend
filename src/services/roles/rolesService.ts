@@ -3,7 +3,7 @@ import type { Rol, RolSelect } from '#/views/admin/roles';
 
 export interface IRolesService {
   getAll(token?: string): Promise<Rol[]>;
-  getForSelect(token?: string): Promise<RolSelect[]>;
+  getForSelect(scope?: 'all' | 'operativos', token?: string): Promise<RolSelect[]>;
   getById(id: number, token?: string): Promise<Rol>;
   create(payload: import('#/views/admin/roles').CreateRolPayload, token?: string): Promise<Rol>;
   update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
@@ -15,8 +15,9 @@ const getAll = (token?: string) => {
   return http<Rol[]>('/roles', { token });
 };
 
-const getForSelect = (token?: string) => {
-  return http<RolSelect[]>('/roles/select', { token }).catch(() => http<RolSelect[]>('/roles', { token }));
+const getForSelect = (scope: 'all' | 'operativos' = 'all', token?: string) => {
+  const path = scope === 'operativos' ? '/roles/select-operativos' : '/roles/select';
+  return http<RolSelect[]>(path, { token }).catch(() => http<RolSelect[]>('/roles', { token }));
 };
 
 const getById = (id: number, token?: string): Promise<Rol> => {

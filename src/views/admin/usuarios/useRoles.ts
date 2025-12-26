@@ -9,7 +9,7 @@ import type { RolSelect } from '#/views/admin/roles';
 // Response helpers centralizados en services
 
 export function useRoles() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   // headers gestionados por el servicio
 
@@ -21,14 +21,15 @@ export function useRoles() {
     setLoading(true);
     setError(null);
     try {
-      const list = await RolesService.getForSelect(token || undefined);
+      const scope: 'all' | 'operativos' = user?.id_rol === 2 ? 'operativos' : 'all';
+      const list = await RolesService.getForSelect(scope, token || undefined);
       setRoles(Array.isArray(list) ? list : []);
     } catch (e) {
       setError(getErrorMessage(e, 'No se pudieron cargar roles'));
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, user?.id_rol]);
 
   useEffect(() => {
     void fetchRoles();

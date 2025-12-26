@@ -7,6 +7,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+import Skeleton from '@mui/material/Skeleton';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
@@ -17,7 +18,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import type { UsuarioEdit } from './types';
-import { useEstablecimientos } from './useEstablecimientos';
+// Establecimiento se asigna automáticamente según el perfil del administrador
 import { useRoles } from './useRoles';
 import { useState, useEffect, useRef } from 'react';
 
@@ -35,7 +36,6 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
   const [editData, setEditData] = useState<UsuarioEdit | null>(null);
   const currentUserRef = useRef<string | null>(null);
   
-  const { establecimientos, loading: loadingEst, error: errorEst } = useEstablecimientos();
   const { roles, loading: loadingRoles, error: errorRoles } = useRoles();
 
   // Usar directamente el user ya que ahora es UsuarioEdit
@@ -167,7 +167,7 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
             )}
           </Stack>
 
-          {/* Fila 4: Rol y Establecimiento */}
+          {/* Fila 4: Rol */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             {/* Rol */}
             <FormControl fullWidth required error={!!errorRoles}>
@@ -194,6 +194,12 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
                   </MenuItem>
                 ))}
               </Select>
+              {loadingRoles && (
+                <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                  <Skeleton variant="rectangular" width={100} height={20} />
+                  <Skeleton variant="rectangular" width={140} height={20} />
+                </Stack>
+              )}
               {errorRoles && (
                 <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                   Error al cargar roles: {errorRoles}
@@ -201,43 +207,7 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
               )}
             </FormControl>
 
-            {/* Establecimiento */}
-            <FormControl fullWidth required error={!!errorEst}>
-              <InputLabel>Establecimiento</InputLabel>
-              <Select
-                value={editData.id_establecimiento || ''}
-                onChange={(e) => handleFieldChange('id_establecimiento', String(e.target.value))}
-                label="Establecimiento"
-                disabled={loadingEst}
-              >
-                <MenuItem value="" disabled>
-                  <em>
-                    {loadingEst 
-                      ? 'Cargando establecimientos...' 
-                      : establecimientos.length === 0 
-                        ? 'No hay establecimientos disponibles'
-                        : 'Seleccione un establecimiento'
-                    }
-                  </em>
-                </MenuItem>
-                {!loadingEst && editData.id_establecimiento && 
-                 !establecimientos.find(e => e.id_establecimiento === editData.id_establecimiento) && (
-                  <MenuItem value={editData.id_establecimiento} disabled>
-                    {editData.id_establecimiento} (No disponible)
-                  </MenuItem>
-                )}
-                {!loadingEst && establecimientos.map((est) => (
-                  <MenuItem key={est.id_establecimiento} value={est.id_establecimiento}>
-                    {est.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errorEst && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                  Error al cargar establecimientos: {errorEst}
-                </Typography>
-              )}
-            </FormControl>
+            
           </Stack>
 
           {/* Fila 5: Estado */}
