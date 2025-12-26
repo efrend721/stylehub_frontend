@@ -28,7 +28,7 @@ function renderTree(
 ): ReactElement[] {
   const items: ReactElement[] = [];
   nodes.forEach((node, index) => {
-    const canReorder = typeof parentId === 'number';
+    const canReorder = (typeof parentId === 'number') || (parentId == null && node.tipo !== 'item');
     const isFirst = index === 0;
     const isLast = index === nodes.length - 1;
     items.push(
@@ -54,14 +54,14 @@ function renderTree(
                   <IconArrowRight size={16} />
                 </IconButton>
                 <IconButton size="small" disabled={!canReorder || isFirst} onClick={() => {
-                  const newOrderOne = index; // 1-based
-                  h?.onReorder(node, parentId, newOrderOne);
+                  const newOrderOne = index; // 1-based target for up
+                  h?.onReorder(node, parentId ?? null, newOrderOne);
                 }}>
                   <IconArrowUp size={16} />
                 </IconButton>
                 <IconButton size="small" disabled={!canReorder || isLast} onClick={() => {
-                  const newOrderOne = index + 2; // 1-based
-                  h?.onReorder(node, parentId, newOrderOne);
+                  const newOrderOne = index + 2; // 1-based target for down
+                  h?.onReorder(node, parentId ?? null, newOrderOne);
                 }}>
                   <IconArrowDown size={16} />
                 </IconButton>

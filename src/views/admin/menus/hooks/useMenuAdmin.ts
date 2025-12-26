@@ -1,6 +1,7 @@
 import { useAuth } from '#/contexts/AuthContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { http } from '#/services/apiClient/http';
+import { AdminMenusService } from '#/services/menus/adminMenusService';
 import notify from '#/utils/notify';
 import { getErrorMessage } from '#/utils/errorUtils';
 import { buildTituloById } from '#/views/admin/menus/utils';
@@ -226,13 +227,21 @@ export function useMenuAdmin() {
   const handleCancelDelete = () => { setConfirmDeleteOpen(false); setConfirmDeleteTarget(null); };
 
   const reorderNode = async (node: MenuTreeNodeLocal, parentIdArg: number | null | undefined, newOrderOneBased: number | null) => {
-    if (typeof parentIdArg !== 'number' || newOrderOneBased === null) return;
+    if (newOrderOneBased === null) return;
     setActionLoadingId(node.id_menu_item);
     try {
-      await http<{ updated: boolean }>('/menus/admin/edges/order', { method: 'PUT', body: { parent_id: parentIdArg, child_id: node.id_menu_item, new_order: newOrderOneBased }, token: token || undefined });
-      notify.success('Orden actualizado');
+      if (typeof parentIdArg === 'number') {
+        const res = await AdminMenusService.reorderChild(parentIdArg, node.id_menu_item, newOrderOneBased, token || undefined);
+        if (res.message) notify.info(res.message);
+        notify.success('Orden de submenú actualizado');
+      } else {
+        const res = await AdminMenusService.reorderRootGroup(node.id_menu_item, newOrderOneBased, token || undefined);
+        const { effective_order, max_order, target_order, current_order, message } = res;
+        if (message) notify.info(message);
+        notify.success('Orden de grupo actualizado');
+      }
       void loadTree();
-    } catch { notify.error('No se pudo reordenar'); } finally { setActionLoadingId(null); }
+    } catch (e) { notify.error(getErrorMessage(e, 'No se pudo reordenar')); } finally { setActionLoadingId(null); }
   };
 
   const parentCandidates = useMemo(() => {

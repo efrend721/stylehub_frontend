@@ -103,5 +103,45 @@ export const AdminMenusService = {
   deleteNode,
   addEdge,
   removeEdge,
-  getTree
+  getTree,
+  reorderRootGroup: async (id: number, newOrder: number, token?: string): Promise<{ updated: boolean; current_order: number; target_order: number; effective_order: number; max_order: number; message?: string }> => {
+    return await http<{ updated: boolean; current_order: number; target_order: number; effective_order: number; max_order: number; message?: string }>(
+      '/menus/admin/groups/order',
+      { method: 'PUT', body: { id, new_order: newOrder }, token }
+    );
+  },
+  reorderChild: async (
+    parentId: number,
+    childId: number,
+    newOrder: number,
+    token?: string
+  ): Promise<{
+    updated: boolean;
+    current_order: number; // >=100 in DB
+    target_order: number; // mapped order (100 + offset)
+    effective_order: number; // final >=100
+    current_position: number; // 1..N
+    target_position: number; // 1..N after clamp
+    effective_position: number; // 1..N final
+    max_position: number; // N
+    max_order?: number;
+    message?: string;
+  }> => {
+    return await http<{
+      updated: boolean;
+      current_order: number;
+      target_order: number;
+      effective_order: number;
+      current_position: number;
+      target_position: number;
+      effective_position: number;
+      max_position: number;
+      max_order?: number;
+      message?: string;
+    }>('/menus/admin/edges/order', {
+      method: 'PUT',
+      body: { parent_id: parentId, child_id: childId, new_order: newOrder },
+      token
+    });
+  }
 };
