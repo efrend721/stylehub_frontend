@@ -1,11 +1,11 @@
 import { http } from '#/services/apiClient/http';
-import type { Rol, RolSelect } from '#/views/admin/roles/types';
+import type { Rol, RolSelect } from '#/views/admin/roles';
 
 export interface IRolesService {
   getAll(token?: string): Promise<Rol[]>;
   getForSelect(token?: string): Promise<RolSelect[]>;
   getById(id: number, token?: string): Promise<Rol>;
-  create(payload: import('#/views/admin/roles/types').CreateRolPayload, token?: string): Promise<Rol>;
+  create(payload: import('#/views/admin/roles').CreateRolPayload, token?: string): Promise<Rol>;
   update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
   deleteOne(id: number, token?: string): Promise<unknown>;
   deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
@@ -23,7 +23,7 @@ const getById = (id: number, token?: string): Promise<Rol> => {
   return http<Rol>(`/roles/${id}`, { token });
 };
 
-const create = (payload: import('#/views/admin/roles/types').CreateRolPayload, token?: string): Promise<Rol> => {
+const create = (payload: import('#/views/admin/roles').CreateRolPayload, token?: string): Promise<Rol> => {
   return http<Rol>('/roles', { method: 'POST', body: payload, token });
 };
 

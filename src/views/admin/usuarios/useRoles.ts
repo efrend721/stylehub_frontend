@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { RolesService } from '#/services';
 import { getErrorMessage } from '#/utils/errorUtils';
-import type { RolSelect } from '#/views/admin/roles/types';
+import type { RolSelect } from '#/views/admin/roles';
 
 // API handled via RolesService
 
