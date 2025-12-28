@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { getIcon } from '#/menu-items/iconMap';
+import { getIcon, getGroupIconByTitle } from '#/menu-items/iconMap';
 import type { BackendMenuItem, UIMenuItem } from '#/types/menu';
 import { useAuth } from '#/contexts/JWTContext';
 import { MenusService } from '#/services';
+import useConfig from '#/hooks/useConfig';
 
 type Source = 'api' | 'static';
 
@@ -21,18 +22,32 @@ function toBool(v: unknown, def = false): boolean {
   return def;
 }
 
-function inflate(item: BackendMenuItem): UIMenuItem {
+function inflate(item: BackendMenuItem, overrideGroupIcons: boolean): UIMenuItem {
+  // Resolve icon: respect backend-provided icon when present; only override for groups without icon
+  let resolvedIcon: UIMenuItem['icon'];
+  if (item.type === 'group') {
+    if (item.icon) {
+      resolvedIcon = getIcon(item.icon);
+    } else if (overrideGroupIcons) {
+      resolvedIcon = getGroupIconByTitle(item.title ?? undefined);
+    } else {
+      resolvedIcon = getIcon(undefined);
+    }
+  } else {
+    resolvedIcon = getIcon(item.icon ?? undefined);
+  }
+
   const uiItem: UIMenuItem = {
     id: item.id,
     title: item.title,
     type: item.type,
-    icon: getIcon(item.icon ?? undefined),
+    icon: resolvedIcon,
     caption: item.caption ?? null,
     url: item.url ?? null,
     breadcrumbs: toBool(item.breadcrumbs, false),
     external: toBool(item.external, false),
     target_blank: toBool(item.target_blank, false),
-    children: item.children?.map(inflate)
+    children: item.children?.map((child) => inflate(child, overrideGroupIcons))
   };
 
   // Add accordion functionality for groups with children
@@ -45,8 +60,9 @@ function inflate(item: BackendMenuItem): UIMenuItem {
 
 export function useMenuItems(): HookState {
   const { token } = useAuth();
+  const { state: cfg } = useConfig();
 
-  const [state, setState] = useState<HookState>({
+  const [menuState, setMenuState] = useState<HookState>({
     items: [],
     loading: true,
     error: null,
@@ -59,12 +75,12 @@ export function useMenuItems(): HookState {
     let cancelled = false;
 
     async function load() {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setMenuState((prev) => ({ ...prev, loading: true, error: null }));
       try {
         const data = await MenusService.getMenus();
-        const items = (Array.isArray(data) ? data : []).map(inflate);
+        const items = (Array.isArray(data) ? data : []).map((i) => inflate(i, cfg.customGroupIcons ?? true));
         if (!cancelled) {
-          setState({ items, loading: false, error: null, source: 'api' });
+          setMenuState({ items, loading: false, error: null, source: 'api' });
           // cache optional
           try {
             localStorage.setItem('menu_cache', JSON.stringify(items));
@@ -97,7 +113,7 @@ export function useMenuItems(): HookState {
             console.warn('[menu] Falling back to static menu:', msg);
           }
           const msg = err instanceof Error ? err.message : 'Menu load failed';
-          setState({ items, loading: false, error: msg, source: 'static' });
+          setMenuState({ items, loading: false, error: msg, source: 'static' });
         }
       }
     }
@@ -106,9 +122,9 @@ export function useMenuItems(): HookState {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, cfg.customGroupIcons]);
 
-  return state;
+  return menuState;
 }
 
 export default useMenuItems;

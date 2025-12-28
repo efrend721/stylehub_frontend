@@ -3,7 +3,7 @@ import { useAuth } from '#/contexts/AuthContext';
 import { useUserManagement } from './hooks/useUserManagement';
 import { UsuariosService } from '#/services';
 import { notify } from '#/utils/notify';
-import { getErrorMessage, getErrorStatus } from '#/utils/errorUtils';
+import { getErrorMessage, getErrorStatus, getErrorArray } from '#/utils/errorUtils';
 import type { Usuario, NuevoUsuario, UsuarioEdit } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 
@@ -40,6 +40,17 @@ function validateUserData(usuario: NuevoUsuario): string[] {
   return errors;
 }
 
+// Construye mapa campo -> mensaje desde arreglo de errores del backend
+function fieldErrorsFromArray(arr: Array<{ path?: string[]; message?: string }>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const e of arr) {
+    const field = Array.isArray(e.path) ? e.path[0] : undefined;
+    const msg = typeof e.message === 'string' ? e.message : undefined;
+    if (field && msg) out[field] = msg;
+  }
+  return out;
+}
+
 export function useUsuarios() {
   const { token, user } = useAuth();
   const scope: 'global' | 'mine' = user?.id_rol === 2 ? 'mine' : 'global';
@@ -66,10 +77,12 @@ export function useUsuarios() {
   const [editUser, setEditUser] = useState<UsuarioEdit | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editFieldErrors, setEditFieldErrors] = useState<Record<string, string>>({});
 
   // Estados para crear usuario
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [createFieldErrors, setCreateFieldErrors] = useState<Record<string, string>>({});
 
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
@@ -178,6 +191,7 @@ export function useUsuarios() {
       // contrasena se deja undefined inicialmente
     };
     setEditUser(editableUser);
+    setEditFieldErrors({});
   };
 
   const saveEdit = async () => {
@@ -186,6 +200,7 @@ export function useUsuarios() {
     try {
       // Forzar id_establecimiento del admin autenticado
       const payload = attachEstablecimiento(editUser);
+      setEditFieldErrors({});
       await UsuariosService.update(payload, scope, token || undefined);
       notify.success('Usuario actualizado');
       setEditUser(null);
@@ -195,6 +210,16 @@ export function useUsuarios() {
       const msg = getErrorMessage(e, 'No se pudo actualizar el usuario');
       if (status === 404) {
         notify.info(msg || 'El usuario no pertenece a tu establecimiento');
+      } else if (status === 422) {
+        const errs = getErrorArray(e);
+        if (errs.length > 0) {
+          const fieldMap = fieldErrorsFromArray(errs.map((x) => ({ path: x.path, message: x.message })));
+          setEditFieldErrors(fieldMap);
+          const messages = errs.map((it) => it.message).filter((m): m is string => !!m);
+          notify.warning(messages.join('\n'));
+        } else {
+          notify.warning(msg);
+        }
       } else {
         notify.error(msg);
       }
@@ -215,6 +240,8 @@ export function useUsuarios() {
         throw new Error(`Datos inválidos: ${validationErrors.join(', ')}`);
       }
 
+      // limpiar errores previos
+      setCreateFieldErrors({});
       await UsuariosService.create(payload, scope, token || undefined);
       notify.success('Usuario creado exitosamente');
       setCreateDialogOpen(false);
@@ -224,6 +251,16 @@ export function useUsuarios() {
       const msg = getErrorMessage(e, 'No se pudo crear el usuario');
       if (status === 404) {
         notify.info(msg || 'Acción no permitida para tu establecimiento');
+      } else if (status === 422) {
+        const errs = getErrorArray(e);
+        if (errs.length > 0) {
+          const fieldMap = fieldErrorsFromArray(errs.map((x) => ({ path: x.path, message: x.message })));
+          setCreateFieldErrors(fieldMap);
+          const messages = errs.map((it) => it.message).filter((m): m is string => !!m);
+          notify.warning(messages.join('\n'));
+        } else {
+          notify.warning(msg);
+        }
       } else {
         notify.error(msg);
       }
@@ -234,6 +271,7 @@ export function useUsuarios() {
 
   const openCreateDialog = () => {
     setCreateDialogOpen(true);
+    setCreateFieldErrors({});
   };
 
   const closeCreateDialog = () => {
@@ -266,6 +304,7 @@ export function useUsuarios() {
     openEditFor,
     saveEdit,
     saving,
+    editFieldErrors,
 
     // create
     createDialogOpen,
@@ -273,6 +312,7 @@ export function useUsuarios() {
     closeCreateDialog,
     createUser,
     creating,
+    createFieldErrors,
 
     // misc
     fetchUsuarios

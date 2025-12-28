@@ -28,13 +28,15 @@ type Props = {
   onClose: () => void;
   onChange: (user: UsuarioEdit) => void;
   onSave: () => void;
+  fieldErrors?: Record<string, string>;
 };
 
-export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: Props) {
+export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fieldErrors = {} }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [editPassword, setEditPassword] = useState(false);
   const [editData, setEditData] = useState<UsuarioEdit | null>(null);
   const currentUserRef = useRef<string | null>(null);
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
   
   const { roles, loading: loadingRoles, error: errorRoles } = useRoles();
 
@@ -50,10 +52,12 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
         setEditPassword(false);
         setShowPassword(false);
         currentUserRef.current = user.usuario_acceso;
+        setLocalErrors({});
       }
     } else {
       setEditData(null);
       currentUserRef.current = null;
+      setLocalErrors({});
     }
   }, [user]);
 
@@ -66,6 +70,22 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
       const updatedData = { ...editData, [field]: value };
       setEditData(updatedData);
       onChange(updatedData);
+      if (typeof value === 'string') {
+        if (field === 'correo_electronico') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const msg = value ? (emailRegex.test(value.trim()) ? '' : 'Correo electrónico inválido') : '';
+          setLocalErrors((prev) => ({ ...prev, correo_electronico: msg }));
+        }
+        if (field === 'telefono') {
+          const phoneRegex = /^\d+$/;
+          const msg = value ? (phoneRegex.test(value.trim()) ? '' : 'El teléfono solo debe contener números') : '';
+          setLocalErrors((prev) => ({ ...prev, telefono: msg }));
+        }
+        if (field === 'contrasena') {
+          const msg = value ? (value.trim().length > 7 ? '' : 'La contraseña debe tener al menos 8 caracteres') : '';
+          setLocalErrors((prev) => ({ ...prev, contrasena: msg }));
+        }
+      }
     }
   };
 
@@ -100,6 +120,8 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
               onChange={(e) => handleFieldChange('nombre_usuario', e.target.value)}
               fullWidth
               required
+              error={Boolean(fieldErrors.nombre_usuario)}
+              helperText={fieldErrors.nombre_usuario || undefined}
             />
             <TextField
               label="Apellido"
@@ -107,6 +129,8 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
               onChange={(e) => handleFieldChange('apellido_usuario', e.target.value)}
               fullWidth
               required
+              error={Boolean(fieldErrors.apellido_usuario)}
+              helperText={fieldErrors.apellido_usuario || undefined}
             />
           </Stack>
 
@@ -119,13 +143,18 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
               onChange={(e) => handleFieldChange('correo_electronico', e.target.value)}
               fullWidth
               required
+              error={Boolean(fieldErrors.correo_electronico || localErrors.correo_electronico)}
+              helperText={fieldErrors.correo_electronico || localErrors.correo_electronico || undefined}
             />
             <TextField
               label="Teléfono"
               value={editData.telefono || ''}
               onChange={(e) => handleFieldChange('telefono', e.target.value || null)}
               fullWidth
-              placeholder="ej: +1234567890"
+              placeholder="ej: 1234567890"
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              error={Boolean(fieldErrors.telefono || localErrors.telefono)}
+              helperText={fieldErrors.telefono || localErrors.telefono || undefined}
             />
           </Stack>
 
@@ -148,6 +177,8 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
                 onChange={(e) => handleFieldChange('contrasena', e.target.value)}
                 fullWidth
                 placeholder="Ingrese nueva contraseña"
+                error={Boolean(fieldErrors.contrasena || localErrors.contrasena)}
+                helperText={fieldErrors.contrasena || localErrors.contrasena || undefined}
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -203,6 +234,11 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave }: 
               {errorRoles && (
                 <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                   Error al cargar roles: {errorRoles}
+                </Typography>
+              )}
+              {fieldErrors.id_rol && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.id_rol}
                 </Typography>
               )}
             </FormControl>

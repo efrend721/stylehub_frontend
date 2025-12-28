@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Collapse, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Collapse, ListItemButton, ListItemText, Typography, ListItemIcon, Tooltip } from '@mui/material';
+import useConfig from '#/hooks/useConfig';
+import { useGetMenuMaster } from '#/api/menu';
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 
 // project imports
@@ -19,6 +21,12 @@ interface NavAccordionProps {
 
 export default function NavAccordion({ item, level, setSelectedID }: NavAccordionProps) {
   const [open, setOpen] = useState(item.isExpanded || false);
+  const { menuMaster } = useGetMenuMaster();
+  const drawerOpen = menuMaster.isDashboardDrawerOpened;
+  const {
+    state: { miniDrawer }
+  } = useConfig();
+  const showIcon = miniDrawer || !drawerOpen;
 
   const handleClick = () => {
     setOpen(!open);
@@ -47,35 +55,54 @@ export default function NavAccordion({ item, level, setSelectedID }: NavAccordio
     <>
       <ListItemButton
         onClick={handleClick}
-        selected={open}
+        disableRipple
         sx={{
           pl: level * 2,
-          '&.Mui-selected': {
-            backgroundColor: 'rgba(25, 118, 210, 0.08)',
-            '&:hover': {
-              backgroundColor: 'rgba(25, 118, 210, 0.12)',
-            },
-          },
+          '&:hover': { backgroundColor: 'transparent' },
+          '&.Mui-focusVisible': { backgroundColor: 'transparent' }
         }}
       >
-        {item.icon && (
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            <item.icon stroke={1.5} size="1.3rem" />
-          </ListItemIcon>
-        )}
-        <ListItemText 
-          primary={item.title}
-          sx={{
-            '& .MuiListItemText-primary': {
-              fontSize: '0.875rem',
-              fontWeight: 500,
-            },
-          }}
-        />
-        {open ? (
-          <IconChevronDown stroke={1.5} size="1rem" />
+        {showIcon && item.icon ? (
+          // Mini mode: show only the icon with tooltip, hide text & chevron
+          <Tooltip title={item.title || ''} placement="right" disableInteractive>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <item.icon stroke={1.5} size="1.3rem" />
+            </ListItemIcon>
+          </Tooltip>
         ) : (
-          <IconChevronRight stroke={1.5} size="1rem" />
+          <>
+            <ListItemText
+              primary={item.title}
+              secondary={
+                item.caption ? (
+                  <Typography
+                    component="span"
+                    sx={{
+                      display: 'block',
+                      fontSize: '0.6875rem',
+                      fontWeight: 500,
+                      color: 'text.secondary',
+                      textTransform: 'capitalize',
+                      lineHeight: 1.66
+                    }}
+                  >
+                    {item.caption}
+                  </Typography>
+                ) : undefined
+              }
+              sx={{
+                '& .MuiListItemText-primary': {
+                  fontSize: '0.875rem',
+                  fontWeight: 500
+                }
+              }}
+            />
+            {open ? (
+              <IconChevronDown stroke={1.5} size="1rem" />
+            ) : (
+              <IconChevronRight stroke={1.5} size="1rem" />
+            )}
+          </>
         )}
       </ListItemButton>
       

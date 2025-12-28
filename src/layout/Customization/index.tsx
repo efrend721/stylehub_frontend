@@ -37,7 +37,9 @@ function CustomTabPanel({ children, value, index, ...other }) {
 
 export default function Customization() {
   const theme = useTheme();
-  const { resetState } = useConfig();
+  const { resetState, state, setField } = useConfig();
+  const isCollapsibleOn = state.collapsibleGroupMenus ?? true;
+  const isCustomIconsOn = state.customGroupIcons ?? true;
   const { setMode } = useColorScheme();
 
   // drawer on/off
@@ -49,6 +51,10 @@ export default function Customization() {
   const handleReset = () => {
     setMode(DEFAULT_THEME_MODE);
     resetState();
+  };
+
+  const toggleCollapsibleGroups = (checked: boolean) => {
+    setField('collapsibleGroupMenus', checked);
   };
 
   return (
@@ -106,6 +112,44 @@ export default function Customization() {
                 <Grid size={12}>
                   {/* border radius */}
                   <BorderRadius />
+                  <Divider />
+                </Grid>
+                <Grid size={12}>
+                  {/* collapsible group menus toggle */}
+                  <Box sx={{ p: 2 }}>
+                    <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="subtitle1">Collapsible Group Menus</Typography>
+                      <Button
+                        variant={isCollapsibleOn ? 'contained' : 'outlined'}
+                        size="small"
+                        onClick={() => toggleCollapsibleGroups(!isCollapsibleOn)}
+                      >
+                        {isCollapsibleOn ? 'On' : 'Off'}
+                      </Button>
+                    </Stack>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      Toggle accordion behavior for top-level Group menus.
+                    </Typography>
+                  </Box>
+                  <Divider />
+                </Grid>
+                <Grid size={12}>
+                  {/* distinct group icons toggle */}
+                  <Box sx={{ p: 2 }}>
+                    <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="subtitle1">Distinct Group Icons</Typography>
+                      <Button
+                        variant={isCustomIconsOn ? 'contained' : 'outlined'}
+                        size="small"
+                        onClick={() => setField('customGroupIcons', !isCustomIconsOn)}
+                      >
+                        {isCustomIconsOn ? 'On' : 'Off'}
+                      </Button>
+                    </Stack>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      Use consistent Tabler/Berry icons per group title when backend icon is missing.
+                    </Typography>
+                  </Box>
                   <Divider />
                 </Grid>
               </Grid>

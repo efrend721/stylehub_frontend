@@ -57,6 +57,25 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 - Evitar añadir librerías de estilos adicionales o reglas globales que entren en conflicto con el tema.
 - Si es necesario un ajuste específico, usar overrides de MUI o estilos locales de componente manteniendo la coherencia con la guía.
 
+## Mobile-First UI (Tablets y Celulares)
+
+Este proyecto está orientado a tablets y celulares. Todo trabajo nuevo debe seguir estas pautas, alineadas con Berry React y MUI:
+
+- Lineamientos: ver [docs/mobile-first-guidelines.md](docs/mobile-first-guidelines.md)
+- Checklist de verificación: ver [docs/mobile-first-checklist.md](docs/mobile-first-checklist.md)
+- Plantilla de PR: ver [.github/pull_request_template.md](.github/pull_request_template.md)
+
+Puntos clave:
+
+- Navegación: en teléfonos usar Bottom Navigation y App Bar conciso; Drawer móvil `SwipeableDrawer`. En `md+`, Drawer mini/persistente.
+- Disposición y puntos de quiebre: usar Grid/Stack y `useMediaQuery`; cambiar variantes de Drawer en `sm/md`.
+- Targets táctiles: 48–56 px; evitar listas densas en móviles.
+- Tipografía: tamaños responsivos; verificar legibilidad en pantallas pequeñas.
+- Tabs: `variant="fullWidth"` en móviles; `scrollable` cuando haya muchas; mantener semántica ARIA.
+- Formularios: campos apilados de ancho completo; `type`/`inputMode` correctos; acciones primarias abajo o FAB.
+- Contenido: preferir listas/cards en móviles; tablas solo en `md+` con skeletons.
+- Accesibilidad y rendimiento: CssBaseline, estados de foco, props iOS para `SwipeableDrawer`, `keepMounted` en Drawer.
+
 ### Code Splitting
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)

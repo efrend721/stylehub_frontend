@@ -28,15 +28,18 @@ type Props = {
   saving: boolean;
   onClose: () => void;
   onSave: (usuario: NuevoUsuario) => void;
+  fieldErrors?: Record<string, string>;
 };
 
-export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
+export function UsuariosCreateDialog({ open, saving, onClose, onSave, fieldErrors = {} }: Props) {
   const firstFieldRef = useFocusManagement<HTMLInputElement>(open);
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
   
   // Aplicar atributo inert al fondo cuando el modal está abierto
   useInertBackground(open);
   
   const [showPassword, setShowPassword] = useState(false);
+  const [usernameEdited, setUsernameEdited] = useState(false);
   
   const initialUsuario: NuevoUsuario = useMemo(() => ({
     usuario_acceso: '',
@@ -59,6 +62,7 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
     if (open) {
       setUsuario(initialUsuario);
       setShowPassword(false);
+      setUsernameEdited(false);
     }
   }, [open, initialUsuario]);
 
@@ -79,6 +83,67 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
     }
   };
 
+  // Helper to generate username from nombre + apellido in lowercase, accents removed, spaces stripped
+  const generateUsername = (nombre: string, apellido: string): string => {
+    const normalize = (s: string) => s
+      .toLowerCase()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '');
+    return normalize(nombre) + normalize(apellido);
+  };
+
+  const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nombre = e.target.value;
+    const next = { ...usuario, nombre_usuario: nombre };
+    // Auto-generate username live unless user edited manually
+    if (!usernameEdited) {
+      next.usuario_acceso = generateUsername(nombre, next.apellido_usuario);
+    }
+    setUsuario(next);
+  };
+
+  const handleApellidoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const apellido = e.target.value;
+    const next = { ...usuario, apellido_usuario: apellido };
+    if (!usernameEdited) {
+      next.usuario_acceso = generateUsername(next.nombre_usuario, apellido);
+    }
+    setUsuario(next);
+  };
+
+  const handleUsuarioAccesoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsuario({ ...usuario, usuario_acceso: e.target.value });
+    setUsernameEdited(true);
+  };
+  const validateEmail = (value: string): string => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value.trim())) return 'Correo electrónico inválido';
+    return '';
+  };
+
+  const validatePhone = (value: string): string => {
+    const phoneRegex = /^\d+$/;
+    if (!phoneRegex.test(value.trim())) return 'El teléfono solo debe contener números';
+    return '';
+  };
+
+  const validatePassword = (value: string): string => {
+    if (value.trim().length <= 7) return 'La contraseña debe tener al menos 8 caracteres';
+    return '';
+  };
+
+  // Auto-generate username whenever Nombre/Apellido change, unless user edited manually
+  useEffect(() => {
+    if (!usernameEdited) {
+      const gen = generateUsername(usuario.nombre_usuario, usuario.apellido_usuario);
+      if (usuario.usuario_acceso !== gen) {
+        setUsuario((prev) => ({ ...prev, usuario_acceso: gen }));
+      }
+    }
+  }, [usuario.nombre_usuario, usuario.apellido_usuario, usuario.usuario_acceso, usernameEdited]);
+
   const isFormValid = 
     usuario.usuario_acceso.trim() &&
     usuario.contrasena.trim() &&
@@ -86,7 +151,10 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
     usuario.apellido_usuario.trim() &&
     usuario.correo_electronico.trim() &&
     usuario.telefono.trim() &&
-    usuario.id_rol > 0;
+    usuario.id_rol > 0 &&
+    !validateEmail(usuario.correo_electronico) &&
+    !validatePhone(usuario.telefono) &&
+    !validatePassword(usuario.contrasena);
 
   return (
     <Dialog 
@@ -103,19 +171,88 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
       <form onSubmit={handleSubmit} noValidate>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
-            {/* Fila 1: Usuario y Contraseña */}
+            {/* Orden fijo: Nombre, Apellido, Correo, Teléfono, Usuario Acceso, Contraseña, Rol */}
+            {/* Nombre y Apellido */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField
+                id="nombre_usuario"
+                name="nombre_usuario"
+                inputRef={firstFieldRef}
+                label="Nombre"
+                value={usuario.nombre_usuario}
+                onChange={handleNombreChange}
+                fullWidth
+                required
+                autoComplete="given-name"
+              />
+              <TextField
+                id="apellido_usuario"
+                name="apellido_usuario"
+                label="Apellido"
+                value={usuario.apellido_usuario}
+                onChange={handleApellidoChange}
+                fullWidth
+                required
+                autoComplete="family-name"
+              />
+            </Stack>
+
+            {/* Correo y Teléfono */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField
+                id="correo_electronico"
+                name="correo_electronico"
+                label="Correo Electrónico"
+                type="email"
+                value={usuario.correo_electronico}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setUsuario({ ...usuario, correo_electronico: v });
+                  const msg = v ? validateEmail(v) : '';
+                  setLocalErrors((prev) => ({ ...prev, correo_electronico: msg }));
+                }}
+                fullWidth
+                required
+                placeholder="ej: mario.lopez@stylehub.com"
+                autoComplete="email"
+                error={Boolean(fieldErrors.correo_electronico || localErrors.correo_electronico)}
+                helperText={fieldErrors.correo_electronico || localErrors.correo_electronico || undefined}
+              />
+              <TextField
+                id="telefono"
+                name="telefono"
+                label="Teléfono"
+                value={usuario.telefono}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setUsuario({ ...usuario, telefono: v });
+                  const msg = v ? validatePhone(v) : '';
+                  setLocalErrors((prev) => ({ ...prev, telefono: msg }));
+                }}
+                fullWidth
+                required
+                placeholder="ej: 1234567890"
+                autoComplete="tel"
+                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                error={Boolean(fieldErrors.telefono || localErrors.telefono)}
+                helperText={fieldErrors.telefono || localErrors.telefono || undefined}
+              />
+            </Stack>
+
+            {/* Usuario y Contraseña */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
                 id="usuario_acceso"
                 name="usuario_acceso"
-                inputRef={firstFieldRef}
                 label="Usuario de Acceso"
                 value={usuario.usuario_acceso}
-                onChange={(e) => setUsuario({ ...usuario, usuario_acceso: e.target.value })}
+                onChange={handleUsuarioAccesoChange}
                 fullWidth
                 required
                 placeholder="ej: mario.lopez"
                 autoComplete="username"
+                error={Boolean(fieldErrors.usuario_acceso)}
+                helperText={fieldErrors.usuario_acceso || undefined}
               />
               <TextField
                 id="contrasena"
@@ -123,10 +260,17 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 label="Contraseña"
                 type={showPassword ? 'text' : 'password'}
                 value={usuario.contrasena}
-                onChange={(e) => setUsuario({ ...usuario, contrasena: e.target.value })}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setUsuario({ ...usuario, contrasena: v });
+                  const msg = v ? validatePassword(v) : '';
+                  setLocalErrors((prev) => ({ ...prev, contrasena: msg }));
+                }}
                 fullWidth
                 required
                 autoComplete="new-password"
+                error={Boolean(fieldErrors.contrasena || localErrors.contrasena)}
+                helperText={fieldErrors.contrasena || localErrors.contrasena || undefined}
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -144,62 +288,10 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 }}
               />
             </Stack>
-
-            {/* Fila 2: Nombre y Apellido */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
-                id="nombre_usuario"
-                name="nombre_usuario"
-                label="Nombre"
-                value={usuario.nombre_usuario}
-                onChange={(e) => setUsuario({ ...usuario, nombre_usuario: e.target.value })}
-                fullWidth
-                required
-                autoComplete="given-name"
-              />
-              <TextField
-                id="apellido_usuario"
-                name="apellido_usuario"
-                label="Apellido"
-                value={usuario.apellido_usuario}
-                onChange={(e) => setUsuario({ ...usuario, apellido_usuario: e.target.value })}
-                fullWidth
-                required
-                autoComplete="family-name"
-              />
-            </Stack>
-
-            {/* Fila 3: Correo y Teléfono */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
-                id="correo_electronico"
-                name="correo_electronico"
-                label="Correo Electrónico"
-                type="email"
-                value={usuario.correo_electronico}
-                onChange={(e) => setUsuario({ ...usuario, correo_electronico: e.target.value })}
-                fullWidth
-                required
-                placeholder="ej: mario.lopez@stylehub.com"
-                autoComplete="email"
-              />
-              <TextField
-                id="telefono"
-                name="telefono"
-                label="Teléfono"
-                value={usuario.telefono}
-                onChange={(e) => setUsuario({ ...usuario, telefono: e.target.value })}
-                fullWidth
-                required
-                placeholder="ej: +1234567890"
-                autoComplete="tel"
-              />
-            </Stack>
-
             {/* Fila 4: Rol */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               {/* Rol */}
-              <FormControl fullWidth required error={!!errorRoles}>
+              <FormControl fullWidth required error={!!errorRoles || Boolean(fieldErrors.id_rol)}>
                 <InputLabel>Rol</InputLabel>
                 <Select
                   value={usuario.id_rol === 0 ? '' : usuario.id_rol}
@@ -235,6 +327,11 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave }: Props) {
                 {errorRoles && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                     {errorRoles}
+                  </Typography>
+                )}
+                {fieldErrors.id_rol && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                    {fieldErrors.id_rol}
                   </Typography>
                 )}
               </FormControl>

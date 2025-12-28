@@ -19,7 +19,9 @@ import {
   IconSettings,
   IconActivity,
   IconReport,
-  IconArrowRight
+  IconArrowRight,
+  IconShoppingCart,
+  IconTruck
 } from '@tabler/icons-react';
 
 // Extend this map as new icon keys appear from backend
@@ -41,6 +43,8 @@ export const iconMap = {
   IconActivity,
   IconReport,
   IconArrowRight
+  ,IconShoppingCart
+  ,IconTruck
 } as const;
 
 export type IconKey = keyof typeof iconMap;
@@ -66,6 +70,8 @@ const iconKeyToCSSName: Record<string, string> = {
   IconRoute: 'route',
   IconWindmill: 'windmill',
   IconArrowRight: 'keyboard-arrow-right-outlined'
+  ,IconShoppingCart: 'shopping-cart'
+  ,IconTruck: 'truck'
 };
 
 // Fallback to a neutral icon if key unknown or absent
@@ -96,4 +102,19 @@ function createWrappedIcon(IconComp: IconComponent, cssName: string): IconCompon
   WrappedIcon.displayName = `Wrapped${IconComp.displayName || IconComp.name || 'Icon'}`;
   
   return WrappedIcon as IconComponent;
+}
+
+// Suggest icon for group menu titles when backend does not provide a good unique icon
+export function getGroupIconByTitle(title?: string | null): IconComponent {
+  const t = (title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // Common Spanish titles mapping
+  if (t.includes('dashboard') || t.includes('panel')) return createWrappedIcon(IconDashboard, 'dashboard');
+  if (t.includes('venta')) return createWrappedIcon(IconShoppingCart, 'shopping-cart');
+  if (t.includes('gestion de usuario') || t.includes('usuarios')) return createWrappedIcon(IconUsers, 'users');
+  if (t.includes('auditoria')) return createWrappedIcon(IconReport, 'report');
+  if (t.includes('configuracion') || t.includes('sistema') || t.includes('ajustes')) return createWrappedIcon(IconSettings, 'settings');
+  if (t.includes('logistica') || t.includes('envio') || t.includes('transporte')) return createWrappedIcon(IconTruck, 'truck');
+  if (t.includes('gestion')) return createWrappedIcon(IconActivity, 'activity');
+  // Fallback neutral icon
+  return createWrappedIcon(IconWindmill, 'windmill');
 }

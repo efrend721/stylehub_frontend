@@ -36,7 +36,9 @@ export default function AdminUsuariosPage() {
     closeCreateDialog,
     createUser,
     creating,
-    fetchUsuarios
+    fetchUsuarios,
+    createFieldErrors,
+    editFieldErrors
   } = useUsuarios();
 
   return (
@@ -95,6 +97,7 @@ export default function AdminUsuariosPage() {
         onClose={() => setEditUser(null)}
         onChange={(u) => setEditUser(u)}
         onSave={() => void saveEdit()}
+        fieldErrors={editFieldErrors}
       />
 
       <UsuariosCreateDialog
@@ -102,6 +105,7 @@ export default function AdminUsuariosPage() {
         saving={creating}
         onClose={closeCreateDialog}
         onSave={(usuario) => void createUser(usuario)}
+        fieldErrors={createFieldErrors}
       />
     </MainCard>
   );

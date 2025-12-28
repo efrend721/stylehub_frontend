@@ -13,6 +13,7 @@ import NavItem from '../NavItem';
 import NavAccordion from './NavAccordion';
 
 import { useGetMenuMaster } from '#/api/menu';
+import useConfig from '#/hooks/useConfig';
 import type { UIMenuItem } from '#/types/menu';
 
 // ==============================|| SIDEBAR MENU LIST GROUP ||============================== //
@@ -30,6 +31,10 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, setSele
 
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
+  const {
+    state: { collapsibleGroupMenus }
+  } = useConfig();
+  const collapsible = collapsibleGroupMenus ?? true;
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [currentItem, setCurrentItem] = useState<UIMenuItem>(item);
@@ -113,6 +118,16 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, setSele
   // If the item itself is a collapse type, render it directly using NavCollapse
   if (item.type === 'collapse') {
     return <NavCollapse key={item.id} menu={item} level={0} parentId={undefined} />;
+  }
+
+  // For top-level groups, optionally render as accordion when flag is enabled
+  if (collapsible) {
+    return (
+      <>
+        <NavAccordion item={currentItem} level={0} setSelectedID={() => setSelectedID?.(currentItem.id)} />
+        {drawerOpen && <Divider sx={{ mt: 0.25, mb: 1.25 }} />}
+      </>
+    );
   }
 
   return (

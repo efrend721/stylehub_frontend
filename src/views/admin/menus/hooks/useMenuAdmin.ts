@@ -236,7 +236,7 @@ export function useMenuAdmin() {
         notify.success('Orden de submenú actualizado');
       } else {
         const res = await AdminMenusService.reorderRootGroup(node.id_menu_item, newOrderOneBased, token || undefined);
-        const { effective_order, max_order, target_order, current_order, message } = res;
+        const { message } = res;
         if (message) notify.info(message);
         notify.success('Orden de grupo actualizado');
       }

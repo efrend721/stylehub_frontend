@@ -1,14 +1,34 @@
 /**
- * Extrae el mensaje de error más específico disponible
- * Prioriza: details > message > fallback
+ * Política de mensajes: mostrar solo el 'mensaje' del backend
+ * Prioriza: message > fallback (ignora details)
  */
 export function getErrorMessage(error: unknown, fallback = 'Error desconocido'): string {
   if (error instanceof Error) {
-    const details = (error as { details?: string }).details;
-    // Priorizar 'details' si existe (mensajes específicos del backend)
-    return details || error.message || fallback;
+    return error.message || fallback;
   }
   return fallback;
+}
+
+/**
+ * Retorna el arreglo de errores de validación si el backend lo envió
+ */
+export type ValidationErrorEntry = {
+  origin?: string;
+  code?: string;
+  path?: string[];
+  message?: string;
+  format?: string;
+  pattern?: string | RegExp | null;
+};
+
+export function getErrorArray(error: unknown): ValidationErrorEntry[] {
+  if (error && typeof error === 'object') {
+    const errs = (error as { errors?: unknown }).errors;
+    if (Array.isArray(errs)) {
+      return errs as ValidationErrorEntry[];
+    }
+  }
+  return [];
 }
 
 /**

@@ -1,5 +1,5 @@
 import { API_BASE, createHeaders, isApiResponse, ApiResponse } from '#/services/common/types';
-import { ApiError } from './errors';
+import { ApiError, ValidationErrorEntry } from './errors';
 
 export interface RequestOptions {
   token?: string;
@@ -35,12 +35,14 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
   
   // Manejar respuestas de error del backend (con campo 'error' en lugar de 'success')
   if (!res.ok && raw && typeof raw === 'object') {
-    const errorObj = raw as { error?: string; message?: string; details?: string };
-    if (errorObj.error || errorObj.message || errorObj.details) {
+    const errorObj = raw as { error?: string; message?: string; mensaje?: string; details?: string; errors?: unknown };
+    const hasStructured = errorObj.error || errorObj.message || errorObj.mensaje || errorObj.details || errorObj.errors;
+    if (hasStructured) {
       // El backend envió una respuesta estructurada de error
-      const msg = errorObj.message || errorObj.error || `HTTP ${res.status}`;
+      const msg = errorObj.mensaje || errorObj.message || errorObj.error || `HTTP ${res.status}`;
       const details = errorObj.details;
-      throw new ApiError(msg, res.status, details);
+      const errs = Array.isArray(errorObj.errors) ? (errorObj.errors as ValidationErrorEntry[]) : undefined;
+      throw new ApiError(msg, res.status, details, errs);
     }
   }
   
@@ -50,10 +52,18 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
   
   const api: ApiResponse<T> = raw;
   if (!res.ok || !api.success) {
-    const msg = api.message ? String(api.message) : `HTTP ${res.status}`;
-    const errorResponse = raw as { details?: string };
-    const details = errorResponse.details;
-    throw new ApiError(msg, res.status, details);
+    const anyRaw = raw as { mensaje?: unknown; message?: unknown; details?: string; errors?: unknown };
+    let msg: string;
+    if (typeof anyRaw.mensaje === 'string') {
+      msg = String(anyRaw.mensaje);
+    } else if (typeof api.message === 'string') {
+      msg = String(api.message);
+    } else {
+      msg = `HTTP ${res.status}`;
+    }
+    const details = anyRaw.details;
+    const errs = Array.isArray(anyRaw.errors) ? (anyRaw.errors as ValidationErrorEntry[]) : undefined;
+    throw new ApiError(msg, res.status, details, errs);
   }
   if (typeof api.data === 'undefined') {
     return undefined as unknown as T;
