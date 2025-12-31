@@ -9,7 +9,6 @@ import Box from '@mui/material/Box';
 // project imports
 import MenuCard from './MenuCard';
 import MenuList from '../MenuList';
-import LogoSection from '../LogoSection';
 
 import { drawerWidth } from '#/store/constant';
 import SimpleBar from '#/ui-component/third-party/SimpleBar';
@@ -23,15 +22,6 @@ function Sidebar() {
 
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
-
-  const logo = useMemo(
-    () => (
-      <Box sx={{ display: 'flex', p: 2 }}>
-        <LogoSection />
-      </Box>
-    ),
-    []
-  );
 
   const drawer = useMemo(() => {
     const drawerContent = (
@@ -89,7 +79,6 @@ function Sidebar() {
         ModalProps={{ keepMounted: true }}
         color="inherit"
       >
-        {!downMD && logo}
         {drawer}
       </Drawer>
     </Box>

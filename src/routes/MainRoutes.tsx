@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import MainLayout from '#/layout/MainLayout';
 import Loadable from '#/ui-component/Loadable';
 import AuthGuard from '#/utils/route-guard/AuthGuard';
+import RoleGuard from '#/utils/route-guard/RoleGuard';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('#/views/dashboard/Default')));
@@ -29,6 +30,13 @@ const SysConfigEstablecimientos = Loadable(lazy(() => import('#/views/sysConfig/
 // auditoría y reportes (new)
 const AuditLogs = Loadable(lazy(() => import('#/views/audit/logs')));
 const Reportes = Loadable(lazy(() => import('#/views/reportes')));
+
+// gestión de productos
+const TipoProducto = Loadable(lazy(() => import('#/views/gestionProductos/tipoProducto')));
+const CategoriaProducto = Loadable(lazy(() => import('#/views/gestionProductos/categoriaProducto')));
+// catálogo
+const Proveedores = Loadable(lazy(() => import('#/views/catalogo/proveedores')));
+const Productos = Loadable(lazy(() => import('#/views/catalogo/productos')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -68,6 +76,7 @@ const MainRoutes = {
     // admin
     {
       path: 'admin',
+      element: <RoleGuard />,
       children: [
         { path: 'usuarios', element: <AdminUsuarios /> },
         { path: 'roles', element: <AdminRoles /> },
@@ -97,6 +106,28 @@ const MainRoutes = {
       children: [
         { path: 'establecimientos', element: <SysConfigEstablecimientos /> }
       ]
+    },
+    // gestión de productos
+    {
+      path: 'gestionproductos',
+      children: [
+        { path: 'tipoproducto', element: <TipoProducto /> },
+        { path: 'categoria', element: <CategoriaProducto /> },
+        // alias para proveedores bajo gestión de productos
+        { path: 'proveedor', element: <Proveedores /> },
+        // alias para productos bajo gestión de productos
+        { path: 'productos', element: <Productos /> }
+      ]
+    }
+    ,
+    // catálogo
+    {
+      path: 'proveedores',
+      element: <Proveedores />
+    },
+    {
+      path: 'productos',
+      element: <Productos />
     }
   ]
 };

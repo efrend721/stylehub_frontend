@@ -9,3 +9,7 @@ export * from './roles/rolesService';
 export * from './establecimientos/establecimientosService';
 export * from './menus/menusService';
 export * from './menus/adminMenusService';
+export * from './tiposProducto/tiposProductoService';
+export * from './categoriasProducto/categoriasProductoService';
+export * from './proveedores/proveedoresService';
+export * from './productos/productosService';
