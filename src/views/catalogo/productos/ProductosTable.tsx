@@ -2,6 +2,8 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import type { Producto } from './types';
@@ -26,6 +28,9 @@ export function ProductosTable({
   onAskDelete,
   onEdit
 }: Props) {
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+
   const columns: GridColDef<Producto>[] = [
     { field: 'id_producto', headerName: 'ID', width: 80 },
     { field: 'nombre_producto', headerName: 'Producto', flex: 1, minWidth: 220 },
@@ -79,19 +84,38 @@ export function ProductosTable({
           </Typography>
         </Box>
       )}
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowId={(row) => row.id_producto}
-        checkboxSelection
-        disableRowSelectionOnClick
-        rowSelectionModel={selectionModel}
-        onRowSelectionModelChange={onSelectionModelChange}
-        pageSizeOptions={[10, 25, 50]}
-        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-        autoHeight
-        sx={{ minHeight: 300 }}
-      />
+      <Box sx={{ width: '100%', overflowX: 'auto' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          getRowId={(row) => row.id_producto}
+          checkboxSelection
+          disableRowSelectionOnClick
+          rowSelectionModel={selectionModel}
+          onRowSelectionModelChange={onSelectionModelChange}
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          autoHeight
+          density={downSm ? 'compact' : 'standard'}
+          getRowClassName={(params) => (params.indexRelativeToCurrentPage % 2 === 0 ? 'row--even' : 'row--odd')}
+          sx={{
+            minHeight: 300,
+            minWidth: { xs: 1500, sm: '100%' },
+            '& .MuiDataGrid-row.row--even': {
+              bgcolor: 'action.hover'
+            },
+            '& .MuiDataGrid-row:hover': {
+              bgcolor: 'action.selected'
+            },
+            '& .MuiDataGrid-row.Mui-selected': {
+              bgcolor: 'action.selected'
+            },
+            '& .MuiDataGrid-row.Mui-selected:hover': {
+              bgcolor: 'action.selected'
+            }
+          }}
+        />
+      </Box>
     </Box>
   );
 }

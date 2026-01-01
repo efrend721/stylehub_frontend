@@ -77,7 +77,7 @@ export function useProductos() {
         setProveedorOptions(defaults);
         return;
       }
-      const results = await ProveedoresService.search(q);
+      const results = await ProveedoresService.search({ nombre: q, estado: 'activos', sort: 'nombre', order: 'asc' });
       const mapped: Option<number>[] = (results || []).map((p) => ({ value: p.id_proveedor, label: p.nombre_proveedor }));
       setProveedorOptions(mapped);
     } catch {

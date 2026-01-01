@@ -3,6 +3,16 @@ import type { Usuario, NuevoUsuario, UsuarioEdit } from '../../views/admin/usuar
 
 type Scope = 'global' | 'mine';
 
+export type UsuariosSearchSort = 'nombre' | 'apellido' | 'usuario' | 'correo';
+export type UsuariosSearchOrder = 'asc' | 'desc';
+
+export type UsuariosSearchParams = {
+  est?: string;
+  q?: string;
+  sort?: UsuariosSearchSort;
+  order?: UsuariosSearchOrder;
+};
+
 function basePath(scope: Scope = 'global'): string {
   return scope === 'mine' ? '/usuarios/mi-establecimiento' : '/usuarios';
 }
@@ -10,6 +20,16 @@ function basePath(scope: Scope = 'global'): string {
 export const UsuariosService = {
   getAll(scope: Scope = 'global', token?: string) {
     return http<Usuario[]>(basePath(scope), { token });
+  },
+  search(params: UsuariosSearchParams = {}, token?: string) {
+    const sp = new URLSearchParams();
+    if (params.est && params.est.trim() !== '') sp.set('est', params.est.trim());
+    if (params.q && params.q.trim() !== '') sp.set('q', params.q.trim());
+    if (params.sort) sp.set('sort', params.sort);
+    if (params.order) sp.set('order', params.order);
+    const qs = sp.toString();
+    const url = qs ? `/usuarios/search?${qs}` : '/usuarios/search';
+    return http<Usuario[]>(url, { token });
   },
   create(usuario: NuevoUsuario, scope: Scope = 'global', token?: string) {
     const payload: Record<string, unknown> = {

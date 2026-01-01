@@ -5,6 +5,8 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { DataGrid, Toolbar, QuickFilter } from '@mui/x-data-grid';
 import type { GridColDef, GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -22,6 +24,9 @@ type Props = {
 };
 
 export function RolesTable({ rows, selectedIds, deleting, selectionModel, onSelectionModelChange, onAskDelete, onEdit }: Props) {
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+
   const columns: GridColDef<Rol>[] = useMemo(
     () => [
       {
@@ -90,22 +95,40 @@ export function RolesTable({ rows, selectedIds, deleting, selectionModel, onSele
 
   return (
     <Paper sx={{ width: '100%', height: 560 }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowId={(r) => r.id_rol}
-        checkboxSelection
-        disableRowSelectionOnClick
-        hideFooterSelectedRowCount
-        showToolbar
-        initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
-        pageSizeOptions={[10, 25, 50]}
-        slots={{ toolbar: CustomToolbar }}
-        sx={{ border: 0 }}
-        density="compact"
-        rowSelectionModel={selectionModel}
-        onRowSelectionModelChange={onSelectionModelChange}
-      />
+      <Box sx={{ width: '100%', height: '100%', overflowX: 'auto' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          getRowId={(r) => r.id_rol}
+          checkboxSelection
+          disableRowSelectionOnClick
+          hideFooterSelectedRowCount
+          showToolbar
+          initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
+          pageSizeOptions={[10, 25, 50]}
+          slots={{ toolbar: CustomToolbar }}
+          sx={{
+            border: 0,
+            minWidth: { xs: 740, sm: '100%' },
+            '& .MuiDataGrid-row.row--even': {
+              bgcolor: 'action.hover'
+            },
+            '& .MuiDataGrid-row:hover': {
+              bgcolor: 'action.selected'
+            },
+            '& .MuiDataGrid-row.Mui-selected': {
+              bgcolor: 'action.selected'
+            },
+            '& .MuiDataGrid-row.Mui-selected:hover': {
+              bgcolor: 'action.selected'
+            }
+          }}
+          getRowClassName={(params) => (params.indexRelativeToCurrentPage % 2 === 0 ? 'row--even' : 'row--odd')}
+          density={downSm ? 'compact' : 'standard'}
+          rowSelectionModel={selectionModel}
+          onRowSelectionModelChange={onSelectionModelChange}
+        />
+      </Box>
     </Paper>
   );
 }

@@ -34,11 +34,22 @@ export interface ProveedorOption {
   label: string;
 }
 
+export type ProveedoresSearchEstado = 'activos' | 'inactivos' | 'todos';
+export type ProveedoresSearchSort = 'nombre' | 'activo';
+export type ProveedoresSearchOrder = 'asc' | 'desc';
+
+export interface ProveedoresSearchParams {
+  nombre?: string;
+  estado?: ProveedoresSearchEstado;
+  sort?: ProveedoresSearchSort;
+  order?: ProveedoresSearchOrder;
+}
+
 export interface IProveedoresService {
   getAll(): Promise<Proveedor[]>;
   getOptions(activos?: 0 | 1): Promise<ProveedorOption[]>;
   getActivos(): Promise<Proveedor[]>;
-  search(nombre: string, opts?: { activos?: 0 | 1 }): Promise<Proveedor[]>;
+  search(params: ProveedoresSearchParams): Promise<Proveedor[]>;
   getById(id: number): Promise<Proveedor>;
   create(payload: CreateProveedorPayload): Promise<{ id_proveedor: number }>;
   update(id: number, payload: UpdateProveedorPayload): Promise<{ id_proveedor: number }>;
@@ -61,10 +72,13 @@ const getActivos = (): Promise<Proveedor[]> => {
   return http<Proveedor[]>('/proveedores/activos', { method: 'GET' });
 };
 
-const search = (nombre: string, opts?: { activos?: 0 | 1 }): Promise<Proveedor[]> => {
+const search = (paramsIn: ProveedoresSearchParams): Promise<Proveedor[]> => {
   const params = new URLSearchParams();
-  params.set('nombre', nombre.trim());
-  if (opts && typeof opts.activos !== 'undefined') params.set('activos', String(opts.activos));
+  const nombre = paramsIn.nombre?.trim();
+  if (nombre) params.set('nombre', nombre);
+  params.set('estado', paramsIn.estado ?? 'todos');
+  params.set('sort', paramsIn.sort ?? 'nombre');
+  params.set('order', paramsIn.order ?? 'asc');
   return http<Proveedor[]>(`/proveedores/search?${params.toString()}`, { method: 'GET' });
 };
 

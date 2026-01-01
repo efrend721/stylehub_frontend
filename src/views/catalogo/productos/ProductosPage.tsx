@@ -8,7 +8,7 @@ import SearchField from '#/ui-component/SearchField';
 import FilterToggle from '#/ui-component/FilterToggle';
 import ProductosFiltersPopover from './ProductosFiltersPopover';
 import type { ProductosFilters } from './types';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // import { ProductosTable } from './ProductosTable';
 import ProductosList from './ProductosList';
@@ -65,19 +65,10 @@ export default function ProductosPage() {
     searchProductos
   } = useProductos();
 
-  const [orderMap, setOrderMap] = useState<Record<number, number>>({});
-
+  const searchRef = useRef('');
   useEffect(() => {
-    // Initialize order map based on incoming rows order
-    const next: Record<number, number> = {};
-    rows.forEach((r, idx) => { next[r.id_producto] = idx; });
-    setOrderMap(next);
-  }, [rows]);
-
-  const displayRows = useMemo(() => {
-    // Rows are already filtered by the backend via /productos/search
-    return [...rows].sort((a, b) => (orderMap[a.id_producto] ?? 0) - (orderMap[b.id_producto] ?? 0));
-  }, [rows, orderMap]);
+    searchRef.current = search;
+  }, [search]);
 
   // Debounce de 500ms para cambios en el texto de búsqueda
   const productSearchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,8 +90,8 @@ export default function ProductosPage() {
 
   // Efecto inmediato para cambios en filtros (incluye búsqueda vacía)
   useEffect(() => {
-    void searchProductos(search.trim(), filters);
-  }, [filters, searchProductos, search]);
+    void searchProductos(searchRef.current.trim(), filters);
+  }, [filters, searchProductos]);
 
   // Initialize filters and search from URL
   useEffect(() => {
@@ -158,19 +149,9 @@ export default function ProductosPage() {
       ) : (
         <Box>
           <ProductosList
-            items={displayRows}
+            items={rows}
             onEdit={openEditFor}
             onAskDelete={(id) => openConfirmFor([id])}
-            onReorder={(id, direction) => {
-              const ids = displayRows.map((r) => r.id_producto);
-              const idx = ids.indexOf(id);
-              if (idx === -1) return;
-              const target = direction === 'up' ? idx - 1 : idx + 1;
-              if (target < 0 || target >= ids.length) return;
-              const a = ids[idx];
-              const b = ids[target];
-              setOrderMap((prev) => ({ ...prev, [a]: target, [b]: idx }));
-            }}
           />
           {emptyHint && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{emptyHint}</Typography>

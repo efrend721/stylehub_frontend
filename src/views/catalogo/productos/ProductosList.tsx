@@ -4,9 +4,11 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import { MoreVert } from '@mui/icons-material';
+import { IconDotsVertical } from '@tabler/icons-react';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import type { Producto } from './types';
 
@@ -14,10 +16,9 @@ interface Props {
   items: Producto[];
   onEdit: (item: Producto) => void;
   onAskDelete: (id: number) => void;
-  onReorder: (id: number, direction: 'up' | 'down') => void;
 }
 
-export default function ProductosList({ items, onEdit, onAskDelete, onReorder }: Props) {
+export default function ProductosList({ items, onEdit, onAskDelete }: Props) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [menuRow, setMenuRow] = useState<Producto | null>(null);
 
@@ -31,32 +32,53 @@ export default function ProductosList({ items, onEdit, onAskDelete, onReorder }:
   };
 
   return (
-    <Stack spacing={1.25} sx={{ my: 1 }}>
+    <Stack spacing={1.5}>
       {items.map((row) => (
-        <Paper key={row.id_producto} variant="outlined" sx={{ px: 2, py: 1, borderRadius: '50px' }}>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-              <Typography variant="subtitle2" noWrap>{row.nombre_producto}</Typography>
+        <Paper
+          key={row.id_producto}
+          elevation={0}
+          variant="outlined"
+          sx={{
+            p: 2,
+            borderRadius: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            transition: 'all 0.2s',
+            '&:hover': {
+              bgcolor: 'action.hover',
+              transform: 'translateY(-2px)',
+              boxShadow: 2
+            }
+          }}
+        >
+          <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
+            <Box sx={{ flexGrow: 1, overflow: 'hidden', minWidth: 0, px: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }} noWrap>
+                {row.nombre_producto}
+              </Typography>
               {row.descripcion && (
                 <Typography variant="body2" color="text.secondary" noWrap>
                   {row.descripcion}
                 </Typography>
               )}
             </Box>
-            <Divider flexItem orientation="vertical" sx={{ mx: 0.5 }} />
             <IconButton size="small" onClick={(e) => openMenuFor(e.currentTarget, row)}>
-              <MoreVert />
+              <IconDotsVertical size={20} />
             </IconButton>
           </Stack>
         </Paper>
       ))}
 
       <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={closeMenu}>
-        <MenuItem onClick={() => { if (menuRow) onReorder(menuRow.id_producto, 'up'); closeMenu(); }}>Mover arriba</MenuItem>
-        <MenuItem onClick={() => { if (menuRow) onReorder(menuRow.id_producto, 'down'); closeMenu(); }}>Mover abajo</MenuItem>
-        <Divider />
-        <MenuItem onClick={() => { if (menuRow) onEdit(menuRow); closeMenu(); }}>Editar</MenuItem>
-        <MenuItem onClick={() => { if (menuRow) onAskDelete(menuRow.id_producto); closeMenu(); }} sx={{ color: 'error.main' }}>Eliminar</MenuItem>
+        <MenuItem onClick={() => { if (menuRow) onEdit(menuRow); closeMenu(); }}>
+          <ListItemIcon><IconEdit size={18} /></ListItemIcon>
+          <ListItemText>Editar</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => { if (menuRow) onAskDelete(menuRow.id_producto); closeMenu(); }} sx={{ color: 'error.main' }}>
+          <ListItemIcon><IconTrash size={18} /></ListItemIcon>
+          <ListItemText>Eliminar</ListItemText>
+        </MenuItem>
       </Menu>
     </Stack>
   );

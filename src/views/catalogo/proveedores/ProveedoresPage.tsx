@@ -1,24 +1,26 @@
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { IconPlus } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
-import { ProveedoresTable } from './ProveedoresTable';
+import SearchField from '#/ui-component/SearchField';
+import FilterToggle from '#/ui-component/FilterToggle';
+import ProveedoresFiltersPopover, { type ProveedoresFilters } from './ProveedoresFiltersPopover';
+import ProveedoresList from './ProveedoresList';
 import { ProveedoresDeleteDialog } from './ProveedoresDeleteDialog';
 import { ProveedoresEditDialog } from './ProveedoresEditDialog';
 import { ProveedoresCreateDialog } from './ProveedoresCreateDialog';
 import { useProveedores } from './useProveedores';
-import type { GridRowSelectionModel } from '@mui/x-data-grid';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 export default function ProveedoresPage() {
   const {
     rows,
     loading,
     error,
-    selectionModel,
-    setSelectionModel,
-    selectedIds,
     confirmOpen,
     setConfirmOpen,
     deleteIds,
@@ -35,23 +37,80 @@ export default function ProveedoresPage() {
     closeCreateDialog,
     createProveedor,
     creating,
-    fetchProveedores,
     createFieldErrors,
-    editFieldErrors
+    editFieldErrors,
+    emptyHint,
+    searchProveedores
   } = useProveedores();
+
+  const [search, setSearch] = useState('');
+  const [filtersAnchor, setFiltersAnchor] = useState<HTMLElement | null>(null);
+  const [filters, setFilters] = useState<ProveedoresFilters>({ estado: 'todos' });
+
+  const searchRef = useRef('');
+  useEffect(() => {
+    searchRef.current = search;
+  }, [search]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+
+  // Initialize search/filters from URL
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    const estadoParam = searchParams.get('estado');
+    setSearch(q);
+    setFilters({
+      estado: estadoParam === 'activos' || estadoParam === 'inactivos' || estadoParam === 'todos' ? estadoParam : 'todos'
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync to URL on changes
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (search.trim() !== '') params.q = search.trim();
+    if (filters.estado !== 'todos') params.estado = String(filters.estado);
+    setSearchParams(params, { replace: true });
+  }, [search, filters, setSearchParams]);
+
+  // Debounce 500ms para cambios en el texto
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const q = search.trim();
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (q === '') {
+      void searchProveedores('', filters);
+      return;
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      void searchProveedores(q, filters);
+    }, 500);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [search, searchProveedores]);
+
+  // Efecto inmediato: cambios en filtros
+  useEffect(() => {
+    void searchProveedores(searchRef.current.trim(), filters);
+  }, [filters, searchProveedores]);
 
   return (
     <MainCard
       title="Gestión de Proveedores"
       secondary={
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="contained" onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
-            Agregar Proveedor
-          </Button>
-          <Button onClick={() => void fetchProveedores()} disabled={loading}>
-            Refrescar
-          </Button>
-        </Box>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+            <SearchField value={search} onChange={setSearch} placeholder="Buscar proveedores" />
+            <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
+          </Stack>
+          <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
+            <Button variant="contained" size="medium" sx={{ py: 0.75 }} onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
+              Agregar Proveedor
+            </Button>
+          </Stack>
+        </Stack>
       }
     >
       {loading ? (
@@ -62,20 +121,17 @@ export default function ProveedoresPage() {
         <Box sx={{ p: 2 }}>
           <Typography color="error">{error}</Typography>
         </Box>
-      ) : rows.length === 0 ? (
-        <Box sx={{ p: 2 }}>
-          <Typography>No hay proveedores.</Typography>
-        </Box>
       ) : (
-        <ProveedoresTable
-          rows={rows}
-          selectedIds={selectedIds}
-          deleting={deleting}
-          selectionModel={selectionModel}
-          onSelectionModelChange={(m: GridRowSelectionModel) => setSelectionModel(m)}
-          onAskDelete={openConfirmFor}
-          onEdit={openEditFor}
-        />
+        <Box>
+          <ProveedoresList
+            items={rows}
+            onEdit={openEditFor}
+            onAskDelete={(id) => openConfirmFor([id])}
+          />
+          {emptyHint && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{emptyHint}</Typography>
+          )}
+        </Box>
       )}
 
       <ProveedoresDeleteDialog
@@ -101,6 +157,15 @@ export default function ProveedoresPage() {
         onClose={closeCreateDialog}
         onSave={(payload) => void createProveedor(payload)}
         fieldErrors={createFieldErrors}
+      />
+
+      <ProveedoresFiltersPopover
+        anchorEl={filtersAnchor}
+        open={!!filtersAnchor}
+        onClose={() => setFiltersAnchor(null)}
+        filters={filters}
+        setFilters={setFilters}
+        onClearFilters={() => setFilters({ estado: 'todos' })}
       />
     </MainCard>
   );

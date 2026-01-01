@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { useUserManagement } from './hooks/useUserManagement';
 import { UsuariosService } from '#/services';
@@ -6,6 +6,7 @@ import { notify } from '#/utils/notify';
 import { getErrorMessage, getErrorStatus, getErrorArray } from '#/utils/errorUtils';
 import type { Usuario, NuevoUsuario, UsuarioEdit } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
+import type { UsuariosSearchParams } from '#/services/usuarios/usuariosService';
 
 const EMPTY_SELECTION: GridRowSelectionModel = { type: 'include', ids: new Set<GridRowId>() };
 
@@ -84,6 +85,36 @@ export function useUsuarios() {
   const [creating, setCreating] = useState(false);
   const [createFieldErrors, setCreateFieldErrors] = useState<Record<string, string>>({});
 
+  const lastQueryRef = useRef<{ kind: 'all' } | { kind: 'search'; params: UsuariosSearchParams }>({ kind: 'all' });
+
+  const searchUsuarios = useCallback(async (params: UsuariosSearchParams) => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (scope !== 'global') {
+        // Para rol 2 no hay endpoint documentado de búsqueda; mantener listado normal.
+        const data = await UsuariosService.getAll(scope, token || undefined);
+        const list = Array.isArray(data) ? data : [];
+        setRows(list);
+        setEmptyHint(list.length === 0 ? (emptyHint ?? 'No hay usuarios.') : null);
+        lastQueryRef.current = { kind: 'all' };
+        return;
+      }
+
+      const data = await UsuariosService.search(params, token || undefined);
+      const list = Array.isArray(data) ? data : [];
+      setRows(list);
+      setEmptyHint(list.length === 0 ? 'Sin resultados.' : null);
+      lastQueryRef.current = { kind: 'search', params };
+    } catch (e) {
+      const msg = getErrorMessage(e, 'No se pudo buscar usuarios');
+      setError(msg);
+      setEmptyHint(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [scope, token, emptyHint]);
+
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -92,6 +123,7 @@ export function useUsuarios() {
       const list = Array.isArray(data) ? data : [];
       setRows(list);
       setEmptyHint(null);
+      lastQueryRef.current = { kind: 'all' };
     } catch (e) {
       const status = getErrorStatus(e);
       const msg = getErrorMessage(e, 'No se pudo cargar usuarios');
@@ -109,6 +141,15 @@ export function useUsuarios() {
       setLoading(false);
     }
   }, [token, scope]);
+
+  const refreshList = useCallback(async () => {
+    const last = lastQueryRef.current;
+    if (last.kind === 'search') {
+      await searchUsuarios(last.params);
+      return;
+    }
+    await fetchUsuarios();
+  }, [fetchUsuarios, searchUsuarios]);
 
   useEffect(() => {
     void fetchUsuarios();
@@ -160,7 +201,7 @@ export function useUsuarios() {
         if (failCount > 0) notify.error(`No se eliminaron ${failCount}`);
       }
       // refrescar y limpiar selección
-      await fetchUsuarios();
+      await refreshList();
       setSelectionModel(EMPTY_SELECTION);
       setDeleteIds([]);
     } catch (e) {
@@ -204,7 +245,7 @@ export function useUsuarios() {
       await UsuariosService.update(payload, scope, token || undefined);
       notify.success('Usuario actualizado');
       setEditUser(null);
-      await fetchUsuarios();
+      await refreshList();
     } catch (e) {
       const status = getErrorStatus(e);
       const msg = getErrorMessage(e, 'No se pudo actualizar el usuario');
@@ -245,7 +286,7 @@ export function useUsuarios() {
       await UsuariosService.create(payload, scope, token || undefined);
       notify.success('Usuario creado exitosamente');
       setCreateDialogOpen(false);
-      await fetchUsuarios();
+      await refreshList();
     } catch (e) {
       const status = getErrorStatus(e);
       const msg = getErrorMessage(e, 'No se pudo crear el usuario');
@@ -315,6 +356,8 @@ export function useUsuarios() {
     createFieldErrors,
 
     // misc
-    fetchUsuarios
+    fetchUsuarios,
+    refreshList,
+    searchUsuarios
   };
 }

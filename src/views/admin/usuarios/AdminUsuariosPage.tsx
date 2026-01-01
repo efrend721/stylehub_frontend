@@ -2,16 +2,31 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import { IconPlus } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
+import SearchField from '#/ui-component/SearchField';
+import FilterToggle from '#/ui-component/FilterToggle';
 import { UsuariosTable } from './UsuariosTable';
 import { UsuariosDeleteDialog } from './UsuariosDeleteDialog';
 import { UsuariosEditDialog } from './UsuariosEditDialog';
 import { UsuariosCreateDialog } from './UsuariosCreateDialog';
 import { useUsuarios } from './useUsuarios';
 import type { GridRowSelectionModel } from '@mui/x-data-grid';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import UsuariosFiltersPopover, { type UsuariosFilters } from './UsuariosFiltersPopover';
+import { useEstablecimientos } from './useEstablecimientos';
 
 export default function AdminUsuariosPage() {
+  const [search, setSearch] = useState('');
+  const [filtersAnchor, setFiltersAnchor] = useState<HTMLElement | null>(null);
+  const [filters, setFilters] = useState<UsuariosFilters>({
+    est: ''
+  });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { establecimientos } = useEstablecimientos();
+
   const {
     rows,
     loading,
@@ -37,26 +52,79 @@ export default function AdminUsuariosPage() {
     createUser,
     creating,
     fetchUsuarios,
+    refreshList,
+    searchUsuarios,
     createFieldErrors,
     editFieldErrors
   } = useUsuarios();
+
+  // Initialize from URL
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    const est = searchParams.get('est') || '';
+    setSearch(q);
+    setFilters({ est });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const searchParamsObj = useMemo(() => {
+    return {
+      est: filters.est || undefined,
+      q: search.trim() || undefined
+    };
+  }, [filters, search]);
+
+  const searchRef = useRef('');
+  useEffect(() => {
+    searchRef.current = search;
+  }, [search]);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      void searchUsuarios(searchParamsObj);
+    }, 500);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search, searchUsuarios]);
+
+  // Efecto inmediato para cambios en filtros (incluye búsqueda vacía)
+  useEffect(() => {
+    void searchUsuarios({ est: filters.est || undefined, q: searchRef.current.trim() || undefined });
+  }, [filters, searchUsuarios]);
+
+  // Sync to URL on changes
+  useEffect(() => {
+    const next: Record<string, string> = {};
+    if (search.trim() !== '') next.q = search.trim();
+    if (filters.est.trim() !== '') next.est = filters.est.trim();
+    setSearchParams(next, { replace: true });
+  }, [search, filters, setSearchParams]);
 
   return (
     <MainCard
       title="Gestión de Usuarios"
       secondary={
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button 
-            variant="contained" 
-            onClick={openCreateDialog}
-            startIcon={<IconPlus size="18" />}
-          >
-            Agregar Usuario
-          </Button>
-          <Button onClick={() => void fetchUsuarios()} disabled={loading}>
-            Refrescar
-          </Button>
-        </Box>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+            <SearchField value={search} onChange={setSearch} placeholder="Buscar usuarios" />
+            <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
+          </Stack>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button
+              variant="contained"
+              onClick={openCreateDialog}
+              startIcon={<IconPlus size="18" />}
+            >
+              Agregar Usuario
+            </Button>
+            <Button onClick={() => void refreshList()} disabled={loading}>
+              Refrescar
+            </Button>
+          </Stack>
+        </Stack>
       }
     >
       {loading ? (
@@ -106,6 +174,15 @@ export default function AdminUsuariosPage() {
         onClose={closeCreateDialog}
         onSave={(usuario) => void createUser(usuario)}
         fieldErrors={createFieldErrors}
+      />
+
+      <UsuariosFiltersPopover
+        anchorEl={filtersAnchor}
+        open={!!filtersAnchor}
+        onClose={() => setFiltersAnchor(null)}
+        filters={filters}
+        setFilters={setFilters}
+        establecimientos={establecimientos}
       />
     </MainCard>
   );
