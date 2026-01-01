@@ -94,9 +94,10 @@ export function RolesTable({ rows, selectedIds, deleting, selectionModel, onSele
   );
 
   return (
-    <Paper sx={{ width: '100%', height: 560 }}>
-      <Box sx={{ width: '100%', height: '100%', overflowX: 'auto' }}>
+    <Paper sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%', overflowX: 'auto' }}>
         <DataGrid
+          autoHeight
           rows={rows}
           columns={columns}
           getRowId={(r) => r.id_rol}
@@ -110,6 +111,10 @@ export function RolesTable({ rows, selectedIds, deleting, selectionModel, onSele
           sx={{
             border: 0,
             minWidth: { xs: 740, sm: '100%' },
+            '& .MuiDataGrid-cell': {
+              display: 'flex',
+              alignItems: 'center'
+            },
             '& .MuiDataGrid-row.row--even': {
               bgcolor: 'action.hover'
             },

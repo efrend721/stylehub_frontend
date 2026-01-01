@@ -54,18 +54,25 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
     }
   }, [item]);
 
+  const isValid = !!form
+    && form.nombre_producto.trim().length >= 2
+    && Number(precioInput) >= 0
+    && Number(fraccionInput) >= 0;
+
   const handleSave = () => {
-    if (!form) return;
-    const precioNum = Number(precioInput);
-    const fraccionNum = Number(fraccionInput);
+    if (!form || !isValid) return;
+    const precioNum = precioInput === '' ? 0 : Number(precioInput);
+    const fraccionNum = fraccionInput === '' ? 0 : Number(fraccionInput);
+    const costoNum = costoInput === '' ? 0 : Number(costoInput);
+
     const payload: UpdateProductoPayload = {
       nombre_producto: form.nombre_producto?.trim(),
       descripcion: form.descripcion?.trim() || null,
       fraccion: fraccionNum,
-      costo: Number(costoInput),
-      costo_fraccion: form.costo_fraccion ?? null,
+      costo: costoNum,
+      costo_fraccion: (form.costo_fraccion !== null && form.costo_fraccion !== undefined) ? Number(form.costo_fraccion) : null,
       precio: precioNum,
-      precio_fraccion: form.precio_fraccion ?? null,
+      precio_fraccion: (form.precio_fraccion !== null && form.precio_fraccion !== undefined) ? Number(form.precio_fraccion) : null,
       id_tipo: form.id_tipo ?? null,
       id_categoria: form.id_categoria ?? null,
       id_proveedor: form.id_proveedor ?? null
@@ -77,13 +84,6 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
     if (saving) return;
     onClose();
   };
-
-  const isValid = !!form
-    && form.nombre_producto.trim().length >= 2
-    && precioInput.trim() !== ''
-    && fraccionInput.trim() !== ''
-    && Number(precioInput) >= 0
-    && Number(fraccionInput) >= 1;
 
   return (
     <Dialog 

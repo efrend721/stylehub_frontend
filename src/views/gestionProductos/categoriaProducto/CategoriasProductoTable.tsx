@@ -102,6 +102,10 @@ export function CategoriasProductoTable({
           sx={{
             minHeight: 300,
             minWidth: { xs: 520, sm: '100%' },
+            '& .MuiDataGrid-cell': {
+              display: 'flex',
+              alignItems: 'center'
+            },
             '& .MuiDataGrid-row.row--even': {
               bgcolor: 'action.hover'
             },

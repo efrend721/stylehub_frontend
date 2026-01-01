@@ -137,7 +137,7 @@ export default function ProductosPage() {
           <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
           <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
         </Stack>
-        <Button variant="contained" size="medium" sx={{ py: 0.75, mt: { xs: 1, sm: 0 } }} onClick={openCreateDialog}>Nuevo Producto</Button>
+        <Button variant="contained" size="medium" sx={{ py: 0.75, mt: { xs: 1, sm: 0 } }} onClick={openCreateDialog}>+ agregar Producto</Button>
       </Stack>
     }>
       {loading ? (
