@@ -11,7 +11,6 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -25,7 +24,7 @@ import Box from '@mui/material/Box';
 import Logo from '#/ui-component/Logo';
 
 // assets
-import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
+import { IconDashboard, IconHome2 } from '@tabler/icons-react';
 import MenuIcon from '@mui/icons-material/Menu';
 
 function ElevationScroll({ children, window }: { children: React.ReactElement<AppBarProps>; window?: Window }) {
@@ -66,17 +65,11 @@ export default function AppBar({ ...others }) {
               <Logo />
             </Typography>
             <Stack direction="row" sx={{ gap: { xs: 1.5, md: 2.5 }, display: { xs: 'none', sm: 'flex' } }}>
-              <Button color="inherit" component={Link} href="#">
+              <Button color="inherit" component={RouterLink} to="/">
                 Home
               </Button>
               <Button color="inherit" component={RouterLink} to="/login" target="_blank">
                 Dashboard
-              </Button>
-              <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
-                Documentation
-              </Button>
-              <Button component={Link} href="https://links.codedthemes.com/hsqll" disableElevation variant="contained" color="secondary">
-                Purchase Now
               </Button>
             </Stack>
             <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
@@ -87,38 +80,18 @@ export default function AppBar({ ...others }) {
                 {drawerToggle && (
                   <Box sx={{ width: 'auto' }} role="presentation" onClick={drawerToggler(false)} onKeyDown={drawerToggler(false)}>
                     <List>
-                      <Link sx={{ textDecoration: 'none' }} href="#" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconHome2 />
-                          </ListItemIcon>
-                          <ListItemText primary="Home" />
-                        </ListItemButton>
-                      </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="/login" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconDashboard />
-                          </ListItemIcon>
-                          <ListItemText primary="Dashboard" />
-                        </ListItemButton>
-                      </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="https://codedthemes.gitbook.io/berry" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconBook />
-                          </ListItemIcon>
-                          <ListItemText primary="Documentation" />
-                        </ListItemButton>
-                      </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="https://links.codedthemes.com/hsqll" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconCreditCard />
-                          </ListItemIcon>
-                          <ListItemText primary="Purchase Now" />
-                        </ListItemButton>
-                      </Link>
+                      <ListItemButton component={RouterLink} to="/">
+                        <ListItemIcon>
+                          <IconHome2 />
+                        </ListItemIcon>
+                        <ListItemText primary="Home" />
+                      </ListItemButton>
+                      <ListItemButton component={RouterLink} to="/login" target="_blank">
+                        <ListItemIcon>
+                          <IconDashboard />
+                        </ListItemIcon>
+                        <ListItemText primary="Dashboard" />
+                      </ListItemButton>
                     </List>
                   </Box>
                 )}

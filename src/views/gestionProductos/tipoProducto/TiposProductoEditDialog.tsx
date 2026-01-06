@@ -60,7 +60,7 @@ export function TiposProductoEditDialog({ item, saving, onClose, onChange, onSav
             error={!!fieldErrors.nombre_tipo}
             helperText={fieldErrors.nombre_tipo || ' '}
             disabled={saving}
-            inputProps={{ maxLength: 50 }}
+            slotProps={{ htmlInput: { maxLength: 50 } }}
             required
           />
         </DialogContent>

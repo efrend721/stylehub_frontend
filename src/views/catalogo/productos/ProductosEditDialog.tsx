@@ -109,7 +109,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                 error={!!fieldErrors.nombre_producto}
                 helperText={fieldErrors.nombre_producto || 'Requerido, 2..120 caracteres'}
                 disabled={saving}
-                inputProps={{ maxLength: 120 }}
+                slotProps={{ htmlInput: { maxLength: 120 } }}
                 required
               />
 
@@ -122,7 +122,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                 error={!!fieldErrors.descripcion}
                 helperText={fieldErrors.descripcion || 'Opcional, hasta 255 caracteres'}
                 disabled={saving}
-                inputProps={{ maxLength: 255 }}
+                slotProps={{ htmlInput: { maxLength: 255 } }}
               />
 
               <TextField
@@ -208,7 +208,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                   error={!!fieldErrors.precio}
                   helperText={fieldErrors.precio || 'Requerido, mínimo 0'}
                   disabled={saving}
-                  inputProps={{ min: 0 }}
+                  slotProps={{ htmlInput: { min: 0 } }}
                   fullWidth
                   required
                 />
@@ -246,7 +246,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                   error={!!fieldErrors.fraccion}
                   helperText={fieldErrors.fraccion}
                   disabled={saving}
-                  inputProps={{ min: 0 }}
+                  slotProps={{ htmlInput: { min: 0 } }}
                   fullWidth
                 />
                 <TextField
@@ -295,7 +295,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                   error={!!fieldErrors.costo}
                   helperText={fieldErrors.costo || 'Opcional, mínimo 0'}
                   disabled={saving}
-                  inputProps={{ min: 0 }}
+                  slotProps={{ htmlInput: { min: 0 } }}
                   fullWidth
                 />
                 <TextField

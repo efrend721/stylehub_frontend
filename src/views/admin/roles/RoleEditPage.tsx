@@ -55,6 +55,8 @@ const RoleEditPage = () => {
             <Typography variant="h4" gutterBottom>Datos Generales</Typography>
             <Stack spacing={3}>
               <TextField
+                id="role-edit-nombre"
+                name="nombre"
                 label="Nombre del Rol"
                 value={role.nombre}
                 onChange={(e) => handleRoleChange('nombre', e.target.value)}
@@ -62,6 +64,8 @@ const RoleEditPage = () => {
                 required
               />
               <TextField
+                id="role-edit-descripcion"
+                name="descripcion"
                 label="Descripción"
                 value={role.descripcion}
                 onChange={(e) => handleRoleChange('descripcion', e.target.value)}
@@ -72,6 +76,8 @@ const RoleEditPage = () => {
               <FormControlLabel
                 control={
                   <Switch
+                    name="estado"
+                    inputProps={{ id: 'role-edit-estado' }}
                     checked={role.estado === 1}
                     onChange={(e) => handleRoleChange('estado', e.target.checked ? 1 : 0)}
                     color="primary"

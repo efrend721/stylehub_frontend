@@ -96,9 +96,11 @@ export function CategoriasProductoCreateDialog({ open, saving, onClose, onSave, 
               error={!!fieldErrors.id_categoria}
               helperText={fieldErrors.id_categoria || '1 o 2 caracteres alfanuméricos'}
               disabled={saving}
-              inputProps={{ 
-                maxLength: 2,
-                style: { textTransform: 'uppercase', fontFamily: 'monospace' }
+              slotProps={{
+                htmlInput: {
+                  maxLength: 2,
+                  style: { textTransform: 'uppercase', fontFamily: 'monospace' }
+                }
               }}
               required
             />
@@ -111,7 +113,7 @@ export function CategoriasProductoCreateDialog({ open, saving, onClose, onSave, 
               error={!!fieldErrors.nombre_categoria}
               helperText={fieldErrors.nombre_categoria || 'Entre 2 y 24 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 24 }}
+              slotProps={{ htmlInput: { maxLength: 24 } }}
               required
             />
           </Stack>

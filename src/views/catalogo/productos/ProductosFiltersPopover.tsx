@@ -19,14 +19,28 @@ interface Props {
   categoriaOptions: Option<string>[];
   proveedorOptions: Option<number>[];
   onSearchProveedor: (query: string) => void;
+  paperSx?: Record<string, unknown>;
 }
 
-export default function ProductosFiltersPopover({ anchorEl, open, onClose, filters, setFilters, onClearFilters, tipoOptions, categoriaOptions, proveedorOptions, onSearchProveedor }: Props) {
+export default function ProductosFiltersPopover({ anchorEl, open, onClose, filters, setFilters, onClearFilters, tipoOptions, categoriaOptions, proveedorOptions, onSearchProveedor, paperSx }: Props) {
   const id = open ? 'productos-filters-popover' : undefined;
 
   return (
-    <Popover id={id} open={open} anchorEl={anchorEl} onClose={onClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
-      <Box sx={{ p: 2, width: 360 }}>
+    <Popover
+      id={id}
+      open={open}
+      anchorEl={anchorEl}
+      onClose={onClose}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      PaperProps={{
+        sx: {
+          width: 360,
+          ...(paperSx || {})
+        }
+      }}
+    >
+      <Box sx={{ p: 2, width: '100%' }}>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>Filtros</Typography>
         <Stack spacing={2}>
           <TextField

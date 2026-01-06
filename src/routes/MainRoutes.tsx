@@ -5,6 +5,7 @@ import MainLayout from '#/layout/MainLayout';
 import Loadable from '#/ui-component/Loadable';
 import AuthGuard from '#/utils/route-guard/AuthGuard';
 import RoleGuard from '#/utils/route-guard/RoleGuard';
+import ErrorBoundary from './ErrorBoundary';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('#/views/dashboard/Default')));
@@ -47,6 +48,7 @@ const MainRoutes = {
       <MainLayout />
     </AuthGuard>
   ),
+  errorElement: <ErrorBoundary />,
   children: [
     {
       path: 'dashboard',
@@ -98,6 +100,14 @@ const MainRoutes = {
     {
       path: 'reportes',
       element: <Reportes />
+    }
+    ,
+    // alias: /logistica/reportes
+    {
+      path: 'logistica',
+      children: [
+        { path: 'reportes', element: <Reportes /> }
+      ]
     }
     ,
     // sysConfig (alias direct access)

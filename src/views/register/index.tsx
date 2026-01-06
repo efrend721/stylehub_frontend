@@ -9,7 +9,6 @@ import AuthWrapper1 from '../auth-ui/AuthWrapper1';
 import AuthCardWrapper from '../auth-ui/AuthCardWrapper';
 
 import Logo from '#/ui-component/Logo';
-import AuthFooter from '#/ui-component/cards/AuthFooter';
 import { RegisterHeader, RegisterForm } from './components';
 
 export default function RegisterPage() {
@@ -40,9 +39,6 @@ export default function RegisterPage() {
               </Stack>
             </AuthCardWrapper>
           </Box>
-        </Stack>
-        <Stack sx={{ px: 3, mb: 3, mt: 1 }}>
-          <AuthFooter />
         </Stack>
       </Stack>
     </AuthWrapper1>

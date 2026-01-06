@@ -233,7 +233,9 @@ export function UsuariosCreateDialog({ open, saving, onClose, onSave, fieldError
                 required
                 placeholder="ej: 1234567890"
                 autoComplete="tel"
-                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                slotProps={{
+                  htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' }
+                }}
                 error={Boolean(fieldErrors.telefono || localErrors.telefono)}
                 helperText={fieldErrors.telefono || localErrors.telefono || undefined}
               />

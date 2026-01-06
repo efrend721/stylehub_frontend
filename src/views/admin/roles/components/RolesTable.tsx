@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import { DataGrid, Toolbar, QuickFilter } from '@mui/x-data-grid';
+import { DataGrid, Toolbar, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import type { GridColDef, GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -80,7 +80,17 @@ export function RolesTable({ rows, selectedIds, deleting, selectionModel, onSele
     () => (
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, width: '100%' }}>
-          <QuickFilter parser={(searchText) => searchText.split(/\s+/).filter(Boolean)} />
+          <GridToolbarQuickFilter
+            quickFilterParser={(searchText) => searchText.split(/\s+/).filter(Boolean)}
+            slotProps={{
+              root: {
+                id: 'roles-quick-filter',
+                slotProps: {
+                  htmlInput: { id: 'roles-quick-filter-input', name: 'rolesQuickFilter' }
+                }
+              }
+            }}
+          />
           <Box sx={{ flexGrow: 1 }} />
           {selectedIds.length > 1 && (
             <Button color="error" variant="contained" onClick={() => onAskDelete(selectedIds)} disabled={deleting}>
@@ -108,6 +118,18 @@ export function RolesTable({ rows, selectedIds, deleting, selectionModel, onSele
           initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
           pageSizeOptions={[10, 25, 50]}
           slots={{ toolbar: CustomToolbar }}
+          slotProps={{
+            basePagination: {
+              material: {
+                SelectProps: {
+                  inputProps: {
+                    id: 'roles-rows-per-page',
+                    name: 'rolesRowsPerPage'
+                  }
+                }
+              }
+            }
+          }}
           sx={{
             border: 0,
             minWidth: { xs: 740, sm: '100%' },

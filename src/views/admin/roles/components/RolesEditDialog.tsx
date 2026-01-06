@@ -34,12 +34,16 @@ export function RolesEditDialog({ rol, saving, onClose, onChange, onSave }: Prop
         {rol && (
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField
+              id="edit-role-name"
+              name="nombre"
               label="Nombre"
               value={rol.nombre}
               onChange={(e) => onChange({ ...rol, nombre: e.target.value })}
               fullWidth
             />
             <TextField
+              id="edit-role-description"
+              name="descripcion"
               label="Descripción"
               value={rol.descripcion}
               onChange={(e) => onChange({ ...rol, descripcion: e.target.value })}
@@ -48,6 +52,8 @@ export function RolesEditDialog({ rol, saving, onClose, onChange, onSave }: Prop
             <FormControlLabel
               control={
                 <Switch
+                  name="estado"
+                  inputProps={{ id: 'edit-role-estado' }}
                   checked={rol.estado === 1}
                   onChange={(e) => onChange({ ...rol, estado: e.target.checked ? 1 : 0 })}
                 />

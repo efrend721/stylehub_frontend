@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import notify from '#/utils/notify';
 import { AuthService } from '#/services';
+import { API_BASE } from '#/services/common/types';
 
 // Types
 export interface User {
@@ -172,7 +173,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         // Manejar errores de conexión específicamente
         if (error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED') || error.message.includes('fetch')) {
-          const connectionMsg = 'No se puede conectar al servidor. Verifica que el backend esté ejecutándose en http://localhost:1234';
+          const connectionMsg = import.meta.env.PROD
+            ? 'No se puede conectar al servidor. Intenta nuevamente en unos momentos.'
+            : `No se puede conectar al servidor. Verifica que el backend esté ejecutándose y accesible en ${API_BASE}`;
           notify.error(connectionMsg);
           throw new Error(connectionMsg);
         }

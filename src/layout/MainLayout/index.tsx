@@ -9,7 +9,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 
 // project imports
-import Footer from './Footer';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MainContentStyled from './MainContentStyled';
@@ -62,7 +61,6 @@ export default function MainLayout() {
           {/* breadcrumb */}
           <Breadcrumbs card heading="" icons={true} links={[]} maxItems={downMD ? 2 : 8} titleBottom={false} sx={{}} />
           <Outlet />
-          <Footer />
         </Box>
       </MainContentStyled>
       <Customization />

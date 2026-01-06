@@ -9,7 +9,6 @@ import AuthWrapper1 from '../auth-ui/AuthWrapper1';
 import AuthCardWrapper from '../auth-ui/AuthCardWrapper';
 
 import Logo from '#/ui-component/Logo';
-import AuthFooter from '#/ui-component/cards/AuthFooter';
 import { LoginHeader, LoginForm } from './components/index.ts';
 
 export default function LoginPage() {
@@ -41,9 +40,6 @@ export default function LoginPage() {
             </AuthCardWrapper>
           </Box>
         </Stack>
-        <Box sx={{ px: 3, my: 3 }}>
-          <AuthFooter />
-        </Box>
       </Stack>
     </AuthWrapper1>
   );

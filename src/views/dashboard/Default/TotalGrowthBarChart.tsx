@@ -77,7 +77,23 @@ export default function TotalGrowthBarChart({ isLoading }) {
                 <Typography variant="subtitle2">Total Growth</Typography>
                 <Typography variant="h3">$2,324.00</Typography>
               </Stack>
-              <TextField id="standard-select-currency" select value={value} onChange={(e) => setValue(e.target.value)}>
+              <TextField
+                id="total-growth-range"
+                name="totalGrowthRange"
+                select
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                slotProps={{
+                  select: {
+                    // MUI renderiza un input oculto para el valor del Select.
+                    // Definir name/id ayuda al browser autofill y elimina el warning.
+                    inputProps: {
+                      id: 'total-growth-range-native',
+                      name: 'totalGrowthRange'
+                    }
+                  }
+                }}
+              >
                 {status.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}

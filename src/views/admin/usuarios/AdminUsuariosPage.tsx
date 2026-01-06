@@ -2,8 +2,10 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import SearchField from '#/ui-component/SearchField';
 import FilterToggle from '#/ui-component/FilterToggle';
@@ -113,15 +115,19 @@ export default function AdminUsuariosPage() {
             <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center">
+            <Tooltip title="Refrescar">
+              <span>
+                <IconButton onClick={() => void refreshList()} disabled={loading} color="secondary">
+                  <IconRefresh size={20} />
+                </IconButton>
+              </span>
+            </Tooltip>
             <Button
               variant="contained"
               onClick={openCreateDialog}
               startIcon={<IconPlus size="18" />}
             >
               Agregar Usuario
-            </Button>
-            <Button onClick={() => void refreshList()} disabled={loading}>
-              Refrescar
             </Button>
           </Stack>
         </Stack>

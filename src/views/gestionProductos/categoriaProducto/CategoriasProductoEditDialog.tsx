@@ -76,7 +76,7 @@ export function CategoriasProductoEditDialog({ item, saving, onClose, onChange, 
               error={!!fieldErrors.nombre_categoria}
               helperText={fieldErrors.nombre_categoria || 'Entre 2 y 24 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 24 }}
+              slotProps={{ htmlInput: { maxLength: 24 } }}
               required
             />
           </Stack>

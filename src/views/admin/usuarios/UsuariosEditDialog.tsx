@@ -152,7 +152,9 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
               onChange={(e) => handleFieldChange('telefono', e.target.value || null)}
               fullWidth
               placeholder="ej: 1234567890"
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              slotProps={{
+                htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' }
+              }}
               error={Boolean(fieldErrors.telefono || localErrors.telefono)}
               helperText={fieldErrors.telefono || localErrors.telefono || undefined}
             />

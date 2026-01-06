@@ -82,18 +82,6 @@ export default function Typography() {
               <MuiTypography variant="overline" gutterBottom sx={{ display: 'block' }}>
                 overline text
               </MuiTypography>
-
-              <MuiTypography
-                variant="body2"
-                component={Link}
-                href="https://berrydashboard.com"
-                target="_blank"
-                underline="hover"
-                gutterBottom
-                sx={{ display: 'block', color: 'primary.main' }}
-              >
-                https://berrydashboard.com
-              </MuiTypography>
             </Stack>
           </SubCard>
         </Grid>

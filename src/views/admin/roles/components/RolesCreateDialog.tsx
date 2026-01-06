@@ -57,6 +57,8 @@ export function RolesCreateDialog({ open, token, onClose, onCreated }: Props) {
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
+            id="create-role-name"
+            name="nombre"
             label="Nombre"
             placeholder="Nombre del rol"
             value={form.nombre}
@@ -66,6 +68,8 @@ export function RolesCreateDialog({ open, token, onClose, onCreated }: Props) {
             fullWidth
           />
           <TextField
+            id="create-role-description"
+            name="descripcion"
             label="Descripción"
             placeholder="Descripción (opcional)"
             value={form.descripcion || ''}
@@ -76,6 +80,8 @@ export function RolesCreateDialog({ open, token, onClose, onCreated }: Props) {
           <FormControlLabel
             control={
               <Switch
+                name="estado"
+                inputProps={{ id: 'create-role-estado' }}
                 checked={(form.estado ?? 1) === 1}
                 onChange={(e) => setForm((f) => ({ ...f, estado: e.target.checked ? 1 : 0 }))}
               />

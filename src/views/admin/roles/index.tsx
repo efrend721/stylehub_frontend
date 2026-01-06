@@ -6,6 +6,9 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import { IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import { RolesTable, RolesDeleteDialog, RolesCreateDialog } from './components';
 import { useRoles } from './hooks';
@@ -34,10 +37,14 @@ export default function RolesPage() {
     <MainCard
       title="Gestión de Roles"
       secondary={
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button onClick={() => void fetchRoles()} disabled={loading}>
-            Refrescar
-          </Button>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Tooltip title="Refrescar">
+            <span>
+              <IconButton onClick={() => void fetchRoles()} disabled={loading} color="secondary">
+                <IconRefresh size={20} />
+              </IconButton>
+            </span>
+          </Tooltip>
           <Button onClick={() => setCreateOpen(true)} variant="contained" disabled={loading}>
             Crear rol
           </Button>

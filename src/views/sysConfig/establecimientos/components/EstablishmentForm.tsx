@@ -70,7 +70,7 @@ export default function EstablishmentForm({ value, tipos, errors = {}, onChange 
             <TextField
               type="date"
               label="Fecha inicio"
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
               value={formatDateISO(value.fecha_ini || value.desde || '')}
               onChange={onDate('fecha_ini')}
               fullWidth
@@ -82,7 +82,7 @@ export default function EstablishmentForm({ value, tipos, errors = {}, onChange 
             <TextField
               type="date"
               label="Fecha fin"
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
               value={formatDateISO(value.fecha_fin || value.hasta || '')}
               onChange={onDate('fecha_fin')}
               fullWidth

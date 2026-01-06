@@ -154,7 +154,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
               error={!!fieldErrors.nombre_producto}
               helperText={fieldErrors.nombre_producto || 'Requerido, 2..120 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 120 }}
+              slotProps={{ htmlInput: { maxLength: 120 } }}
               required
             />
 
@@ -167,7 +167,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
               error={!!fieldErrors.descripcion}
               helperText={fieldErrors.descripcion || 'Opcional, hasta 255 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 255 }}
+              slotProps={{ htmlInput: { maxLength: 255 } }}
             />
 
             <TextField
@@ -242,7 +242,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
                 error={!!fieldErrors.precio}
                 helperText={fieldErrors.precio || 'Requerido, mínimo 0'}
                 disabled={saving}
-                inputProps={{ min: 0 }}
+                slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
                 required
               />
@@ -262,7 +262,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
                 error={!!fieldErrors.fraccion}
                 helperText={fieldErrors.fraccion}
                 disabled={saving}
-                inputProps={{ min: 0 }}
+                slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
               />
               <TextField
@@ -279,7 +279,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
                 error={!!fieldErrors.precio_fraccion}
                 helperText={fieldErrors.precio_fraccion || 'Por defecto: precio / fracción (redondeado). Puedes ajustarlo.'}
                 disabled={saving}
-                inputProps={{ min: 0 }}
+                slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
               />
               <TextField
@@ -298,7 +298,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
                 error={!!fieldErrors.costo}
                 helperText={fieldErrors.costo || 'Opcional, mínimo 0'}
                 disabled={saving}
-                inputProps={{ min: 0 }}
+                slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
               />
               <TextField
@@ -315,7 +315,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
                 error={!!fieldErrors.costo_fraccion}
                 helperText={fieldErrors.costo_fraccion || 'Por defecto: costo / fracción (redondeado). Puedes ajustarlo.'}
                 disabled={saving}
-                inputProps={{ min: 0 }}
+                slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
               />
             </Stack>

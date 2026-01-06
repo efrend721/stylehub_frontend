@@ -64,7 +64,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
               error={!!fieldErrors.nombre_proveedor}
               helperText={fieldErrors.nombre_proveedor || 'Requerido, 2..60 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 60 }}
+              slotProps={{ htmlInput: { maxLength: 60 } }}
               required
             />
             <TextField
@@ -76,7 +76,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
               error={!!fieldErrors.direccion}
               helperText={fieldErrors.direccion || 'Opcional, hasta 120 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 120 }}
+              slotProps={{ htmlInput: { maxLength: 120 } }}
             />
             <TextField
               margin="dense"
@@ -87,7 +87,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
               error={!!fieldErrors.telefono}
               helperText={fieldErrors.telefono || 'Opcional, hasta 20 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 20 }}
+              slotProps={{ htmlInput: { maxLength: 20 } }}
             />
             <TextField
               margin="dense"
@@ -98,7 +98,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
               error={!!fieldErrors.representante}
               helperText={fieldErrors.representante || 'Opcional, hasta 60 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 60 }}
+              slotProps={{ htmlInput: { maxLength: 60 } }}
             />
             <TextField
               margin="dense"
@@ -109,7 +109,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
               error={!!fieldErrors.telefono_representante}
               helperText={fieldErrors.telefono_representante || 'Opcional, hasta 20 caracteres'}
               disabled={saving}
-              inputProps={{ maxLength: 20 }}
+              slotProps={{ htmlInput: { maxLength: 20 } }}
             />
             <FormControlLabel
               control={<Switch checked={item.activo === 1} onChange={(e) => onChange({ ...item, activo: e.target.checked ? 1 : 0 })} />}

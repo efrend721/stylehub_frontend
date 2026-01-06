@@ -8,7 +8,8 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
-import { IconPencil, IconTrash, IconArrowRight, IconArrowUp, IconArrowDown } from '@tabler/icons-react';
+import Tooltip from '@mui/material/Tooltip';
+import { IconPencil, IconTrash, IconArrowRight, IconArrowUp, IconArrowDown, IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import { renderIconPreview } from '#/views/admin/menus/utils';
 import { type MenuTreeNodeLocal } from '#/views/admin/menus/types';
@@ -94,7 +95,13 @@ export function TreeView(props: {
             <Typography variant="body2" color="text.secondary">
               {loading ? 'Cargando…' : error ? error : 'Árbol generado por el servidor'}
             </Typography>
-            <Button size="small" onClick={onRefresh}>Refrescar</Button>
+            <Tooltip title="Refrescar">
+              <span>
+                <IconButton size="small" onClick={onRefresh} color="secondary">
+                  <IconRefresh size={20} />
+                </IconButton>
+              </span>
+            </Tooltip>
           </Stack>
           <Divider />
           <List dense>

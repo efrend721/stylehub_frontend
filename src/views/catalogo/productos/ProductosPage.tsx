@@ -4,6 +4,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import SearchField from '#/ui-component/SearchField';
 import FilterToggle from '#/ui-component/FilterToggle';
 import ProductosFiltersPopover from './ProductosFiltersPopover';
@@ -18,8 +20,14 @@ import { ProductosDeleteDialog } from './ProductosDeleteDialog';
 import { useProductos } from './useProductos';
 
 export default function ProductosPage() {
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
   const [search, setSearch] = useState('');
   const [filtersAnchor, setFiltersAnchor] = useState<HTMLElement | null>(null);
+  const [filtersPopoverWidth, setFiltersPopoverWidth] = useState<number | null>(null);
   const [filters, setFilters] = useState<ProductosFilters>({
     id_tipo: null,
     id_categoria: null,
@@ -130,16 +138,74 @@ export default function ProductosPage() {
     setSearchParams(params, { replace: true });
   }, [search, filters, setSearchParams]);
 
+  const openFiltersPopover = (anchor: HTMLElement) => {
+    setFiltersAnchor(anchor);
+    if (downSm && cardRef.current) {
+      setFiltersPopoverWidth(Math.round(cardRef.current.getBoundingClientRect().width));
+    } else {
+      setFiltersPopoverWidth(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!downSm) {
+      setFiltersPopoverWidth(null);
+      return;
+    }
+    if (filtersAnchor && cardRef.current) {
+      setFiltersPopoverWidth(Math.round(cardRef.current.getBoundingClientRect().width));
+    }
+  }, [downSm, filtersAnchor]);
+
   return (
-    <MainCard title="Productos" secondary={
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-          <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
-          <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
-        </Stack>
-        <Button variant="contained" size="medium" sx={{ py: 0.75, mt: { xs: 1, sm: 0 } }} onClick={openCreateDialog}>+ agregar Producto</Button>
-      </Stack>
-    }>
+    <MainCard
+      ref={cardRef}
+      title={
+        downSm ? (
+          <Stack spacing={1} sx={{ width: '100%', alignItems: 'stretch' }}>
+            <Typography variant="h5" sx={{ textAlign: 'center' }}>
+              Productos
+            </Typography>
+            <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <FilterToggle size="small" onClick={(e) => openFiltersPopover(e.currentTarget as HTMLElement)} />
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ py: 0.75, flexGrow: 1 }}
+                onClick={openCreateDialog}
+              >
+                + agregar Producto
+              </Button>
+            </Stack>
+          </Stack>
+        ) : (
+          'Productos'
+        )
+      }
+      secondary={
+        downSm ? undefined : (
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+              <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
+              <FilterToggle onClick={(e) => openFiltersPopover(e.currentTarget as HTMLElement)} />
+            </Stack>
+            <Button variant="contained" size="medium" sx={{ py: 0.75, mt: { xs: 1, sm: 0 } }} onClick={openCreateDialog}>
+              + agregar Producto
+            </Button>
+          </Stack>
+        )
+      }
+      headerSX={{
+        '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
+        ...(downSm
+          ? {
+              py: 1,
+              '& .MuiCardHeader-title': { width: '100%' }
+            }
+          : null)
+      }}
+    >
       {loading ? (
         <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
           <CircularProgress />
@@ -197,6 +263,7 @@ export default function ProductosPage() {
         onClose={() => setFiltersAnchor(null)}
         filters={filters}
         setFilters={setFilters}
+        paperSx={downSm && filtersPopoverWidth ? { width: filtersPopoverWidth, maxWidth: 'none' } : undefined}
         onClearFilters={() => setFilters({
           id_tipo: null,
           id_categoria: null,

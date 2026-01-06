@@ -2,7 +2,9 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { IconPlus } from '@tabler/icons-react';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import { CategoriasProductoTable } from './CategoriasProductoTable';
 import { CategoriasProductoDeleteDialog } from './CategoriasProductoDeleteDialog';
@@ -44,12 +46,16 @@ export default function CategoriaProductoPage() {
     <MainCard
       title="Gestión de Categorías de Producto"
       secondary={
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Tooltip title="Refrescar">
+            <span>
+              <IconButton onClick={() => void fetchCategorias()} disabled={loading} color="secondary">
+                <IconRefresh size={20} />
+              </IconButton>
+            </span>
+          </Tooltip>
           <Button variant="contained" onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
             Agregar Categoría
-          </Button>
-          <Button onClick={() => void fetchCategorias()} disabled={loading}>
-            Refrescar
           </Button>
         </Box>
       }
