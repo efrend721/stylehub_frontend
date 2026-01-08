@@ -3,6 +3,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { IconPlus } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import SearchField from '#/ui-component/SearchField';
@@ -17,6 +19,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 export default function ProveedoresPage() {
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+
   const {
     rows,
     loading,
@@ -46,6 +51,11 @@ export default function ProveedoresPage() {
   const [search, setSearch] = useState('');
   const [filtersAnchor, setFiltersAnchor] = useState<HTMLElement | null>(null);
   const [filters, setFilters] = useState<ProveedoresFilters>({ estado: 'todos' });
+
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   const searchRef = useRef('');
   useEffect(() => {
@@ -80,11 +90,11 @@ export default function ProveedoresPage() {
     const q = search.trim();
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     if (q === '') {
-      void searchProveedores('', filters);
+      void searchProveedores('', filtersRef.current);
       return;
     }
     searchDebounceRef.current = setTimeout(() => {
-      void searchProveedores(q, filters);
+      void searchProveedores(q, filtersRef.current);
     }, 500);
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
@@ -98,20 +108,54 @@ export default function ProveedoresPage() {
 
   return (
     <MainCard
-      title="Gestión de Proveedores"
-      secondary={
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+      title={
+        downSm ? (
+          <Stack spacing={1} sx={{ width: '100%', alignItems: 'stretch' }}>
+            <Typography variant="h5" sx={{ textAlign: 'center' }}>
+              Gestión de Proveedores
+            </Typography>
             <SearchField value={search} onChange={setSearch} placeholder="Buscar proveedores" />
-            <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <FilterToggle size="small" onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ py: 0.75, flexGrow: 1 }}
+                onClick={openCreateDialog}
+                startIcon={<IconPlus size="18" />}
+              >
+                Agregar Proveedor
+              </Button>
+            </Stack>
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
-            <Button variant="contained" size="medium" sx={{ py: 0.75 }} onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
-              Agregar Proveedor
-            </Button>
-          </Stack>
-        </Stack>
+        ) : (
+          'Gestión de Proveedores'
+        )
       }
+      secondary={
+        downSm ? undefined : (
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+              <SearchField value={search} onChange={setSearch} placeholder="Buscar proveedores" />
+              <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
+            </Stack>
+            <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
+              <Button variant="contained" size="medium" sx={{ py: 0.75 }} onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
+                Agregar Proveedor
+              </Button>
+            </Stack>
+          </Stack>
+        )
+      }
+      headerSX={{
+        '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
+        ...(downSm
+          ? {
+            py: 1,
+            '& .MuiCardHeader-title': { width: '100%' }
+          }
+          : null)
+      }}
     >
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>

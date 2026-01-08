@@ -61,8 +61,9 @@ function MenuList() {
   const navItems = navArray.slice(0, lastItemIndex + 1).map((item, index) => {
     switch (item.type) {
       case 'group': {
-        // Proteger acceso a url
-        if ('url' in item && item.url && item.id !== lastItemId) {
+        // Si un "group" viene con url pero SIN hijos, tratarlo como item.
+        // Si tiene hijos, siempre debe renderizarse como grupo colapsable.
+        if ('url' in item && item.url && (!item.children || item.children.length === 0) && item.id !== lastItemId) {
           return (
             <List key={item.id}>
               <NavItem item={item} level={1} isParents setSelectedID={() => setSelectedID('')} />

@@ -19,7 +19,8 @@ function flattenUrls(items: import('#/types/menu').UIMenuItem[]): string[] {
   const urls: string[] = [];
   const stack = [...items];
   while (stack.length) {
-    const it = stack.pop()!;
+    const it = stack.pop();
+    if (!it) break;
     if (it.url) urls.push(normalizePath(it.url));
     if (it.children && it.children.length) stack.push(...it.children);
   }

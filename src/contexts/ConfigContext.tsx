@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { createContext, useMemo } from 'react';
+import { createContext, useEffect, useMemo } from 'react';
 
 // project imports
 import config from '#/config';
@@ -32,6 +32,23 @@ export function ConfigProvider({ children }) {
     setField: (k: string, v: unknown) => void;
     resetState: () => void;
   };
+
+  // One-time migration: some UI changes/dev toggles may have persisted this flag as false.
+  // We restore it to true once, and then never override user choice again.
+  useEffect(() => {
+    try {
+      const MIGRATION_KEY = 'berry-config-migration:collapsibleGroupMenus:2026-01-07';
+      if (localStorage.getItem(MIGRATION_KEY) === '1') return;
+
+      if (state?.collapsibleGroupMenus === false) {
+        setField('collapsibleGroupMenus', true);
+      }
+
+      localStorage.setItem(MIGRATION_KEY, '1');
+    } catch {
+      // ignore storage errors (private mode, quota, etc)
+    }
+  }, [setField, state?.collapsibleGroupMenus]);
 
   const memoizedValue = useMemo<ConfigContextValue>(
     () => ({ state, setState, setField, resetState }),

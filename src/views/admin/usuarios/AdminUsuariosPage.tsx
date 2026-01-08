@@ -15,7 +15,7 @@ import { UsuariosEditDialog } from './UsuariosEditDialog';
 import { UsuariosCreateDialog } from './UsuariosCreateDialog';
 import { useUsuarios } from './useUsuarios';
 import type { GridRowSelectionModel } from '@mui/x-data-grid';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import UsuariosFiltersPopover, { type UsuariosFilters } from './UsuariosFiltersPopover';
 import { useEstablecimientos } from './useEstablecimientos';
@@ -53,7 +53,6 @@ export default function AdminUsuariosPage() {
     closeCreateDialog,
     createUser,
     creating,
-    fetchUsuarios,
     refreshList,
     searchUsuarios,
     createFieldErrors,
@@ -69,23 +68,26 @@ export default function AdminUsuariosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const searchParamsObj = useMemo(() => {
-    return {
-      est: filters.est || undefined,
-      q: search.trim() || undefined
-    };
-  }, [filters, search]);
-
   const searchRef = useRef('');
   useEffect(() => {
     searchRef.current = search;
   }, [search]);
 
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
+    const q = search.trim();
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (q === '') {
+      void searchUsuarios({ est: filtersRef.current.est || undefined, q: undefined });
+      return;
+    }
     debounceRef.current = setTimeout(() => {
-      void searchUsuarios(searchParamsObj);
+      void searchUsuarios({ est: filtersRef.current.est || undefined, q: q || undefined });
     }, 500);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);

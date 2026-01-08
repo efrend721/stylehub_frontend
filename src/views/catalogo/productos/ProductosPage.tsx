@@ -43,9 +43,6 @@ export default function ProductosPage() {
     loading,
     error,
     emptyHint,
-    selectionModel,
-    setSelectionModel,
-    selectedIds,
     confirmOpen,
     setConfirmOpen,
     deleteIds,
@@ -73,6 +70,11 @@ export default function ProductosPage() {
     searchProductos
   } = useProductos();
 
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
   const searchRef = useRef('');
   useEffect(() => {
     searchRef.current = search;
@@ -85,11 +87,11 @@ export default function ProductosPage() {
     if (productSearchDebounceRef.current) clearTimeout(productSearchDebounceRef.current);
     if (q === '') {
       // no esperar: si no hay texto, delega a efecto inmediato de filtros
-      void searchProductos('', filters);
+      void searchProductos('', filtersRef.current);
       return;
     }
     productSearchDebounceRef.current = setTimeout(() => {
-      void searchProductos(q, filters);
+      void searchProductos(q, filtersRef.current);
     }, 500);
     return () => {
       if (productSearchDebounceRef.current) clearTimeout(productSearchDebounceRef.current);
@@ -200,9 +202,9 @@ export default function ProductosPage() {
         '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
         ...(downSm
           ? {
-              py: 1,
-              '& .MuiCardHeader-title': { width: '100%' }
-            }
+            py: 1,
+            '& .MuiCardHeader-title': { width: '100%' }
+          }
           : null)
       }}
     >
