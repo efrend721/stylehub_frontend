@@ -33,10 +33,12 @@ export default function ProductosFiltersPopover({ anchorEl, open, onClose, filte
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      PaperProps={{
-        sx: {
-          width: 360,
-          ...(paperSx || {})
+      slotProps={{
+        paper: {
+          sx: {
+            width: 360,
+            ...(paperSx || {})
+          }
         }
       }}
     >
