@@ -4,23 +4,24 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
-import { TiposProductoTable } from './TiposProductoTable';
+import { TiposProductoList } from './TiposProductoList';
 import { TiposProductoDeleteDialog } from './TiposProductoDeleteDialog';
 import { TiposProductoEditDialog } from './TiposProductoEditDialog';
 import { TiposProductoCreateDialog } from './TiposProductoCreateDialog';
 import { useTiposProducto } from './useTiposProducto';
-import type { GridRowSelectionModel } from '@mui/x-data-grid';
 
 export default function TipoProductoPage() {
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+
   const {
     rows,
     loading,
     error,
-    selectionModel,
-    setSelectionModel,
-    selectedIds,
     confirmOpen,
     setConfirmOpen,
     deleteIds,
@@ -44,9 +45,17 @@ export default function TipoProductoPage() {
 
   return (
     <MainCard
-      title="Gestión de Tipos de Producto"
+      title={
+        downSm ? (
+          <Typography variant="h5" sx={{ textAlign: 'center' }} noWrap>
+            Gestión de Tipos de Producto
+          </Typography>
+        ) : (
+          'Gestión de Tipos de Producto'
+        )
+      }
       secondary={
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        downSm ? (
           <Tooltip title="Refrescar">
             <span>
               <IconButton onClick={() => void fetchTipos()} disabled={loading} color="secondary">
@@ -54,12 +63,61 @@ export default function TipoProductoPage() {
               </IconButton>
             </span>
           </Tooltip>
-          <Button variant="contained" onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
+        ) : (
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Tooltip title="Refrescar">
+              <span>
+                <IconButton onClick={() => void fetchTipos()} disabled={loading} color="secondary">
+                  <IconRefresh size={20} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Button variant="contained" onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
+              Agregar Tipo
+            </Button>
+          </Box>
+        )
+      }
+      headerSX={{
+        '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
+        ...(downSm
+          ? {
+              py: 1,
+              position: 'relative',
+              '& .MuiCardHeader-action': {
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: 'translateY(-50%)'
+              },
+              '& .MuiCardHeader-title': {
+                width: '100%',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }
+            }
+          : null)
+      }}
+    >
+      {downSm && (
+        <Box sx={{ mb: 2 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={(e) => {
+              (e.currentTarget as HTMLElement).blur();
+              openCreateDialog();
+            }}
+            startIcon={<IconPlus size="18" />}
+            sx={{ py: 0.75 }}
+          >
             Agregar Tipo
           </Button>
         </Box>
-      }
-    >
+      )}
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
@@ -73,14 +131,10 @@ export default function TipoProductoPage() {
           <Typography>No hay tipos de producto.</Typography>
         </Box>
       ) : (
-        <TiposProductoTable
-          rows={rows}
-          selectedIds={selectedIds}
-          deleting={deleting}
-          selectionModel={selectionModel}
-          onSelectionModelChange={(m: GridRowSelectionModel) => setSelectionModel(m)}
-          onAskDelete={openConfirmFor}
+        <TiposProductoList
+          items={rows}
           onEdit={openEditFor}
+          onAskDelete={(id) => openConfirmFor([id])}
         />
       )}
 

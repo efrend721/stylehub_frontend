@@ -4,23 +4,24 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
-import { CategoriasProductoTable } from './CategoriasProductoTable';
+import { CategoriasProductoList } from './CategoriasProductoList';
 import { CategoriasProductoDeleteDialog } from './CategoriasProductoDeleteDialog';
 import { CategoriasProductoEditDialog } from './CategoriasProductoEditDialog';
 import { CategoriasProductoCreateDialog } from './CategoriasProductoCreateDialog';
 import { useCategoriaProducto } from './useCategoriaProducto';
-import type { GridRowSelectionModel } from '@mui/x-data-grid';
 
 export default function CategoriaProductoPage() {
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+
   const {
     rows,
     loading,
     error,
-    selectionModel,
-    setSelectionModel,
-    selectedIds,
     confirmOpen,
     setConfirmOpen,
     deleteIds,
@@ -44,9 +45,17 @@ export default function CategoriaProductoPage() {
 
   return (
     <MainCard
-      title="Gestión de Categorías de Producto"
+      title={
+        downSm ? (
+          <Typography variant="h5" sx={{ textAlign: 'center' }} noWrap>
+            Gestión de Categorías de Producto
+          </Typography>
+        ) : (
+          'Gestión de Categorías de Producto'
+        )
+      }
       secondary={
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        downSm ? (
           <Tooltip title="Refrescar">
             <span>
               <IconButton onClick={() => void fetchCategorias()} disabled={loading} color="secondary">
@@ -54,12 +63,68 @@ export default function CategoriaProductoPage() {
               </IconButton>
             </span>
           </Tooltip>
-          <Button variant="contained" onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
+        ) : (
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Tooltip title="Refrescar">
+              <span>
+                <IconButton onClick={() => void fetchCategorias()} disabled={loading} color="secondary">
+                  <IconRefresh size={20} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Button
+              variant="contained"
+              onClick={(e) => {
+                (e.currentTarget as HTMLElement).blur();
+                openCreateDialog();
+              }}
+              startIcon={<IconPlus size="18" />}
+            >
+              Agregar Categoría
+            </Button>
+          </Box>
+        )
+      }
+      headerSX={{
+        '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
+        ...(downSm
+          ? {
+            py: 1,
+            position: 'relative',
+            '& .MuiCardHeader-action': {
+              position: 'absolute',
+              right: 8,
+              top: '50%',
+              transform: 'translateY(-50%)'
+            },
+            '& .MuiCardHeader-title': {
+              width: '100%',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }
+          }
+          : null)
+      }}
+    >
+      {downSm && (
+        <Box sx={{ mb: 2 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={(e) => {
+              (e.currentTarget as HTMLElement).blur();
+              openCreateDialog();
+            }}
+            startIcon={<IconPlus size="18" />}
+            sx={{ py: 0.75 }}
+          >
             Agregar Categoría
           </Button>
         </Box>
-      }
-    >
+      )}
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
@@ -73,15 +138,7 @@ export default function CategoriaProductoPage() {
           <Typography>No hay categorías de producto.</Typography>
         </Box>
       ) : (
-        <CategoriasProductoTable
-          rows={rows}
-          selectedIds={selectedIds}
-          deleting={deleting}
-          selectionModel={selectionModel}
-          onSelectionModelChange={(m: GridRowSelectionModel) => setSelectionModel(m)}
-          onAskDelete={openConfirmFor}
-          onEdit={openEditFor}
-        />
+        <CategoriasProductoList items={rows} onEdit={openEditFor} onAskDelete={(id) => openConfirmFor([id])} />
       )}
 
       <CategoriasProductoDeleteDialog

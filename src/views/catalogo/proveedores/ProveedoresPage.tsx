@@ -21,6 +21,9 @@ import { useSearchParams } from 'react-router-dom';
 export default function ProveedoresPage() {
   const theme = useTheme();
   const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+  const isLandscape = useMediaQuery('(orientation: landscape)');
+  const landscapePhone = useMediaQuery('(orientation: landscape) and (max-height: 500px)');
+  const mobileHeader = downSm || landscapePhone;
 
   const {
     rows,
@@ -109,31 +112,33 @@ export default function ProveedoresPage() {
   return (
     <MainCard
       title={
-        downSm ? (
+        mobileHeader ? (
           <Stack spacing={1} sx={{ width: '100%', alignItems: 'stretch' }}>
-            <Typography variant="h5" sx={{ textAlign: 'center' }}>
+            <Typography variant="h5" sx={{ textAlign: 'center' }} noWrap>
               Gestión de Proveedores
             </Typography>
-            <SearchField value={search} onChange={setSearch} placeholder="Buscar proveedores" />
             <Stack direction="row" spacing={1} alignItems="center">
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <SearchField value={search} onChange={setSearch} placeholder="Buscar proveedores" />
+              </Box>
               <FilterToggle size="small" onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
-              <Button
-                variant="contained"
-                size="small"
-                sx={{ py: 0.75, flexGrow: 1 }}
-                onClick={openCreateDialog}
-                startIcon={<IconPlus size="18" />}
-              >
-                Agregar Proveedor
-              </Button>
             </Stack>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ py: 0.75 }}
+              onClick={openCreateDialog}
+              startIcon={<IconPlus size="18" />}
+            >
+              Agregar Proveedor
+            </Button>
           </Stack>
         ) : (
           'Gestión de Proveedores'
         )
       }
       secondary={
-        downSm ? undefined : (
+        mobileHeader ? undefined : (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
               <SearchField value={search} onChange={setSearch} placeholder="Buscar proveedores" />
@@ -149,10 +154,16 @@ export default function ProveedoresPage() {
       }
       headerSX={{
         '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
-        ...(downSm
+        ...(mobileHeader
           ? {
             py: 1,
-            '& .MuiCardHeader-title': { width: '100%' }
+            '& .MuiCardHeader-title': {
+              width: '100%',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }
           }
           : null)
       }}

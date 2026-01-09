@@ -25,13 +25,11 @@ export function useFocusManagement<T extends HTMLElement>(
       previouslyFocusedElement.current = document.activeElement;
 
       if (autoFocus) {
-        // Enfocar el primer elemento interactivo del modal después de un pequeño delay
-        // para asegurar que el DOM esté completamente renderizado
+        // Enfocar el primer elemento interactivo lo antes posible.
+        // Un delay largo puede dejar el foco en el botón disparador mientras MUI aplica aria-hidden.
         const timer = setTimeout(() => {
-          if (elementRef.current) {
-            elementRef.current.focus();
-          }
-        }, 100);
+          elementRef.current?.focus();
+        }, 0);
 
         return () => clearTimeout(timer);
       }

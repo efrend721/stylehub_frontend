@@ -4,7 +4,6 @@ import CategoriaProductoPage from './CategoriaProductoPage';
 export default CategoriaProductoPage;
 
 export { CategoriaProductoPage };
-export { CategoriasProductoTable } from './CategoriasProductoTable';
 export { CategoriasProductoCreateDialog } from './CategoriasProductoCreateDialog';
 export { CategoriasProductoEditDialog } from './CategoriasProductoEditDialog';
 export { CategoriasProductoDeleteDialog } from './CategoriasProductoDeleteDialog';

@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CategoriasProductoService } from '#/services';
 import { notify } from '#/utils/notify';
 import { getErrorMessage, getErrorStatus, getErrorArray } from '#/utils/errorUtils';
 import type { CategoriaProducto, CreateCategoriaProductoPayload, UpdateCategoriaProductoPayload } from './types';
-import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
-
-const EMPTY_SELECTION: GridRowSelectionModel = { type: 'include', ids: new Set<GridRowId>() };
 
 // Construye mapa campo -> mensaje desde arreglo de errores del backend
 function fieldErrorsFromArray(arr: Array<{ path?: string[]; message?: string }>): Record<string, string> {
@@ -22,14 +19,6 @@ export function useCategoriaProducto() {
   const [rows, setRows] = useState<CategoriaProducto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>(EMPTY_SELECTION);
-  const selectedIds = useMemo<GridRowId[]>(() => {
-    const ids = selectionModel.ids as unknown;
-    if (ids instanceof Set) return Array.from(ids) as GridRowId[];
-    if (Array.isArray(ids)) return ids as GridRowId[];
-    return [] as GridRowId[];
-  }, [selectionModel]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
@@ -77,7 +66,6 @@ export function useCategoriaProducto() {
         notify.error(`Eliminadas ${deleted}/${requested}. Revise dependencias.`);
       }
       await fetchCategorias();
-      setSelectionModel(EMPTY_SELECTION);
       setDeleteIds([]);
     } catch (e) {
       const msg = getErrorMessage(e, 'Error al eliminar categorías');
@@ -156,9 +144,6 @@ export function useCategoriaProducto() {
     rows,
     loading,
     error,
-    selectionModel,
-    setSelectionModel,
-    selectedIds,
     confirmOpen,
     setConfirmOpen,
     deleteIds,

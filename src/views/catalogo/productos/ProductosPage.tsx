@@ -22,6 +22,11 @@ import { useProductos } from './useProductos';
 export default function ProductosPage() {
   const theme = useTheme();
   const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+  const isLandscape = useMediaQuery('(orientation: landscape)');
+  // Muchos teléfonos en landscape superan el breakpoint md (p.ej. 932px),
+  // así que usamos altura baja para detectar "celular rotado".
+  const landscapePhone = useMediaQuery('(orientation: landscape) and (max-height: 500px)');
+  const mobileHeader = downSm || landscapePhone;
 
   const cardRef = useRef<HTMLDivElement | null>(null);
 
@@ -142,7 +147,7 @@ export default function ProductosPage() {
 
   const openFiltersPopover = (anchor: HTMLElement) => {
     setFiltersAnchor(anchor);
-    if (downSm && cardRef.current) {
+    if (mobileHeader && cardRef.current) {
       setFiltersPopoverWidth(Math.round(cardRef.current.getBoundingClientRect().width));
     } else {
       setFiltersPopoverWidth(null);
@@ -150,43 +155,40 @@ export default function ProductosPage() {
   };
 
   useEffect(() => {
-    if (!downSm) {
+    if (!mobileHeader) {
       setFiltersPopoverWidth(null);
       return;
     }
     if (filtersAnchor && cardRef.current) {
       setFiltersPopoverWidth(Math.round(cardRef.current.getBoundingClientRect().width));
     }
-  }, [downSm, filtersAnchor]);
+  }, [mobileHeader, filtersAnchor]);
 
   return (
     <MainCard
       ref={cardRef}
       title={
-        downSm ? (
+        mobileHeader ? (
           <Stack spacing={1} sx={{ width: '100%', alignItems: 'stretch' }}>
-            <Typography variant="h5" sx={{ textAlign: 'center' }}>
-              Productos
+            <Typography variant="h5" sx={{ textAlign: 'center' }} noWrap>
+              Gestión de Productos
             </Typography>
-            <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
             <Stack direction="row" spacing={1} alignItems="center">
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
+              </Box>
               <FilterToggle size="small" onClick={(e) => openFiltersPopover(e.currentTarget as HTMLElement)} />
-              <Button
-                variant="contained"
-                size="small"
-                sx={{ py: 0.75, flexGrow: 1 }}
-                onClick={openCreateDialog}
-              >
-                + agregar Producto
-              </Button>
             </Stack>
+            <Button variant="contained" size="small" sx={{ py: 0.75 }} onClick={openCreateDialog}>
+              + agregar Producto
+            </Button>
           </Stack>
         ) : (
-          'Productos'
+          'Gestión de Productos'
         )
       }
       secondary={
-        downSm ? undefined : (
+        mobileHeader ? undefined : (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
               <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
@@ -200,10 +202,16 @@ export default function ProductosPage() {
       }
       headerSX={{
         '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
-        ...(downSm
+        ...(mobileHeader
           ? {
             py: 1,
-            '& .MuiCardHeader-title': { width: '100%' }
+            '& .MuiCardHeader-title': {
+              width: '100%',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }
           }
           : null)
       }}
