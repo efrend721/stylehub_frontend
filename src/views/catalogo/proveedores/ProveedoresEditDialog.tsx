@@ -10,6 +10,7 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useFocusManagement, useInertBackground } from '#/hooks/useFocusManagement';
+import { useRef } from 'react';
 import type { Proveedor } from './types';
 
 interface Props {
@@ -26,7 +27,30 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
   const firstFieldRef = useFocusManagement<HTMLInputElement>(isOpen);
   useInertBackground(isOpen);
 
+  const currentIdRef = useRef<number | null>(null);
+  const initialSnapshotRef = useRef<string | null>(null);
+
+  function normalizeForCompare(p: Proveedor) {
+    const direccion = (p.direccion ?? '').trim();
+    const telefono = (p.telefono ?? '').trim();
+    const representante = (p.representante ?? '').trim();
+    const telefonoRep = (p.telefono_representante ?? '').trim();
+    return {
+      nombre_proveedor: (p.nombre_proveedor ?? '').trim(),
+      direccion: direccion === '' ? null : direccion,
+      telefono: telefono === '' ? null : telefono,
+      representante: representante === '' ? null : representante,
+      telefono_representante: telefonoRep === '' ? null : telefonoRep,
+      activo: p.activo === 1 ? 1 : 0
+    };
+  }
+
   if (!item) return null;
+
+  if (currentIdRef.current !== item.id_proveedor) {
+    currentIdRef.current = item.id_proveedor;
+    initialSnapshotRef.current = JSON.stringify(normalizeForCompare(item));
+  }
 
   const handleClose = () => {
     if (saving) return;
@@ -40,6 +64,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
   };
 
   const isValid = item.nombre_proveedor.trim().length >= 2;
+  const isDirty = initialSnapshotRef.current !== null && JSON.stringify(normalizeForCompare(item)) !== initialSnapshotRef.current;
 
   return (
     <Dialog 
@@ -124,7 +149,7 @@ export function ProveedoresEditDialog({ item, saving, onClose, onChange, onSave,
           <Button
             type="submit"
             variant="contained"
-            disabled={saving || !isValid}
+            disabled={saving || !isValid || !isDirty}
             startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
           >
             Guardar

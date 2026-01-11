@@ -60,9 +60,9 @@ export function useUsuarios() {
   // headers handled by services layer
 
   const [rows, setRows] = useState<Usuario[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [emptyHint, setEmptyHint] = useState<string | null>(null);
+  const [emptyHint, setEmptyHint] = useState<string | null>('Escribe para buscar');
 
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>(EMPTY_SELECTION);
   const selectedIds = useMemo<GridRowId[]>(() => {
@@ -88,20 +88,25 @@ export function useUsuarios() {
   const lastQueryRef = useRef<{ kind: 'all' } | { kind: 'search'; params: UsuariosSearchParams }>({ kind: 'all' });
 
   const searchUsuarios = useCallback(async (params: UsuariosSearchParams) => {
+    const q = (params.q ?? '').trim();
+    const hasFilters = !!(
+      (params.est && params.est.trim() !== '') ||
+      (params.rol != null) ||
+      (params.estado != null && String(params.estado).trim() !== '')
+    );
+    if (q === '' && !hasFilters) {
+      setRows([]);
+      setEmptyHint('Escribe para buscar');
+      setError(null);
+      setLoading(false);
+      lastQueryRef.current = { kind: 'search', params };
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      if (scope !== 'global') {
-        // Para rol 2 no hay endpoint documentado de búsqueda; mantener listado normal.
-        const data = await UsuariosService.getAll(scope, token || undefined);
-        const list = Array.isArray(data) ? data : [];
-        setRows(list);
-        setEmptyHint(list.length === 0 ? (emptyHint ?? 'No hay usuarios.') : null);
-        lastQueryRef.current = { kind: 'all' };
-        return;
-      }
-
-      const data = await UsuariosService.search(params, token || undefined);
+      const data = await UsuariosService.search(params, token || undefined, scope);
       const list = Array.isArray(data) ? data : [];
       setRows(list);
       setEmptyHint(list.length === 0 ? 'Sin resultados.' : null);
@@ -113,7 +118,7 @@ export function useUsuarios() {
     } finally {
       setLoading(false);
     }
-  }, [scope, token, emptyHint]);
+  }, [scope, token]);
 
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
@@ -151,9 +156,16 @@ export function useUsuarios() {
     await fetchUsuarios();
   }, [fetchUsuarios, searchUsuarios]);
 
-  useEffect(() => {
-    void fetchUsuarios();
-  }, [fetchUsuarios]);
+  const clearSearchUI = useCallback(() => {
+    setRows([]);
+    setLoading(false);
+    setError(null);
+    setEmptyHint('Escribe para buscar');
+    lastQueryRef.current = { kind: 'search', params: {} };
+    setSelectionModel(EMPTY_SELECTION);
+  }, []);
+
+  // No cargar usuarios automáticamente; se hará bajo demanda (búsqueda)
 
   // Limpiar selección si cambia el alcance (scope)
   useEffect(() => {
@@ -242,7 +254,8 @@ export function useUsuarios() {
       // Forzar id_establecimiento del admin autenticado
       const payload = attachEstablecimiento(editUser);
       setEditFieldErrors({});
-      await UsuariosService.update(payload, scope, token || undefined);
+      const isRole2SelfUpdate = scope === 'mine' && user?.id_rol === 2 && payload.usuario_acceso === user?.usuario_acceso;
+      await UsuariosService.update(payload, scope, token || undefined, { omitRole: isRole2SelfUpdate });
       notify.success('Usuario actualizado');
       setEditUser(null);
       await refreshList();
@@ -358,6 +371,7 @@ export function useUsuarios() {
     // misc
     fetchUsuarios,
     refreshList,
-    searchUsuarios
+    searchUsuarios,
+    clearSearchUI
   };
 }

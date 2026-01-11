@@ -33,6 +33,7 @@ export default function ProductosFiltersPopover({ anchorEl, open, onClose, filte
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      disableRestoreFocus
       slotProps={{
         paper: {
           sx: {

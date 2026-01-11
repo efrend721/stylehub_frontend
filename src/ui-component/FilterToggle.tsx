@@ -1,4 +1,5 @@
 import Button from '@mui/material/Button';
+import type { SxProps, Theme } from '@mui/material/styles';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 
 interface FilterToggleProps {
@@ -7,9 +8,10 @@ interface FilterToggleProps {
   disabled?: boolean;
   label?: string;
   size?: 'small' | 'medium' | 'large';
+  sx?: SxProps<Theme>;
 }
 
-export default function FilterToggle({ onClick, ariaLabel, disabled = false, label = 'Filtros', size = 'medium' }: FilterToggleProps) {
+export default function FilterToggle({ onClick, ariaLabel, disabled = false, label = 'Filtros', size = 'medium', sx }: FilterToggleProps) {
   return (
     <Button
       variant="outlined"
@@ -18,7 +20,7 @@ export default function FilterToggle({ onClick, ariaLabel, disabled = false, lab
       aria-label={ariaLabel}
       size={size}
       startIcon={<IconAdjustmentsHorizontal stroke={1.75} size={20} />}
-      sx={{ whiteSpace: 'nowrap' }}
+      sx={{ whiteSpace: 'nowrap', ...sx }}
     >
       {label}
     </Button>

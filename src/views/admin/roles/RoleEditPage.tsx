@@ -23,7 +23,7 @@ const RoleEditPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const roleId = id ? Number(id) : undefined;
-  const { loading, saving, error, role, menus, handleRoleChange, handleMenuToggle, save } = useRoleEdit(roleId);
+  const { loading, saving, error, role, menus, isDirty, handleRoleChange, handleMenuToggle, save } = useRoleEdit(roleId);
 
   useEffect(() => {
     if (error) {
@@ -115,7 +115,7 @@ const RoleEditPage = () => {
             <Button 
               variant="contained" 
               onClick={() => { void handleSave(); }}
-              disabled={saving}
+              disabled={saving || !isDirty}
             >
               {saving ? 'Guardando...' : 'Guardar Cambios'}
             </Button>

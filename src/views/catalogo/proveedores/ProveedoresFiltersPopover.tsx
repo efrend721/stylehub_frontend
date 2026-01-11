@@ -37,6 +37,7 @@ export default function ProveedoresFiltersPopover({
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      disableRestoreFocus
       slotProps={{ paper: { sx: { width: 300, p: 2, mt: 1 } } }}
     >
       <Stack spacing={2}>

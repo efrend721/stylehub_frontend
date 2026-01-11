@@ -8,6 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import type { Rol } from '../types';
+import { useEffect, useRef } from 'react';
 
 type Props = {
   rol: Rol | null;
@@ -18,6 +19,36 @@ type Props = {
 };
 
 export function RolesEditDialog({ rol, saving, onClose, onChange, onSave }: Props) {
+  const initialSnapshotRef = useRef<string | null>(null);
+  const currentRoleIdRef = useRef<number | null>(null);
+
+  function normalizeForCompare(r: Rol) {
+    return {
+      nombre: (r.nombre ?? '').trim(),
+      descripcion: (r.descripcion ?? '').trim(),
+      estado: Number(r.estado)
+    };
+  }
+
+  useEffect(() => {
+    if (!rol) {
+      initialSnapshotRef.current = null;
+      currentRoleIdRef.current = null;
+      return;
+    }
+
+    const isNewRole = currentRoleIdRef.current !== rol.id_rol;
+    if (isNewRole) {
+      currentRoleIdRef.current = rol.id_rol;
+      initialSnapshotRef.current = JSON.stringify(normalizeForCompare(rol));
+    }
+  }, [rol]);
+
+  const isDirty =
+    !!rol &&
+    initialSnapshotRef.current !== null &&
+    JSON.stringify(normalizeForCompare(rol)) !== initialSnapshotRef.current;
+
   return (
     <Dialog 
       open={!!rol} 
@@ -67,7 +98,7 @@ export function RolesEditDialog({ rol, saving, onClose, onChange, onSave }: Prop
         <Button onClick={onClose} disabled={saving}>
           Cancelar
         </Button>
-        <Button onClick={onSave} variant="contained" disabled={saving}>
+        <Button onClick={onSave} variant="contained" disabled={saving || !isDirty}>
           {saving ? 'Guardando…' : 'Guardar'}
         </Button>
       </DialogActions>

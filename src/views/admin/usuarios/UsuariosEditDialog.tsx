@@ -21,6 +21,7 @@ import type { UsuarioEdit } from './types';
 // Establecimiento se asigna automáticamente según el perfil del administrador
 import { useRoles } from './useRoles';
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '#/contexts/AuthContext';
 
 type Props = {
   user: UsuarioEdit | null;
@@ -32,13 +33,30 @@ type Props = {
 };
 
 export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fieldErrors = {} }: Props) {
+  const { user: authUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [editPassword, setEditPassword] = useState(false);
   const [editData, setEditData] = useState<UsuarioEdit | null>(null);
   const currentUserRef = useRef<string | null>(null);
+  const initialSnapshotRef = useRef<string | null>(null);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
   
   const { roles, loading: loadingRoles, error: errorRoles } = useRoles();
+
+  function normalizeForCompare(u: UsuarioEdit, passwordForCompare: string) {
+    const telefono = (u.telefono ?? '').trim();
+    const idEst = (u.id_establecimiento ?? '').trim();
+    return {
+      nombre_usuario: (u.nombre_usuario ?? '').trim(),
+      apellido_usuario: (u.apellido_usuario ?? '').trim(),
+      correo_electronico: (u.correo_electronico ?? '').trim(),
+      telefono: telefono === '' ? null : telefono,
+      id_rol: Number(u.id_rol),
+      id_establecimiento: idEst,
+      estado: Number(u.estado),
+      contrasena: passwordForCompare
+    };
+  }
 
   // Usar directamente el user ya que ahora es UsuarioEdit
   useEffect(() => {
@@ -53,11 +71,13 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
         setShowPassword(false);
         currentUserRef.current = user.usuario_acceso;
         setLocalErrors({});
+        initialSnapshotRef.current = JSON.stringify(normalizeForCompare(user, ''));
       }
     } else {
       setEditData(null);
       currentUserRef.current = null;
       setLocalErrors({});
+      initialSnapshotRef.current = null;
     }
   }, [user]);
 
@@ -89,6 +109,16 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
     }
   };
 
+  const handleEditPasswordChange = (enabled: boolean) => {
+    setEditPassword(enabled);
+    if (!enabled && editData) {
+      const updatedData = { ...editData, contrasena: null };
+      setEditData(updatedData);
+      onChange(updatedData);
+      setLocalErrors((prev) => ({ ...prev, contrasena: '' }));
+    }
+  };
+
   const handleSave = () => {
     if (editData) {
       onChange(editData);
@@ -97,6 +127,13 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
   };
 
   if (!editData) return null;
+
+  const isRole2EditingSelf = authUser?.id_rol === 2 && authUser?.usuario_acceso === editData.usuario_acceso;
+
+  const passwordForCompare = editPassword ? (editData.contrasena ?? '').trim() : '';
+  const isDirty =
+    initialSnapshotRef.current !== null &&
+    JSON.stringify(normalizeForCompare(editData, passwordForCompare)) !== initialSnapshotRef.current;
 
   return (
     <Dialog 
@@ -166,7 +203,7 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
               control={
                 <Switch
                   checked={editPassword}
-                  onChange={(e) => setEditPassword(e.target.checked)}
+                  onChange={(e) => handleEditPasswordChange(e.target.checked)}
                 />
               }
               label="Cambiar contraseña"
@@ -209,7 +246,7 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
                 value={editData.id_rol || ''}
                 onChange={(e) => handleFieldChange('id_rol', Number(e.target.value))}
                 label="Rol"
-                disabled={loadingRoles}
+                disabled={loadingRoles || isRole2EditingSelf}
               >
                 <MenuItem value="" disabled>
                   <em>
@@ -264,7 +301,7 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
         <Button onClick={onClose} disabled={saving}>
           Cancelar
         </Button>
-        <Button onClick={handleSave} variant="contained" disabled={saving}>
+        <Button onClick={handleSave} variant="contained" disabled={saving || !isDirty}>
           {saving ? 'Guardando…' : 'Guardar'}
         </Button>
       </DialogActions>

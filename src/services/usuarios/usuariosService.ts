@@ -6,9 +6,13 @@ type Scope = 'global' | 'mine';
 export type UsuariosSearchSort = 'nombre' | 'apellido' | 'usuario' | 'correo';
 export type UsuariosSearchOrder = 'asc' | 'desc';
 
+export type UsuariosSearchEstado = '0' | '1' | 'all' | '*';
+
 export type UsuariosSearchParams = {
   est?: string;
   q?: string;
+  rol?: number;
+  estado?: UsuariosSearchEstado;
   sort?: UsuariosSearchSort;
   order?: UsuariosSearchOrder;
 };
@@ -17,18 +21,29 @@ function basePath(scope: Scope = 'global'): string {
   return scope === 'mine' ? '/usuarios/mi-establecimiento' : '/usuarios';
 }
 
+function searchPath(scope: Scope = 'global'): string {
+  return scope === 'mine' ? '/usuarios/mi-establecimiento/search' : '/usuarios/search';
+}
+
 export const UsuariosService = {
-  getAll(scope: Scope = 'global', token?: string) {
-    return http<Usuario[]>(basePath(scope), { token });
-  },
-  search(params: UsuariosSearchParams = {}, token?: string) {
+  getAll(scope: Scope = 'global', token?: string, params: { estado?: UsuariosSearchEstado } = {}) {
     const sp = new URLSearchParams();
-    if (params.est && params.est.trim() !== '') sp.set('est', params.est.trim());
+    if (params.estado) sp.set('estado', params.estado);
+    const qs = sp.toString();
+    const url = qs ? `${basePath(scope)}?${qs}` : basePath(scope);
+    return http<Usuario[]>(url, { token });
+  },
+  search(params: UsuariosSearchParams = {}, token?: string, scope: Scope = 'global') {
+    const sp = new URLSearchParams();
+    if (scope !== 'mine' && params.est && params.est.trim() !== '') sp.set('est', params.est.trim());
     if (params.q && params.q.trim() !== '') sp.set('q', params.q.trim());
+    if (params.rol != null) sp.set('rol', String(params.rol));
+    if (params.estado) sp.set('estado', params.estado);
     if (params.sort) sp.set('sort', params.sort);
     if (params.order) sp.set('order', params.order);
     const qs = sp.toString();
-    const url = qs ? `/usuarios/search?${qs}` : '/usuarios/search';
+    const base = searchPath(scope);
+    const url = qs ? `${base}?${qs}` : base;
     return http<Usuario[]>(url, { token });
   },
   create(usuario: NuevoUsuario, scope: Scope = 'global', token?: string) {
@@ -45,16 +60,18 @@ export const UsuariosService = {
     };
     return http<unknown>(basePath(scope), { method: 'POST', body: payload, token });
   },
-  update(editUser: UsuarioEdit, scope: Scope = 'global', token?: string) {
+  update(editUser: UsuarioEdit, scope: Scope = 'global', token?: string, opts: { omitRole?: boolean } = {}) {
     const payload: Record<string, unknown> = {
       nombre_usuario: editUser.nombre_usuario.trim(),
       apellido_usuario: editUser.apellido_usuario.trim(),
       correo_electronico: editUser.correo_electronico.trim(),
       telefono: editUser.telefono?.trim() || null,
-      id_rol: Number(editUser.id_rol),
       id_establecimiento: editUser.id_establecimiento.trim(),
       estado: Number(editUser.estado)
     };
+    if (!opts.omitRole) {
+      payload.id_rol = Number(editUser.id_rol);
+    }
     if (editUser.contrasena && editUser.contrasena.trim()) {
       payload.contrasena = editUser.contrasena.trim();
     }

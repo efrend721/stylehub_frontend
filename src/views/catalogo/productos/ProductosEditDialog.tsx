@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 import { useFocusManagement, useInertBackground } from '#/hooks/useFocusManagement';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Producto, UpdateProductoPayload, Option } from './types';
 
 interface Props {
@@ -30,11 +30,34 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
   const firstFieldRef = useFocusManagement<HTMLInputElement>(open);
   useInertBackground(open);
   const [form, setForm] = useState<Producto | null>(null);
+  const initialSnapshotRef = useRef<string | null>(null);
+  const currentIdRef = useRef<number | null>(null);
   const [manualPrecioFraccion, setManualPrecioFraccion] = useState(false);
   const [manualCostoFraccion, setManualCostoFraccion] = useState(false);
   const [precioInput, setPrecioInput] = useState<string>('');
   const [fraccionInput, setFraccionInput] = useState<string>('');
   const [costoInput, setCostoInput] = useState<string>('');
+
+  function buildCompareSnapshot(source: Producto, precioText: string, fraccionText: string, costoText: string) {
+    const precioNum = precioText === '' ? 0 : Number(precioText);
+    const fraccionNum = fraccionText === '' ? 0 : Number(fraccionText);
+    const costoNum = costoText === '' ? 0 : Number(costoText);
+
+    const payload: UpdateProductoPayload = {
+      nombre_producto: source.nombre_producto?.trim(),
+      descripcion: source.descripcion?.trim() || null,
+      fraccion: fraccionNum,
+      costo: costoNum,
+      costo_fraccion: (source.costo_fraccion !== null && source.costo_fraccion !== undefined) ? Number(source.costo_fraccion) : null,
+      precio: precioNum,
+      precio_fraccion: (source.precio_fraccion !== null && source.precio_fraccion !== undefined) ? Number(source.precio_fraccion) : null,
+      id_tipo: source.id_tipo ?? null,
+      id_categoria: source.id_categoria ?? null,
+      id_proveedor: source.id_proveedor ?? null
+    };
+
+    return JSON.stringify(payload);
+  }
 
   useEffect(() => {
     if (item) {
@@ -44,6 +67,11 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
       setPrecioInput(String(item.precio ?? 0));
       setFraccionInput(String(item.fraccion ?? 0));
       setCostoInput(String(item.costo ?? 0));
+
+      if (currentIdRef.current !== item.id_producto) {
+        currentIdRef.current = item.id_producto;
+        initialSnapshotRef.current = buildCompareSnapshot(item, String(item.precio ?? 0), String(item.fraccion ?? 0), String(item.costo ?? 0));
+      }
     } else {
       setForm(null);
       setManualPrecioFraccion(false);
@@ -51,6 +79,8 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
       setPrecioInput('');
       setFraccionInput('');
       setCostoInput('');
+      currentIdRef.current = null;
+      initialSnapshotRef.current = null;
     }
   }, [item]);
 
@@ -58,6 +88,11 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
     && form.nombre_producto.trim().length >= 2
     && Number(precioInput) >= 0
     && Number(fraccionInput) >= 0;
+
+  const isDirty =
+    !!form &&
+    initialSnapshotRef.current !== null &&
+    buildCompareSnapshot(form, precioInput, fraccionInput, costoInput) !== initialSnapshotRef.current;
 
   const handleSave = () => {
     if (!form || !isValid) return;
@@ -324,7 +359,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
             <Button
               type="submit"
               variant="contained"
-              disabled={saving || !isValid}
+              disabled={saving || !isValid || !isDirty}
               startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
             >
               Guardar

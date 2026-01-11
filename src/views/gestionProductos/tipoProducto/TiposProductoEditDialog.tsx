@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { useFocusManagement, useInertBackground } from '#/hooks/useFocusManagement';
+import { useRef } from 'react';
 import type { TipoProducto } from './types';
 
 interface Props {
@@ -25,7 +26,21 @@ export function TiposProductoEditDialog({ item, saving, onClose, onChange, onSav
   // Aplicar atributo inert al fondo cuando el modal está abierto (accesibilidad)
   useInertBackground(isOpen);
 
+  const currentIdRef = useRef<number | null>(null);
+  const initialSnapshotRef = useRef<string | null>(null);
+
+  function normalizeForCompare(t: TipoProducto) {
+    return {
+      nombre_tipo: (t.nombre_tipo ?? '').trim()
+    };
+  }
+
   if (!item) return null;
+
+  if (currentIdRef.current !== item.id_tipo) {
+    currentIdRef.current = item.id_tipo;
+    initialSnapshotRef.current = JSON.stringify(normalizeForCompare(item));
+  }
 
   const handleClose = () => {
     if (saving) return;
@@ -37,6 +52,8 @@ export function TiposProductoEditDialog({ item, saving, onClose, onChange, onSav
     if (!item.nombre_tipo.trim()) return;
     onSave();
   };
+
+  const isDirty = initialSnapshotRef.current !== null && JSON.stringify(normalizeForCompare(item)) !== initialSnapshotRef.current;
 
   return (
     <Dialog 
@@ -71,7 +88,7 @@ export function TiposProductoEditDialog({ item, saving, onClose, onChange, onSav
           <Button
             type="submit"
             variant="contained"
-            disabled={saving || !item.nombre_tipo.trim()}
+            disabled={saving || !item.nombre_tipo.trim() || !isDirty}
             startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
           >
             Guardar

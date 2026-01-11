@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useFocusManagement, useInertBackground } from '#/hooks/useFocusManagement';
+import { useRef } from 'react';
 import type { CategoriaProducto } from './types';
 
 interface Props {
@@ -27,7 +28,21 @@ export function CategoriasProductoEditDialog({ item, saving, onClose, onChange, 
   // Aplicar atributo inert al fondo cuando el modal está abierto (accesibilidad)
   useInertBackground(isOpen);
 
+  const currentIdRef = useRef<string | null>(null);
+  const initialSnapshotRef = useRef<string | null>(null);
+
+  function normalizeForCompare(c: CategoriaProducto) {
+    return {
+      nombre_categoria: (c.nombre_categoria ?? '').trim()
+    };
+  }
+
   if (!item) return null;
+
+  if (currentIdRef.current !== item.id_categoria) {
+    currentIdRef.current = item.id_categoria;
+    initialSnapshotRef.current = JSON.stringify(normalizeForCompare(item));
+  }
 
   const handleClose = () => {
     if (saving) return;
@@ -41,6 +56,7 @@ export function CategoriasProductoEditDialog({ item, saving, onClose, onChange, 
   };
 
   const isValid = item.nombre_categoria.trim().length >= 2;
+  const isDirty = initialSnapshotRef.current !== null && JSON.stringify(normalizeForCompare(item)) !== initialSnapshotRef.current;
 
   return (
     <Dialog 
@@ -88,7 +104,7 @@ export function CategoriasProductoEditDialog({ item, saving, onClose, onChange, 
           <Button
             type="submit"
             variant="contained"
-            disabled={saving || !isValid}
+            disabled={saving || !isValid || !isDirty}
             startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
           >
             Guardar

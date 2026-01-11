@@ -1,19 +1,17 @@
 import MainCard from '#/ui-component/cards/MainCard';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import SearchField from '#/ui-component/SearchField';
-import FilterToggle from '#/ui-component/FilterToggle';
 import ProductosFiltersPopover from './ProductosFiltersPopover';
 import type { ProductosFilters } from './types';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 // import { ProductosTable } from './ProductosTable';
 import ProductosList from './ProductosList';
+import ProductosHeaderCard from './ProductosHeaderCard';
 import { ProductosCreateDialog } from './ProductosCreateDialog';
 import { ProductosEditDialog } from './ProductosEditDialog';
 import { ProductosDeleteDialog } from './ProductosDeleteDialog';
@@ -22,7 +20,6 @@ import { useProductos } from './useProductos';
 export default function ProductosPage() {
   const theme = useTheme();
   const downSm = useMediaQuery(theme.breakpoints.down('sm'));
-  const isLandscape = useMediaQuery('(orientation: landscape)');
   // Muchos teléfonos en landscape superan el breakpoint md (p.ej. 932px),
   // así que usamos altura baja para detectar "celular rotado".
   const landscapePhone = useMediaQuery('(orientation: landscape) and (max-height: 500px)');
@@ -165,75 +162,35 @@ export default function ProductosPage() {
   }, [mobileHeader, filtersAnchor]);
 
   return (
-    <MainCard
-      ref={cardRef}
-      title={
-        mobileHeader ? (
-          <Stack spacing={1} sx={{ width: '100%', alignItems: 'stretch' }}>
-            <Typography variant="h5" sx={{ textAlign: 'center' }} noWrap>
-              Gestión de Productos
-            </Typography>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
-              </Box>
-              <FilterToggle size="small" onClick={(e) => openFiltersPopover(e.currentTarget as HTMLElement)} />
-            </Stack>
-            <Button variant="contained" size="small" sx={{ py: 0.75 }} onClick={openCreateDialog}>
-              + agregar Producto
-            </Button>
+    <>
+      <ProductosHeaderCard
+        ref={cardRef}
+        mobileHeader={mobileHeader}
+        landscapePhone={landscapePhone}
+        searchValue={search}
+        onSearchChange={setSearch}
+        onOpenFilters={openFiltersPopover}
+        onAdd={openCreateDialog}
+      />
+
+      <MainCard sx={{ mt: 0.5 }}>
+        {loading ? (
+          <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
+            <CircularProgress />
           </Stack>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
         ) : (
-          'Gestión de Productos'
-        )
-      }
-      secondary={
-        mobileHeader ? undefined : (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-              <SearchField value={search} onChange={setSearch} placeholder="Buscar productos" />
-              <FilterToggle onClick={(e) => openFiltersPopover(e.currentTarget as HTMLElement)} />
-            </Stack>
-            <Button variant="contained" size="medium" sx={{ py: 0.75, mt: { xs: 1, sm: 0 } }} onClick={openCreateDialog}>
-              + agregar Producto
-            </Button>
-          </Stack>
-        )
-      }
-      headerSX={{
-        '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
-        ...(mobileHeader
-          ? {
-            py: 1,
-            '& .MuiCardHeader-title': {
-              width: '100%',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }
-          }
-          : null)
-      }}
-    >
-      {loading ? (
-        <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
-          <CircularProgress />
-        </Stack>
-      ) : error ? (
-        <Typography color="error">{error}</Typography>
-      ) : (
-        <Box>
-          <ProductosList
-            items={rows}
-            onEdit={openEditFor}
-            onAskDelete={(id) => openConfirmFor([id])}
-          />
-          {emptyHint && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{emptyHint}</Typography>
-          )}
-        </Box>
-      )}
+          <Box>
+            <ProductosList items={rows} onEdit={openEditFor} onAskDelete={(id) => openConfirmFor([id])} />
+            {emptyHint && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {emptyHint}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </MainCard>
 
       <ProductosCreateDialog
         open={createDialogOpen}
@@ -274,20 +231,22 @@ export default function ProductosPage() {
         filters={filters}
         setFilters={setFilters}
         paperSx={downSm && filtersPopoverWidth ? { width: filtersPopoverWidth, maxWidth: 'none' } : undefined}
-        onClearFilters={() => setFilters({
-          id_tipo: null,
-          id_categoria: null,
-          id_proveedor: null,
-          precio_min: '',
-          precio_max: '',
-          costo_min: '',
-          costo_max: ''
-        })}
+        onClearFilters={() =>
+          setFilters({
+            id_tipo: null,
+            id_categoria: null,
+            id_proveedor: null,
+            precio_min: '',
+            precio_max: '',
+            costo_min: '',
+            costo_max: ''
+          })
+        }
         tipoOptions={tipoOptions}
         categoriaOptions={categoriaOptions}
         proveedorOptions={proveedorOptions}
         onSearchProveedor={searchProveedorOptions}
       />
-    </MainCard>
+    </>
   );
 }

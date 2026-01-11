@@ -1,18 +1,15 @@
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import MainCard from '#/ui-component/cards/MainCard';
 import { TiposProductoList } from './TiposProductoList';
 import { TiposProductoDeleteDialog } from './TiposProductoDeleteDialog';
 import { TiposProductoEditDialog } from './TiposProductoEditDialog';
 import { TiposProductoCreateDialog } from './TiposProductoCreateDialog';
 import { useTiposProducto } from './useTiposProducto';
+import TipoProductoHeaderCard from './TipoProductoHeaderCard';
 
 export default function TipoProductoPage() {
   const theme = useTheme();
@@ -38,105 +35,31 @@ export default function TipoProductoPage() {
     closeCreateDialog,
     createTipo,
     creating,
-    fetchTipos,
     createFieldErrors,
     editFieldErrors
   } = useTiposProducto();
 
   return (
-    <MainCard
-      title={
-        downSm ? (
-          <Typography variant="h5" sx={{ textAlign: 'center' }} noWrap>
-            Gestión de Tipos de Producto
-          </Typography>
-        ) : (
-          'Gestión de Tipos de Producto'
-        )
-      }
-      secondary={
-        downSm ? (
-          <Tooltip title="Refrescar">
-            <span>
-              <IconButton onClick={() => void fetchTipos()} disabled={loading} color="secondary">
-                <IconRefresh size={20} />
-              </IconButton>
-            </span>
-          </Tooltip>
-        ) : (
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Tooltip title="Refrescar">
-              <span>
-                <IconButton onClick={() => void fetchTipos()} disabled={loading} color="secondary">
-                  <IconRefresh size={20} />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Button variant="contained" onClick={openCreateDialog} startIcon={<IconPlus size="18" />}>
-              Agregar Tipo
-            </Button>
-          </Box>
-        )
-      }
-      headerSX={{
-        '& .MuiCardHeader-content': { width: '100%', overflow: 'visible' },
-        ...(downSm
-          ? {
-              py: 1,
-              position: 'relative',
-              '& .MuiCardHeader-action': {
-                position: 'absolute',
-                right: 8,
-                top: '50%',
-                transform: 'translateY(-50%)'
-              },
-              '& .MuiCardHeader-title': {
-                width: '100%',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }
-            }
-          : null)
-      }}
-    >
-      {downSm && (
-        <Box sx={{ mb: 2 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={(e) => {
-              (e.currentTarget as HTMLElement).blur();
-              openCreateDialog();
-            }}
-            startIcon={<IconPlus size="18" />}
-            sx={{ py: 0.75 }}
-          >
-            Agregar Tipo
-          </Button>
-        </Box>
-      )}
+    <>
+      <TipoProductoHeaderCard downSm={downSm} onAdd={openCreateDialog} />
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Box sx={{ p: 2 }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
-      ) : rows.length === 0 ? (
-        <Box sx={{ p: 2 }}>
-          <Typography>No hay tipos de producto.</Typography>
-        </Box>
-      ) : (
-        <TiposProductoList
-          items={rows}
-          onEdit={openEditFor}
-          onAskDelete={(id) => openConfirmFor([id])}
-        />
-      )}
+      <MainCard sx={{ mt: 0.5 }}>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box sx={{ p: 2 }}>
+            <Typography color="error">{error}</Typography>
+          </Box>
+        ) : rows.length === 0 ? (
+          <Box sx={{ p: 2 }}>
+            <Typography>No hay tipos de producto.</Typography>
+          </Box>
+        ) : (
+          <TiposProductoList items={rows} onEdit={openEditFor} onAskDelete={(id) => openConfirmFor([id])} />
+        )}
+      </MainCard>
 
       <TiposProductoDeleteDialog
         open={confirmOpen}
@@ -162,6 +85,6 @@ export default function TipoProductoPage() {
         onSave={(payload) => void createTipo(payload)}
         fieldErrors={createFieldErrors}
       />
-    </MainCard>
+    </>
   );
 }

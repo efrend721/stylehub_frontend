@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import notify from '#/utils/notify';
 import { getErrorMessage } from '#/utils/errorUtils';
 import { RolesService } from '#/services/roles/rolesService';
@@ -13,6 +13,17 @@ export function useRoleEdit(roleId: number | undefined) {
   const [error, setError] = useState<string | null>(null);
   const [role, setRole] = useState<Rol | null>(null);
   const [menus, setMenus] = useState<RoleMenuItem[]>([]);
+  const initialSnapshotRef = useRef<string | null>(null);
+
+  const buildSnapshot = useCallback((r: Rol, menuItems: RoleMenuItem[]) => {
+    const assignedMenuIds = getAllAssignedIds(menuItems).slice().sort((a, b) => a - b);
+    return JSON.stringify({
+      nombre: (r.nombre ?? '').trim(),
+      descripcion: (r.descripcion ?? '').trim(),
+      estado: Number(r.estado),
+      assignedMenuIds
+    });
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!roleId) return;
@@ -25,6 +36,7 @@ export function useRoleEdit(roleId: number | undefined) {
       ]);
       setRole(roleData);
       setMenus(menusData);
+      initialSnapshotRef.current = buildSnapshot(roleData, menusData);
     } catch (e) {
       const msg = getErrorMessage(e, 'Error al cargar datos del rol');
       setError(msg);
@@ -32,7 +44,7 @@ export function useRoleEdit(roleId: number | undefined) {
     } finally {
       setLoading(false);
     }
-  }, [roleId]);
+  }, [buildSnapshot, roleId]);
 
   useEffect(() => {
     void fetchData();
@@ -61,5 +73,10 @@ export function useRoleEdit(roleId: number | undefined) {
     }
   };
 
-  return { loading, saving, error, role, menus, handleRoleChange, handleMenuToggle, save };
+  const isDirty = useMemo(() => {
+    if (!role || initialSnapshotRef.current === null) return false;
+    return buildSnapshot(role, menus) !== initialSnapshotRef.current;
+  }, [buildSnapshot, menus, role]);
+
+  return { loading, saving, error, role, menus, isDirty, handleRoleChange, handleMenuToggle, save };
 }

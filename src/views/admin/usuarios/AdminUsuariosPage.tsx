@@ -1,42 +1,58 @@
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
-import { IconPlus, IconRefresh } from '@tabler/icons-react';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import MainCard from '#/ui-component/cards/MainCard';
-import SearchField from '#/ui-component/SearchField';
-import FilterToggle from '#/ui-component/FilterToggle';
-import { UsuariosTable } from './UsuariosTable';
 import { UsuariosDeleteDialog } from './UsuariosDeleteDialog';
 import { UsuariosEditDialog } from './UsuariosEditDialog';
 import { UsuariosCreateDialog } from './UsuariosCreateDialog';
 import { useUsuarios } from './useUsuarios';
-import type { GridRowSelectionModel } from '@mui/x-data-grid';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import UsuariosFiltersPopover, { type UsuariosFilters } from './UsuariosFiltersPopover';
 import { useEstablecimientos } from './useEstablecimientos';
+import { useRoles } from './useRoles';
+import UsuariosHeaderCard from './UsuariosHeaderCard';
+import UsuariosList from './UsuariosList';
+import { useAuth } from '#/contexts/AuthContext';
 
 export default function AdminUsuariosPage() {
+  const { user } = useAuth();
+  const isRole2 = user?.id_rol === 2;
+  const defaultEstado = undefined;
+
+  const theme = useTheme();
+  const downSm = useMediaQuery(theme.breakpoints.down('sm'));
+  const landscapePhone = useMediaQuery('(orientation: landscape) and (max-height: 500px)');
+  const mobileHeader = downSm || landscapePhone;
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const userInteractedRef = useRef(false);
+
   const [search, setSearch] = useState('');
   const [filtersAnchor, setFiltersAnchor] = useState<HTMLElement | null>(null);
   const [filters, setFilters] = useState<UsuariosFilters>({
-    est: ''
+    est: '',
+    rol: null,
+    estado: defaultEstado
   });
+
+  const setFiltersFromUI = (next: UsuariosFilters) => {
+    userInteractedRef.current = true;
+    setFilters(next);
+  };
+  const [filtersPopoverWidth, setFiltersPopoverWidth] = useState<number | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { establecimientos } = useEstablecimientos();
+  const { roles } = useRoles();
 
   const {
     rows,
     loading,
     error,
     emptyHint,
-    selectionModel,
-    setSelectionModel,
-    selectedIds,
     confirmOpen,
     setConfirmOpen,
     deleteIds,
@@ -53,20 +69,47 @@ export default function AdminUsuariosPage() {
     closeCreateDialog,
     createUser,
     creating,
-    refreshList,
     searchUsuarios,
+    clearSearchUI,
     createFieldErrors,
     editFieldErrors
   } = useUsuarios();
 
+  const clearAllFiltersAndSearch = () => {
+    userInteractedRef.current = false;
+    setSearch('');
+    setFilters({ est: '', rol: null, estado: defaultEstado });
+    setFiltersAnchor(null);
+    setSearchParams({}, { replace: true });
+    clearSearchUI();
+  };
+
   // Initialize from URL
   useEffect(() => {
     const q = searchParams.get('q') || '';
-    const est = searchParams.get('est') || '';
+    const est = isRole2 ? '' : (searchParams.get('est') || '');
+    const rol = searchParams.get('rol');
+    const estadoParam = searchParams.get('estado');
+    const estadoRaw = estadoParam || undefined;
+    const estado = estadoRaw && ['0', '1', 'all', '*'].includes(estadoRaw) ? estadoRaw : defaultEstado;
+
+    const hasEstadoParam = estadoParam != null && estadoParam !== '';
+
+    const hasNonDefaultFromUrl =
+      q.trim() !== '' ||
+      (!isRole2 && est.trim() !== '') ||
+      (rol != null && rol !== '') ||
+      hasEstadoParam;
+    userInteractedRef.current = hasNonDefaultFromUrl;
+
     setSearch(q);
-    setFilters({ est });
+    setFilters({
+      est,
+      rol: rol == null || rol === '' ? null : Number(rol),
+      estado
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultEstado, isRole2]);
 
   const searchRef = useRef('');
   useEffect(() => {
@@ -82,82 +125,133 @@ export default function AdminUsuariosPage() {
   useEffect(() => {
     const q = search.trim();
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    const isDefaultQuery =
+      q === '' &&
+      (!filtersRef.current.rol) &&
+      (filtersRef.current.estado === defaultEstado) &&
+      (isRole2 ? true : (filtersRef.current.est.trim() === ''));
+
+    if (!userInteractedRef.current && isDefaultQuery) {
+      return;
+    }
+
     if (q === '') {
-      void searchUsuarios({ est: filtersRef.current.est || undefined, q: undefined });
+      void searchUsuarios({
+        est: isRole2 ? undefined : (filtersRef.current.est || undefined),
+        q: undefined,
+        rol: filtersRef.current.rol ?? undefined,
+        estado: filtersRef.current.estado
+      });
       return;
     }
     debounceRef.current = setTimeout(() => {
-      void searchUsuarios({ est: filtersRef.current.est || undefined, q: q || undefined });
+      void searchUsuarios({
+        est: isRole2 ? undefined : (filtersRef.current.est || undefined),
+        q: q || undefined,
+        rol: filtersRef.current.rol ?? undefined,
+        estado: filtersRef.current.estado
+      });
     }, 500);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [search, searchUsuarios]);
+  }, [search, defaultEstado, isRole2, searchUsuarios]);
 
   // Efecto inmediato para cambios en filtros (incluye búsqueda vacía)
   useEffect(() => {
-    void searchUsuarios({ est: filters.est || undefined, q: searchRef.current.trim() || undefined });
-  }, [filters, searchUsuarios]);
+    const q = searchRef.current.trim();
+    const isDefaultQuery =
+      q === '' &&
+      (!filters.rol) &&
+      (filters.estado === defaultEstado) &&
+      (isRole2 ? true : (filters.est.trim() === ''));
+
+    if (!userInteractedRef.current && isDefaultQuery) {
+      return;
+    }
+
+    void searchUsuarios({
+      est: isRole2 ? undefined : (filters.est || undefined),
+      q: q || undefined,
+      rol: filters.rol ?? undefined,
+      estado: filters.estado
+    });
+  }, [filters, defaultEstado, isRole2, searchUsuarios]);
 
   // Sync to URL on changes
   useEffect(() => {
+    const isDefaultQuery =
+      search.trim() === '' &&
+      (!filters.rol) &&
+      (filters.estado === defaultEstado) &&
+      (isRole2 ? true : (filters.est.trim() === ''));
+
+    if (!userInteractedRef.current && isDefaultQuery) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
     const next: Record<string, string> = {};
     if (search.trim() !== '') next.q = search.trim();
-    if (filters.est.trim() !== '') next.est = filters.est.trim();
+    if (!isRole2 && filters.est.trim() !== '') next.est = filters.est.trim();
+    if (filters.rol != null) next.rol = String(filters.rol);
+    if (filters.estado) next.estado = String(filters.estado);
     setSearchParams(next, { replace: true });
-  }, [search, filters, setSearchParams]);
+  }, [search, filters, defaultEstado, isRole2, setSearchParams]);
+
+  const openFiltersPopover = (anchor: HTMLElement) => {
+    setFiltersAnchor(anchor);
+    if (mobileHeader && cardRef.current) {
+      setFiltersPopoverWidth(Math.round(cardRef.current.getBoundingClientRect().width));
+    } else {
+      setFiltersPopoverWidth(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!mobileHeader) {
+      setFiltersPopoverWidth(null);
+      return;
+    }
+    if (filtersAnchor && cardRef.current) {
+      setFiltersPopoverWidth(Math.round(cardRef.current.getBoundingClientRect().width));
+    }
+  }, [mobileHeader, filtersAnchor]);
 
   return (
-    <MainCard
-      title="Gestión de Usuarios"
-      secondary={
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }}>
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: 'wrap' }}>
-            <SearchField value={search} onChange={setSearch} placeholder="Buscar usuarios" />
-            <FilterToggle onClick={(e) => setFiltersAnchor(e.currentTarget as HTMLElement)} />
+    <>
+      <UsuariosHeaderCard
+        ref={cardRef}
+        mobileHeader={mobileHeader}
+        landscapePhone={landscapePhone}
+        searchValue={search}
+        onSearchChange={(v) => {
+          userInteractedRef.current = true;
+          setSearch(v);
+        }}
+        onOpenFilters={openFiltersPopover}
+        onAdd={openCreateDialog}
+      />
+
+      <MainCard sx={{ mt: 0.5 }}>
+        {loading ? (
+          <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
+            <CircularProgress />
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Tooltip title="Refrescar">
-              <span>
-                <IconButton onClick={() => void refreshList()} disabled={loading} color="secondary">
-                  <IconRefresh size={20} />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Button
-              variant="contained"
-              onClick={openCreateDialog}
-              startIcon={<IconPlus size="18" />}
-            >
-              Agregar Usuario
-            </Button>
-          </Stack>
-        </Stack>
-      }
-    >
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Box sx={{ p: 2 }}>
+        ) : error ? (
           <Typography color="error">{error}</Typography>
-        </Box>
-      ) : rows.length === 0 ? (
-        <Box sx={{ p: 2 }}>
-          <Typography>{emptyHint ?? 'No hay usuarios.'}</Typography>
-        </Box>
-      ) : (
-        <UsuariosTable
-          rows={rows}
-          selectedIds={selectedIds}
-          deleting={deleting}
-          selectionModel={selectionModel}
-          onSelectionModelChange={(m: GridRowSelectionModel) => setSelectionModel(m)}
-          onAskDelete={openConfirmFor}
-          onEdit={openEditFor}
-        />
-      )}
+        ) : (
+          <Box>
+            <UsuariosList items={rows} onEdit={openEditFor} onAskDelete={(id) => openConfirmFor([id])} />
+            {emptyHint && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {emptyHint}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </MainCard>
 
       <UsuariosDeleteDialog
         open={confirmOpen}
@@ -189,9 +283,13 @@ export default function AdminUsuariosPage() {
         open={!!filtersAnchor}
         onClose={() => setFiltersAnchor(null)}
         filters={filters}
-        setFilters={setFilters}
+        setFilters={setFiltersFromUI}
         establecimientos={establecimientos}
+        roles={roles}
+        hideEstablecimiento={isRole2}
+        onClear={clearAllFiltersAndSearch}
+        paperSx={downSm && filtersPopoverWidth ? { width: filtersPopoverWidth, maxWidth: 'none' } : undefined}
       />
-    </MainCard>
+    </>
   );
 }
