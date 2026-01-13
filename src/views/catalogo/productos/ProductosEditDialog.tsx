@@ -13,6 +13,46 @@ import { useFocusManagement, useInertBackground } from '#/hooks/useFocusManageme
 import { useEffect, useRef, useState } from 'react';
 import type { Producto, UpdateProductoPayload, Option } from './types';
 
+function buildUpdatePayload(
+  source: Producto,
+  precioText: string,
+  fraccionText: string,
+  costoText: string,
+  includeCostoFraccion: boolean,
+  includePrecioFraccion: boolean
+): UpdateProductoPayload {
+  const precioNum = precioText === '' ? 0 : Number(precioText);
+  const fraccionNum = fraccionText === '' ? 0 : Number(fraccionText);
+  const costoNum = costoText === '' ? 0 : Number(costoText);
+
+  const costoFraccionValue = source.costo_fraccion ?? 0;
+  const precioFraccionValue = source.precio_fraccion ?? 0;
+
+  return {
+    nombre_producto: source.nombre_producto?.trim(),
+    descripcion: source.descripcion?.trim() || undefined,
+    fraccion: fraccionNum,
+    costo: costoNum,
+    precio: precioNum,
+    costo_fraccion: includeCostoFraccion ? costoFraccionValue : undefined,
+    precio_fraccion: includePrecioFraccion ? precioFraccionValue : undefined,
+    id_tipo: source.id_tipo ?? undefined,
+    id_categoria: source.id_categoria ?? undefined,
+    id_proveedor: source.id_proveedor ?? undefined
+  };
+}
+
+function buildCompareSnapshot(
+  source: Producto,
+  precioText: string,
+  fraccionText: string,
+  costoText: string,
+  includeCostoFraccion: boolean,
+  includePrecioFraccion: boolean
+) {
+  return JSON.stringify(buildUpdatePayload(source, precioText, fraccionText, costoText, includeCostoFraccion, includePrecioFraccion));
+}
+
 interface Props {
   item: Producto | null;
   saving: boolean;
@@ -32,36 +72,24 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
   const [form, setForm] = useState<Producto | null>(null);
   const initialSnapshotRef = useRef<string | null>(null);
   const currentIdRef = useRef<number | null>(null);
+  const initialHasCostoFraccionRef = useRef<boolean>(false);
+  const initialHasPrecioFraccionRef = useRef<boolean>(false);
   const [manualPrecioFraccion, setManualPrecioFraccion] = useState(false);
   const [manualCostoFraccion, setManualCostoFraccion] = useState(false);
   const [precioInput, setPrecioInput] = useState<string>('');
   const [fraccionInput, setFraccionInput] = useState<string>('');
   const [costoInput, setCostoInput] = useState<string>('');
 
-  function buildCompareSnapshot(source: Producto, precioText: string, fraccionText: string, costoText: string) {
-    const precioNum = precioText === '' ? 0 : Number(precioText);
-    const fraccionNum = fraccionText === '' ? 0 : Number(fraccionText);
-    const costoNum = costoText === '' ? 0 : Number(costoText);
-
-    const payload: UpdateProductoPayload = {
-      nombre_producto: source.nombre_producto?.trim(),
-      descripcion: source.descripcion?.trim() || null,
-      fraccion: fraccionNum,
-      costo: costoNum,
-      costo_fraccion: (source.costo_fraccion !== null && source.costo_fraccion !== undefined) ? Number(source.costo_fraccion) : null,
-      precio: precioNum,
-      precio_fraccion: (source.precio_fraccion !== null && source.precio_fraccion !== undefined) ? Number(source.precio_fraccion) : null,
-      id_tipo: source.id_tipo ?? null,
-      id_categoria: source.id_categoria ?? null,
-      id_proveedor: source.id_proveedor ?? null
-    };
-
-    return JSON.stringify(payload);
-  }
+  const includeCostoFraccion = manualCostoFraccion || initialHasCostoFraccionRef.current;
+  const includePrecioFraccion = manualPrecioFraccion || initialHasPrecioFraccionRef.current;
 
   useEffect(() => {
     if (item) {
-      setForm({ ...item });
+      setForm({
+        ...item,
+        costo_fraccion: item.costo_fraccion ?? 0,
+        precio_fraccion: item.precio_fraccion ?? 0
+      });
       setManualPrecioFraccion(false);
       setManualCostoFraccion(false);
       setPrecioInput(String(item.precio ?? 0));
@@ -70,7 +98,16 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
 
       if (currentIdRef.current !== item.id_producto) {
         currentIdRef.current = item.id_producto;
-        initialSnapshotRef.current = buildCompareSnapshot(item, String(item.precio ?? 0), String(item.fraccion ?? 0), String(item.costo ?? 0));
+        initialHasCostoFraccionRef.current = item.costo_fraccion != null;
+        initialHasPrecioFraccionRef.current = item.precio_fraccion != null;
+        initialSnapshotRef.current = buildCompareSnapshot(
+          item,
+          String(item.precio ?? 0),
+          String(item.fraccion ?? 0),
+          String(item.costo ?? 0),
+          initialHasCostoFraccionRef.current,
+          initialHasPrecioFraccionRef.current
+        );
       }
     } else {
       setForm(null);
@@ -81,6 +118,8 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
       setCostoInput('');
       currentIdRef.current = null;
       initialSnapshotRef.current = null;
+      initialHasCostoFraccionRef.current = false;
+      initialHasPrecioFraccionRef.current = false;
     }
   }, [item]);
 
@@ -92,7 +131,7 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
   const isDirty =
     !!form &&
     initialSnapshotRef.current !== null &&
-    buildCompareSnapshot(form, precioInput, fraccionInput, costoInput) !== initialSnapshotRef.current;
+    buildCompareSnapshot(form, precioInput, fraccionInput, costoInput, includeCostoFraccion, includePrecioFraccion) !== initialSnapshotRef.current;
 
   const handleSave = () => {
     if (!form || !isValid) return;
@@ -100,18 +139,19 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
     const fraccionNum = fraccionInput === '' ? 0 : Number(fraccionInput);
     const costoNum = costoInput === '' ? 0 : Number(costoInput);
 
-    const payload: UpdateProductoPayload = {
-      nombre_producto: form.nombre_producto?.trim(),
-      descripcion: form.descripcion?.trim() || null,
-      fraccion: fraccionNum,
-      costo: costoNum,
-      costo_fraccion: (form.costo_fraccion !== null && form.costo_fraccion !== undefined) ? Number(form.costo_fraccion) : null,
-      precio: precioNum,
-      precio_fraccion: (form.precio_fraccion !== null && form.precio_fraccion !== undefined) ? Number(form.precio_fraccion) : null,
-      id_tipo: form.id_tipo ?? null,
-      id_categoria: form.id_categoria ?? null,
-      id_proveedor: form.id_proveedor ?? null
-    };
+    const payload: UpdateProductoPayload = buildUpdatePayload(
+      {
+        ...form,
+        precio: precioNum,
+        fraccion: fraccionNum,
+        costo: costoNum
+      },
+      String(precioNum),
+      String(fraccionNum),
+      String(costoNum),
+      includeCostoFraccion,
+      includePrecioFraccion
+    );
     onSave(payload);
   };
 
@@ -218,34 +258,33 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <TextField
                   margin="dense"
-                  label="Precio"
+                  label="Costo"
                   type="number"
-                  value={precioInput}
+                  value={costoInput}
                   onChange={(e) => {
                     const v = e.target.value;
-                    setPrecioInput(v);
+                    setCostoInput(v);
                     if (v === '') return; // permitir limpiar completamente
-                    const precio = Number(v);
+                    const costo = Number(v);
                     setForm((prev) => {
                       if (!prev) return prev;
-                      const next: Producto = { ...prev, precio: Number.isNaN(precio) ? prev.precio : precio };
-                      if (!manualPrecioFraccion) {
+                      const next: Producto = { ...prev, costo: Number.isNaN(costo) ? prev.costo : costo };
+                      if (!manualCostoFraccion) {
                         if (next.fraccion && next.fraccion >= 1) {
-                          next.precio_fraccion = Math.round(next.precio / next.fraccion);
+                          next.costo_fraccion = Math.round(next.costo / next.fraccion);
                         } else {
-                          next.precio_fraccion = null;
+                          next.costo_fraccion = 0;
                         }
                       }
                       return next;
                     });
                   }}
                   placeholder="0"
-                  error={!!fieldErrors.precio}
-                  helperText={fieldErrors.precio || 'Requerido, mínimo 0'}
+                  error={!!fieldErrors.costo}
+                  helperText={fieldErrors.costo || 'Opcional, mínimo 0'}
                   disabled={saving}
                   slotProps={{ htmlInput: { min: 0 } }}
                   fullWidth
-                  required
                 />
                 <TextField
                   margin="dense"
@@ -264,14 +303,14 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                         if (next.fraccion && next.fraccion >= 1) {
                           next.precio_fraccion = Math.round(next.precio / next.fraccion);
                         } else {
-                          next.precio_fraccion = null;
+                          next.precio_fraccion = 0;
                         }
                       }
                       if (!manualCostoFraccion) {
                         if (next.fraccion && next.fraccion >= 1) {
                           next.costo_fraccion = Math.round(next.costo / next.fraccion);
                         } else {
-                          next.costo_fraccion = null;
+                          next.costo_fraccion = 0;
                         }
                       }
                       return next;
@@ -286,66 +325,68 @@ export function ProductosEditDialog({ item, saving, onClose, onSave, fieldErrors
                 />
                 <TextField
                   margin="dense"
-                  label="Precio fracción"
+                  label="Precio"
                   type="number"
-                  value={form.precio_fraccion ?? ''}
-                  onChange={(e) => {
-                    const val = e.target.value === '' ? null : Math.max(0, Number(e.target.value) || 0);
-                    setForm((prev) => (prev ? { ...prev, precio_fraccion: val as number | null } : prev));
-                    setManualPrecioFraccion(true);
-                  }}
-                  placeholder="0"
-                  error={!!fieldErrors.precio_fraccion}
-                  helperText={fieldErrors.precio_fraccion || 'Por defecto: precio / fracción (redondeado). Puedes ajustarlo.'}
-                  disabled={saving}
-                  fullWidth
-                />
-              </Stack>
-
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <TextField
-                  margin="dense"
-                  label="Costo"
-                  type="number"
-                  value={costoInput}
+                  value={precioInput}
                   onChange={(e) => {
                     const v = e.target.value;
-                    setCostoInput(v);
-                    if (v === '') return;
-                    const costo = Number(v);
+                    setPrecioInput(v);
+                    if (v === '') return; // permitir limpiar completamente
+                    const precio = Number(v);
                     setForm((prev) => {
                       if (!prev) return prev;
-                      const next: Producto = { ...prev, costo: Number.isNaN(costo) ? prev.costo : costo };
-                      if (!manualCostoFraccion) {
+                      const next: Producto = { ...prev, precio: Number.isNaN(precio) ? prev.precio : precio };
+                      if (!manualPrecioFraccion) {
                         if (next.fraccion && next.fraccion >= 1) {
-                          next.costo_fraccion = Math.round(next.costo / next.fraccion);
+                          next.precio_fraccion = Math.round(next.precio / next.fraccion);
                         } else {
-                          next.costo_fraccion = null;
+                          next.precio_fraccion = 0;
                         }
                       }
                       return next;
                     });
                   }}
                   placeholder="0"
-                  error={!!fieldErrors.costo}
-                  helperText={fieldErrors.costo || 'Opcional, mínimo 0'}
+                  error={!!fieldErrors.precio}
+                  helperText={fieldErrors.precio || 'Requerido, mínimo 0'}
+                  disabled={saving}
+                  slotProps={{ htmlInput: { min: 0 } }}
+                  fullWidth
+                  required
+                />
+              </Stack>
+
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField
+                  margin="dense"
+                  label="Costo Fracción"
+                  type="number"
+                  value={form.costo_fraccion ?? 0}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? 0 : Math.max(0, Number(e.target.value) || 0);
+                    setForm((prev) => (prev ? { ...prev, costo_fraccion: val } : prev));
+                    setManualCostoFraccion(true);
+                  }}
+                  placeholder="0"
+                  error={!!fieldErrors.costo_fraccion}
+                  helperText={fieldErrors.costo_fraccion || 'Por defecto: costo / fracción (redondeado). Puedes ajustarlo.'}
                   disabled={saving}
                   slotProps={{ htmlInput: { min: 0 } }}
                   fullWidth
                 />
                 <TextField
                   margin="dense"
-                  label="Costo fracción"
+                  label="Precio Fracción"
                   type="number"
-                  value={form.costo_fraccion ?? ''}
+                  value={form.precio_fraccion ?? 0}
                   onChange={(e) => {
-                    const val = e.target.value === '' ? null : Math.max(0, Number(e.target.value) || 0);
-                    setForm((prev) => (prev ? { ...prev, costo_fraccion: val as number | null } : prev));
-                    setManualCostoFraccion(true);
+                    const val = e.target.value === '' ? 0 : Math.max(0, Number(e.target.value) || 0);
+                    setForm((prev) => (prev ? { ...prev, precio_fraccion: val } : prev));
+                    setManualPrecioFraccion(true);
                   }}
                   placeholder="0"
-                  error={!!fieldErrors.costo_fraccion}
-                  helperText={fieldErrors.costo_fraccion || 'Por defecto: costo / fracción (redondeado). Puedes ajustarlo.'}
+                  error={!!fieldErrors.precio_fraccion}
+                  helperText={fieldErrors.precio_fraccion || 'Por defecto: precio / fracción (redondeado). Puedes ajustarlo.'}
                   disabled={saving}
                   fullWidth
                 />

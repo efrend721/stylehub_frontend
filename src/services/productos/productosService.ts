@@ -1,5 +1,14 @@
 import { http } from '#/services/apiClient/http';
 
+function omitNullish<T extends Record<string, unknown>>(payload: T): Partial<T> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === null || value === undefined) continue;
+    out[key] = value;
+  }
+  return out as Partial<T>;
+}
+
 // Types
 export interface Producto {
   id_producto: number;
@@ -103,11 +112,11 @@ const search = (paramsIn: {
 };
 
 const create = (payload: CreateProductoPayload): Promise<{ id_producto: number }> => {
-  return http<{ id_producto: number }>('/productos', { method: 'POST', body: payload });
+  return http<{ id_producto: number }>('/productos', { method: 'POST', body: omitNullish(payload) });
 };
 
 const update = (id: number, payload: UpdateProductoPayload): Promise<{ id_producto: number }> => {
-  return http<{ id_producto: number }>(`/productos/${id}`, { method: 'PUT', body: payload });
+  return http<{ id_producto: number }>(`/productos/${id}`, { method: 'PUT', body: omitNullish(payload) });
 };
 
 const deleteOne = (id: number): Promise<void> => {

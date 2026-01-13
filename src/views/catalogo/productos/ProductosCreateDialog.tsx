@@ -34,9 +34,9 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
   const [fraccionInput, setFraccionInput] = useState<string>('0');
   const [costo, setCosto] = useState<number>(0);
   const [costoInput, setCostoInput] = useState<string>('0');
-  const [precioFraccion, setPrecioFraccion] = useState<number | ''>('');
+  const [precioFraccion, setPrecioFraccion] = useState<number | ''>(0);
   const [precioFraccionManual, setPrecioFraccionManual] = useState<boolean>(false);
-  const [costoFraccion, setCostoFraccion] = useState<number | ''>('');
+  const [costoFraccion, setCostoFraccion] = useState<number | ''>(0);
   const [costoFraccionManual, setCostoFraccionManual] = useState<boolean>(false);
   const [idTipo, setIdTipo] = useState<number | ''>('');
   const [idCategoria, setIdCategoria] = useState<string | ''>('');
@@ -55,8 +55,8 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
       setPrecioInput('0');
       setCosto(0);
       setCostoInput('0');
-      setPrecioFraccion('');
-      setCostoFraccion('');
+      setPrecioFraccion(0);
+      setCostoFraccion(0);
       setIdTipo('');
       setIdCategoria('');
       setIdProveedor('');
@@ -73,10 +73,10 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
           const calc = Math.round(precio / fraccion);
           setPrecioFraccion(calc);
         } else {
-          setPrecioFraccion('');
+          setPrecioFraccion(0);
         }
       } else {
-        setPrecioFraccion('');
+        setPrecioFraccion(0);
       }
     }
   }, [precio, fraccion, precioFraccionManual, precioInput, fraccionInput]);
@@ -88,10 +88,10 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
           const calc = Math.round(costo / fraccion);
           setCostoFraccion(calc);
         } else {
-          setCostoFraccion('');
+          setCostoFraccion(0);
         }
       } else {
-        setCostoFraccion('');
+        setCostoFraccion(0);
       }
     }
   }, [costo, fraccion, costoFraccionManual, costoInput, fraccionInput]);
@@ -103,14 +103,14 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
     const payload: Omit<CreateProductoPayload, 'id_establecimiento'> = {
       nombre_producto: nombre.trim(),
       descripcion: descripcion?.trim() || undefined,
-      fraccion: fraccionNum || 1,
+      fraccion: Number.isNaN(fraccionNum) ? 0 : fraccionNum,
       precio: precioNum,
       costo: costoNum,
-      costo_fraccion: costoFraccion === '' ? null : Number(costoFraccion),
-      precio_fraccion: precioFraccion === '' ? null : Number(precioFraccion),
-      id_tipo: idTipo === '' ? null : Number(idTipo),
-      id_categoria: idCategoria === '' ? null : String(idCategoria),
-      id_proveedor: idProveedor === '' ? null : Number(idProveedor)
+      costo_fraccion: costoFraccion === '' ? undefined : Number(costoFraccion),
+      precio_fraccion: precioFraccion === '' ? undefined : Number(precioFraccion),
+      id_tipo: idTipo === '' ? undefined : Number(idTipo),
+      id_categoria: idCategoria === '' ? undefined : String(idCategoria),
+      id_proveedor: idProveedor === '' ? undefined : Number(idProveedor)
     };
     onSave(payload);
   };
@@ -129,7 +129,7 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
     && precioInput.trim() !== ''
     && fraccionInput.trim() !== ''
     && Number(precioInput) >= 0
-    && Number(fraccionInput) >= 1;
+    && Number(fraccionInput) >= 0;
 
   return (
     <Dialog 
@@ -228,23 +228,22 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
                 margin="dense"
-                label="Precio"
+                label="Costo"
                 type="number"
-                value={precioInput}
+                value={costoInput}
                 onChange={(e) => {
                   const v = e.target.value;
-                  setPrecioInput(v);
+                  setCostoInput(v);
                   if (v === '') return; // permitir limpiar
                   const n = Number(v);
-                  setPrecio(Number.isNaN(n) ? 0 : n);
+                  setCosto(Number.isNaN(n) ? 0 : n);
                 }}
                 placeholder="0"
-                error={!!fieldErrors.precio}
-                helperText={fieldErrors.precio || 'Requerido, mínimo 0'}
+                error={!!fieldErrors.costo}
+                helperText={fieldErrors.costo || 'Opcional, mínimo 0'}
                 disabled={saving}
                 slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
-                required
               />
               <TextField
                 margin="dense"
@@ -267,43 +266,30 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
               />
               <TextField
                 margin="dense"
-                label="Precio fracción"
+                label="Precio"
                 type="number"
-                value={precioFraccion}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? '' : Math.max(0, Number(e.target.value) || 0);
-                  setPrecioFraccion(val);
-                  setPrecioFraccionManual(true);
-                }}
-                placeholder="0"
-                error={!!fieldErrors.precio_fraccion}
-                helperText={fieldErrors.precio_fraccion || 'Por defecto: precio / fracción (redondeado). Puedes ajustarlo.'}
-                disabled={saving}
-                slotProps={{ htmlInput: { min: 0 } }}
-                fullWidth
-              />
-              <TextField
-                margin="dense"
-                label="Costo"
-                type="number"
-                value={costoInput}
+                value={precioInput}
                 onChange={(e) => {
                   const v = e.target.value;
-                  setCostoInput(v);
+                  setPrecioInput(v);
                   if (v === '') return; // permitir limpiar
                   const n = Number(v);
-                  setCosto(Number.isNaN(n) ? 0 : n);
+                  setPrecio(Number.isNaN(n) ? 0 : n);
                 }}
                 placeholder="0"
-                error={!!fieldErrors.costo}
-                helperText={fieldErrors.costo || 'Opcional, mínimo 0'}
+                error={!!fieldErrors.precio}
+                helperText={fieldErrors.precio || 'Requerido, mínimo 0'}
                 disabled={saving}
                 slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
+                required
               />
+            </Stack>
+
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
                 margin="dense"
-                label="Costo fracción"
+                label="Costo Fracción"
                 type="number"
                 value={costoFraccion}
                 onChange={(e) => {
@@ -314,6 +300,24 @@ export function ProductosCreateDialog({ open, saving, onClose, onSave, fieldErro
                 placeholder="0"
                 error={!!fieldErrors.costo_fraccion}
                 helperText={fieldErrors.costo_fraccion || 'Por defecto: costo / fracción (redondeado). Puedes ajustarlo.'}
+                disabled={saving}
+                slotProps={{ htmlInput: { min: 0 } }}
+                fullWidth
+              />
+
+              <TextField
+                margin="dense"
+                label="Precio Fracción"
+                type="number"
+                value={precioFraccion}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? '' : Math.max(0, Number(e.target.value) || 0);
+                  setPrecioFraccion(val);
+                  setPrecioFraccionManual(true);
+                }}
+                placeholder="0"
+                error={!!fieldErrors.precio_fraccion}
+                helperText={fieldErrors.precio_fraccion || 'Por defecto: precio / fracción (redondeado). Puedes ajustarlo.'}
                 disabled={saving}
                 slotProps={{ htmlInput: { min: 0 } }}
                 fullWidth
