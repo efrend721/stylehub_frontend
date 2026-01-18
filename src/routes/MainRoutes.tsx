@@ -1,43 +1,19 @@
-import { lazy } from 'react';
+import { Navigate } from 'react-router-dom';
 
 // project imports
 import MainLayout from '#/layout/MainLayout';
-import Loadable from '#/ui-component/Loadable';
 import AuthGuard from '#/utils/route-guard/AuthGuard';
 import RoleGuard from '#/utils/route-guard/RoleGuard';
 import ErrorBoundary from './ErrorBoundary';
+import DynamicRouteRenderer from './DynamicRouteRenderer';
 
-// dashboard routing
+import { lazy } from 'react';
+import Loadable from '#/ui-component/Loadable';
+
+// errors
+const ForbiddenPage = Loadable(lazy(() => import('#/views/errors/ForbiddenPage')));
+// dashboard routing (safe default)
 const DashboardDefault = Loadable(lazy(() => import('#/views/dashboard/Default')));
-
-// utilities routing
-const UtilsTypography = Loadable(lazy(() => import('#/views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('#/views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('#/views/utilities/Shadow')));
-
-// sample page routing
-const SamplePage = Loadable(lazy(() => import('#/views/sample-page')));
-
-// admin routing (new)
-const AdminUsuarios = Loadable(lazy(() => import('#/views/admin/usuarios')));
-const AdminRoles = Loadable(lazy(() => import('#/views/admin/roles')));
-const AdminRolesEdit = Loadable(lazy(() => import('#/views/admin/roles/RoleEditPage')));
-const AdminMenus = Loadable(lazy(() => import('#/views/admin/menus')));
-const AdminRutasProtegidas = Loadable(lazy(() => import('#/views/admin/rutas-protegidas')));
-const AdminConfiguracion = Loadable(lazy(() => import('#/views/admin/configuracion')));
-// sys config routing
-const SysConfigEstablecimientos = Loadable(lazy(() => import('#/views/sysConfig/establecimientos')));
-
-// auditoría y reportes (new)
-const AuditLogs = Loadable(lazy(() => import('#/views/audit/logs')));
-const Reportes = Loadable(lazy(() => import('#/views/reportes')));
-
-// gestión de productos
-const TipoProducto = Loadable(lazy(() => import('#/views/gestionProductos/tipoProducto')));
-const CategoriaProducto = Loadable(lazy(() => import('#/views/gestionProductos/categoriaProducto')));
-// catálogo
-const Proveedores = Loadable(lazy(() => import('#/views/catalogo/proveedores')));
-const Productos = Loadable(lazy(() => import('#/views/catalogo/productos')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -50,6 +26,7 @@ const MainRoutes = {
   ),
   errorElement: <ErrorBoundary />,
   children: [
+    // Safe fallback (siempre disponible después de autenticado)
     {
       path: 'dashboard',
       children: [
@@ -59,85 +36,27 @@ const MainRoutes = {
         }
       ]
     },
+    // Hardcoded forbidden route (útil para futuro PBAC/dynamic routing)
     {
-      path: 'typography',
-      element: <UtilsTypography />
+      path: '403',
+      element: <ForbiddenPage />
     },
+    // Protected routes (sólo accesible si el usuario tiene el rol/permiso adecuado)
     {
-      path: 'color',
-      element: <UtilsColor />
-    },
-    {
-      path: 'shadow',
-      element: <UtilsShadow />
-    },
-    {
-      path: '/sample-page',
-      element: <SamplePage />
-    },
-    // admin
-    {
-      path: 'admin',
       element: <RoleGuard />,
       children: [
-        { path: 'usuarios', element: <AdminUsuarios /> },
-        { path: 'roles', element: <AdminRoles /> },
-        { path: 'roles/editar/:id', element: <AdminRolesEdit /> },
-        { path: 'menus', element: <AdminMenus /> },
-        { path: 'rutas-protegidas', element: <AdminRutasProtegidas /> },
-        { path: 'configuracion', element: <AdminConfiguracion /> },
-        { path: 'configuracion/establecimientos', element: <SysConfigEstablecimientos /> }
+        // Dynamic protected routes:
+        // Renderiza el componente según /menus/routes + registry local (id_key -> componente)
+        {
+          path: '*',
+          element: <DynamicRouteRenderer />
+        }
       ]
     },
-    // auditoría
+    // Catch-all: si no existe la ruta (o aún no está en el JSON dinámico), volver al dashboard
     {
-      path: 'audit',
-      children: [
-        { path: 'logs', element: <AuditLogs /> }
-      ]
-    },
-    // reportes
-    {
-      path: 'reportes',
-      element: <Reportes />
-    }
-    ,
-    // alias: /logistica/reportes
-    {
-      path: 'logistica',
-      children: [
-        { path: 'reportes', element: <Reportes /> }
-      ]
-    }
-    ,
-    // sysConfig (alias direct access)
-    {
-      path: 'sysConfig',
-      children: [
-        { path: 'establecimientos', element: <SysConfigEstablecimientos /> }
-      ]
-    },
-    // gestión de productos
-    {
-      path: 'gestionproductos',
-      children: [
-        { path: 'tipoproducto', element: <TipoProducto /> },
-        { path: 'categoria', element: <CategoriaProducto /> },
-        // alias para proveedores bajo gestión de productos
-        { path: 'proveedor', element: <Proveedores /> },
-        // alias para productos bajo gestión de productos
-        { path: 'productos', element: <Productos /> }
-      ]
-    }
-    ,
-    // catálogo
-    {
-      path: 'proveedores',
-      element: <Proveedores />
-    },
-    {
-      path: 'productos',
-      element: <Productos />
+      path: '*',
+      element: <Navigate to="/dashboard/default" replace />
     }
   ]
 };

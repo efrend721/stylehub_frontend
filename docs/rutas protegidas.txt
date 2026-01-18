@@ -1,0 +1,24 @@
+Las “rutas protegidas” están definidas en el router de React Router, 
+y se protegen con guards (no con ProtectedRoute.tsx, aunque existe).
+
+Dónde se definen las rutas
+
+El router se arma en index.tsx: createBrowserRouter([AuthenticationRoutes, MainRoutes])
+Rutas públicas/auth: AuthenticationRoutes.tsx
+Rutas “del sistema” (app): MainRoutes.tsx
+Qué está realmente protegiendo hoy
+
+Protección por autenticación (login requerido): en MainRoutes.tsx el element raíz es:
+
+<AuthGuard><MainLayout /></AuthGuard>
+Ese guard es AuthGuard.tsx (usa #/contexts/JWTContext).
+Resultado: todo lo que cuelga de MainRoutes requiere estar autenticado.
+Protección por rol/permisos (autorización): dentro de MainRoutes, el árbol path: 'admin' tiene:
+
+element: <RoleGuard />
+El guard es RoleGuard.tsx y valida contra useMenuItems() (URLs permitidas desde backend).
+Resultado: todo /admin/* está protegido por permisos/rol.
+ Nota importante
+
+Existe ProtectedRoute.tsx, pero no es el que se usa en el router actual
+(el proyecto usa AuthGuard/GuestGuard en src/utils/route-guard/*).

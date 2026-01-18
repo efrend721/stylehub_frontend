@@ -22,6 +22,7 @@ import type { UsuarioEdit } from './types';
 import { useRoles } from './useRoles';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
+import { hasRole } from '#/utils/auth/roleUtils';
 
 type Props = {
   user: UsuarioEdit | null;
@@ -128,7 +129,7 @@ export function UsuariosEditDialog({ user, saving, onClose, onChange, onSave, fi
 
   if (!editData) return null;
 
-  const isRole2EditingSelf = authUser?.id_rol === 2 && authUser?.usuario_acceso === editData.usuario_acceso;
+  const isRole2EditingSelf = hasRole(authUser, 2) && authUser?.usuario_acceso === editData.usuario_acceso;
 
   const passwordForCompare = editPassword ? (editData.contrasena ?? '').trim() : '';
   const isDirty =

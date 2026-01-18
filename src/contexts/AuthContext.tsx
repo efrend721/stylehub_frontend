@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import notify from '#/utils/notify';
 import { AuthService } from '#/services';
 import { API_BASE } from '#/services/common/types';
+import { setUnauthorizedHandler } from '#/services/apiClient/authEvents';
 
 // Types
 export interface User {
@@ -12,6 +13,8 @@ export interface User {
   telefono: string;
   correo_electronico: string;
   id_rol: number;
+  // PBAC / multirol (compatibilidad: el backend puede enviar roles[])
+  roles?: number[];
   id_establecimiento: string;
   estado: number;
   fecha_creacion: string;
@@ -254,6 +257,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading: false
     });
   };
+
+  // Handler global: si una request retorna 401, limpiar sesión y dejar que AuthGuard redirija
+  useEffect(() => {
+    setUnauthorizedHandler(({ message } = {}) => {
+      // Evitar ruido en login screen: igual limpiamos estado.
+      clearAuth();
+
+      if (import.meta.env.MODE !== 'production' && message) {
+        console.warn('[auth] 401 unauthorized:', message);
+      }
+
+      // Mensaje consistente para UX
+      notify.warning('Tu sesión ha expirado. Inicia sesión nuevamente.');
+    });
+
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, []);
 
   const contextValue: AuthContextType = {
     ...state,

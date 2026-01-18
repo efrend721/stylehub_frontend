@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
+import { hasRole } from '#/utils/auth/roleUtils';
 
 type WithEstablecimiento = { id_establecimiento?: string | null };
 
@@ -11,7 +12,7 @@ export function useUserManagement() {
     return raw && typeof raw === 'string' ? raw : undefined;
   }, [user]);
 
-  const isOperativoAdmin = user?.id_rol === 2;
+  const isOperativoAdmin = hasRole(user, 2);
 
   const attachEstablecimiento = <T extends WithEstablecimiento>(payload: T): T & { id_establecimiento: string } => {
     if (!idEstablecimiento) {

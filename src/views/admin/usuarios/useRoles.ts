@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '#/contexts/AuthContext';
 import { RolesService } from '#/services';
 import { getErrorMessage } from '#/utils/errorUtils';
+import { hasRole } from '#/utils/auth/roleUtils';
 import type { RolSelect } from '#/views/admin/roles';
 
 // API handled via RolesService
@@ -21,7 +22,7 @@ export function useRoles() {
     setLoading(true);
     setError(null);
     try {
-      const scope: 'all' | 'operativos' = user?.id_rol === 2 ? 'operativos' : 'all';
+      const scope: 'all' | 'operativos' = hasRole(user, 2) ? 'operativos' : 'all';
       const list = await RolesService.getForSelect(scope, token || undefined);
       setRoles(Array.isArray(list) ? list : []);
     } catch (e) {
@@ -29,7 +30,7 @@ export function useRoles() {
     } finally {
       setLoading(false);
     }
-  }, [token, user?.id_rol]);
+  }, [token, user]);
 
   useEffect(() => {
     void fetchRoles();

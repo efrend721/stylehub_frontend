@@ -1,12 +1,25 @@
 /**
- * Política de mensajes: mostrar solo el 'mensaje' del backend
- * Prioriza: message > fallback (ignora details)
+ * Política de mensajes (guía integración):
+ * - 422: usar errors[] (join por \n), fallback a details
+ * - otros: preferir details cuando exista (login suele venir en details)
  */
 export function getErrorMessage(error: unknown, fallback = 'Error desconocido'): string {
-  if (error instanceof Error) {
-    return error.message || fallback;
+  if (!(error instanceof Error)) return fallback;
+
+  const status = (error as { status?: number }).status;
+  const details = (error as { details?: unknown }).details;
+  const errs = (error as { errors?: unknown }).errors;
+
+  if (status === 422 && Array.isArray(errs)) {
+    const msgs = errs
+      .map((e) => (e && typeof e === 'object' ? (e as { message?: unknown }).message : undefined))
+      .filter((m): m is string => typeof m === 'string' && m.trim().length > 0)
+      .map((m) => m.trim());
+    if (msgs.length) return msgs.join('\n');
   }
-  return fallback;
+
+  if (typeof details === 'string' && details.trim()) return details.trim();
+  return error.message || fallback;
 }
 
 /**

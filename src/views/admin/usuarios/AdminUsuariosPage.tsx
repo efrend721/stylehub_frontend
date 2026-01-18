@@ -17,10 +17,11 @@ import { useRoles } from './useRoles';
 import UsuariosHeaderCard from './UsuariosHeaderCard';
 import UsuariosList from './UsuariosList';
 import { useAuth } from '#/contexts/AuthContext';
+import { hasRole } from '#/utils/auth/roleUtils';
 
 export default function AdminUsuariosPage() {
   const { user } = useAuth();
-  const isRole2 = user?.id_rol === 2;
+  const isRole2 = hasRole(user, 2);
   const defaultEstado = undefined;
 
   const theme = useTheme();

@@ -11,6 +11,8 @@ export type BackendMenuItem = {
   breadcrumbs?: boolean | 0 | 1 | null;
   external?: boolean | 0 | 1 | null;
   target_blank?: boolean | 0 | 1 | null;
+  // Cuando viene desde /menus/routes (o administración), puede incluir visibilidad en navegación
+  nav_visible?: boolean | 0 | 1 | null;
   children?: BackendMenuItem[];
 };
 

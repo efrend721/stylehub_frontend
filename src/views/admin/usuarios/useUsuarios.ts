@@ -4,6 +4,7 @@ import { useUserManagement } from './hooks/useUserManagement';
 import { UsuariosService } from '#/services';
 import { notify } from '#/utils/notify';
 import { getErrorMessage, getErrorStatus, getErrorArray } from '#/utils/errorUtils';
+import { hasRole } from '#/utils/auth/roleUtils';
 import type { Usuario, NuevoUsuario, UsuarioEdit } from './types';
 import type { GridRowId, GridRowSelectionModel } from '@mui/x-data-grid';
 import type { UsuariosSearchParams } from '#/services/usuarios/usuariosService';
@@ -54,7 +55,7 @@ function fieldErrorsFromArray(arr: Array<{ path?: string[]; message?: string }>)
 
 export function useUsuarios() {
   const { token, user } = useAuth();
-  const scope: 'global' | 'mine' = user?.id_rol === 2 ? 'mine' : 'global';
+  const scope: 'global' | 'mine' = hasRole(user, 2) ? 'mine' : 'global';
   const { attachEstablecimiento } = useUserManagement();
 
   // headers handled by services layer
@@ -254,7 +255,7 @@ export function useUsuarios() {
       // Forzar id_establecimiento del admin autenticado
       const payload = attachEstablecimiento(editUser);
       setEditFieldErrors({});
-      const isRole2SelfUpdate = scope === 'mine' && user?.id_rol === 2 && payload.usuario_acceso === user?.usuario_acceso;
+      const isRole2SelfUpdate = scope === 'mine' && hasRole(user, 2) && payload.usuario_acceso === user?.usuario_acceso;
       await UsuariosService.update(payload, scope, token || undefined, { omitRole: isRole2SelfUpdate });
       notify.success('Usuario actualizado');
       setEditUser(null);
