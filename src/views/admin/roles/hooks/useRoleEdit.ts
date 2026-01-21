@@ -26,7 +26,13 @@ export function useRoleEdit(roleId: number | undefined) {
   }, []);
 
   const fetchData = useCallback(async () => {
-    if (!roleId) return;
+    if (!roleId) {
+      setRole(null);
+      setMenus([]);
+      setError('Rol inválido');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {

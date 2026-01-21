@@ -64,6 +64,23 @@ export function useAllowedRoutes(): HookState {
           } catch {}
         }
       } catch (err: unknown) {
+        const status = err instanceof Error ? (err as { status?: number }).status : undefined;
+        const errSource = err instanceof Error ? (err as { source?: unknown }).source : undefined;
+
+        // PBAC: si el backend marca source='routes' es bloqueo a nivel aplicación.
+        // No debemos usar cache ni intentar renderizar con allowlist vacía.
+        if (status === 403 && errSource === 'routes') {
+          try {
+            localStorage.removeItem(ROUTES_CACHE_KEY);
+          } catch {}
+
+          if (!cancelled) {
+            const msg = err instanceof Error ? err.message : 'No tienes permisos para acceder a esta aplicación';
+            setState({ routes: [], loading: false, error: msg, source: 'empty' });
+          }
+          return;
+        }
+
         let routes: AllowedRoute[] = [];
         try {
           const cached = localStorage.getItem(ROUTES_CACHE_KEY);

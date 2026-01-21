@@ -11,12 +11,14 @@ export class ApiError extends Error {
   status?: number;
   details?: string;
   errors?: ValidationErrorEntry[];
-  constructor(message: string, status?: number, details?: string, errors?: ValidationErrorEntry[]) {
+  source?: string;
+  constructor(message: string, status?: number, details?: string, errors?: ValidationErrorEntry[], source?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.details = details;
     this.errors = errors;
+    this.source = source;
   }
 }
 

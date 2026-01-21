@@ -76,6 +76,14 @@ Puntos clave:
 - Contenido: preferir listas/cards en móviles; tablas solo en `md+` con skeletons.
 - Accesibilidad y rendimiento: CssBaseline, estados de foco, props iOS para `SwipeableDrawer`, `keepMounted` en Drawer.
 
+## PBAC: Sidebar vs Router Guard vs Admin Menús
+
+Regla de oro (deny-by-default):
+
+- Sidebar: usar `GET /menus` (árbol ya filtrado por permisos efectivos; no incluye items con `nav_visible = 0` cuando aplica).
+- Router guard (allowlist): usar `GET /menus/routes` (puede incluir rutas “ocultas” como `/admin/roles/editar/:id` aunque no se muestren en el sidebar).
+- Admin UI de menús: usar `GET /menus/admin/tree` solo en pantallas de administración (nunca para el sidebar).
+
 ### Code Splitting
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)

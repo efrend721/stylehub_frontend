@@ -268,8 +268,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn('[auth] 401 unauthorized:', message);
       }
 
-      // Mensaje consistente para UX
-      notify.warning('Tu sesión ha expirado. Inicia sesión nuevamente.');
+      // Mantener el mensaje del backend cuando exista
+      notify.warning(message || 'Tu sesión ha expirado. Inicia sesión nuevamente.');
     });
 
     return () => {

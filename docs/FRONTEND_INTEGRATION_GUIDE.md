@@ -16,12 +16,12 @@
 ```javascript
 // ✅ Obtener mensajes (toast)
 const mensajes = Array.isArray(data.errors)
-  ? data.errors.map(e => e.message).join("\n")
+  ? data.errors.map((e) => e.message).join("\n")
   : "Error de validación";
 
 // ✅ Formularios (React Hook Form)
 if (Array.isArray(data.errors)) {
-  data.errors.forEach(e => {
+  data.errors.forEach((e) => {
     const field = e.path?.[0];
     if (field) setError(field, { message: e.message });
   });
@@ -32,19 +32,24 @@ if (Array.isArray(data.errors)) {
 
 ## 📊 Resumen Rápido por Status Code
 
-| Status                   | Campo del Mensaje | Uso            |
-| ------------------------ | ----------------- | -------------- |
-| **401** (No autenticado) | `message`         | `data.message` |
-| **403** (No autorizado)  | `message`         | `data.message` |
-| **422** (Validación)     | `errors[]`        | `data.errors`  |
-| **404** (No encontrado)  | `message`         | `data.message` |
-| **500** (Error DB)       | `message`         | `data.message` |
-| **503** (Servicio caído) | `error`           | `data.error`   |
+| Status                     | Campo del Mensaje | Uso            |
+| -------------------------- | ----------------- | -------------- |
+| **401** (No autenticado)   | `message`         | `data.message` |
+| **403** (No autorizado)    | `message`         | `data.message` |
+| **422** (Validación)       | `errors[]`        | `data.errors`  |
+| **404** (No encontrado)    | `message`         | `data.message` |
+| **500** (DB / Interno)     | `message`         | `data.message` |
+| **503** (DB no disponible) | `error`           | `data.error`   |
 
 > Nota PBAC: cuando el backend bloquea por permisos (PEP), las respuestas 401/403 vienen con este formato:
 >
 > ```json
-> { "success": false, "error": "No autorizado", "message": "No tienes permisos para este endpoint", "timestamp": "..." }
+> {
+>   "success": false,
+>   "error": "No autorizado",
+>   "message": "No tienes permisos para este endpoint",
+>   "timestamp": "..."
+> }
 > ```
 
 ---
@@ -65,7 +70,9 @@ const res = await fetch("/api/auth/login", {
 });
 if (!res.ok) {
   const data = await res.json();
-  const mensaje = data.details || "Error de validación";
+  const mensaje = Array.isArray(data.errors)
+    ? data.errors.map((e) => e.message).join("\n")
+    : data.message || data.error || "Error de validación";
   toast.error(mensaje);
 }
 ```
@@ -84,7 +91,10 @@ const res = await fetch("/api/auth/login", {
 });
 if (!res.ok) {
   const data = await res.json();
-  toast.error(data.details);
+  const mensaje = Array.isArray(data.errors)
+    ? data.errors.map((e) => e.message).join("\n")
+    : data.message || data.error || "Error de validación";
+  toast.error(mensaje);
 }
 ```
 
@@ -97,7 +107,10 @@ const res = await fetch("/api/auth/login", {
 });
 if (!res.ok) {
   const data = await res.json();
-  toast.error(data.details);
+  const mensaje = Array.isArray(data.errors)
+    ? data.errors.map((e) => e.message).join("\n")
+    : data.message || data.error || "Error de validación";
+  toast.error(mensaje);
 }
 ```
 
@@ -107,7 +120,9 @@ if (!res.ok) {
 const res = await fetch("/api/usuarios", { credentials: "include" });
 if (!res.ok) {
   const data = await res.json();
-  const mensaje = data.details;
+  const mensaje = Array.isArray(data.errors)
+    ? data.errors.map((e) => e.message).join("\n")
+    : data.message || data.error || "Sesión expirada";
   toast.error(mensaje);
   navigate("/login");
 }
@@ -124,7 +139,12 @@ const res = await fetch("/api/roles", {
 });
 if (!res.ok) {
   const data = await res.json();
-  setError("nombre", { message: data.message });
+  // Duplicados de BD llegan como 422 con errors[0].path y errors[0].message
+  const errs = Array.isArray(data.errors) ? data.errors : [];
+  const first = errs[0];
+  const field = first?.path?.[0] || "nombre";
+  const msg = first?.message || data.message || data.error || "Valor duplicado";
+  setError(field, { message: msg });
 }
 ```
 
@@ -171,7 +191,7 @@ export const request = async (cfg) => {
       if (status === 422) {
         const errs = Array.isArray(payload.errors) ? payload.errors : [];
         errorMsg = errs.length
-          ? errs.map(e => e.message).join("\n")
+          ? errs.map((e) => e.message).join("\n")
           : "Error de validación";
       } else if (status === 404) {
         errorMsg = payload.message || "Recurso no encontrado";
@@ -228,7 +248,7 @@ export const useApi = () => {
         body: method !== "GET" && data ? JSON.stringify(data) : undefined,
       });
       const isJson = (res.headers.get("content-type") || "").includes(
-        "application/json"
+        "application/json",
       );
       const payload = isJson ? await res.json() : null;
       if (!res.ok) {
@@ -238,9 +258,11 @@ export const useApi = () => {
           if (status === 422) {
             const errs = Array.isArray(payload.errors) ? payload.errors : [];
             // Toast general
-            msg = errs.length ? errs.map(e => e.message).join("\n") : "Error de validación";
+            msg = errs.length
+              ? errs.map((e) => e.message).join("\n")
+              : "Error de validación";
             // Form field mapping
-            errs.forEach(e => {
+            errs.forEach((e) => {
               const field = e.path?.[0];
               if (field) setError(field, { message: e.message });
             });
@@ -287,7 +309,7 @@ function LoginForm() {
       // Login exitoso
       navigate("/dashboard");
     } else {
-      // Mostrar error - ya viene procesado desde 'details'
+      // Mostrar error - ya viene normalizado por el helper
       setFormError(result.error);
     }
   };
@@ -341,11 +363,13 @@ Consulta el archivo **`http-requests/ejemplos_respuestas_error.http`** para:
   - Select simple: `GET /establecimientos/select` → `[{ id_establecimiento, nombre }]`
   - Options estandarizadas: `GET /establecimientos/options` → `[{ value, label }]`
   - Tipos: `GET /establecimientos/tipos`
-  
+
   Ejemplo de carga para dropdown:
 
   ```javascript
-  const res = await fetch('/api/establecimientos/options', { credentials: 'include' });
+  const res = await fetch("/api/establecimientos/options", {
+    credentials: "include",
+  });
   const { data } = await res.json();
   // data: [{ value: 'EST001', label: 'Spa Belleza Total' }]
   setOptions(data);
@@ -483,6 +507,114 @@ Notas:
 
 - Si no hay roles activos, la API devuelve `success: true` con `data: []`.
 - Para permisos en UI, usar `user.roles` del login o refrescar aquí (fuente de verdad).
+
+### Implementación recomendada (React Router v6)
+
+Objetivo:
+
+- `GET /menus` → sidebar (solo `nav_visible = 1`)
+- `GET /menus/routes` → allowlist del router (incluye `nav_visible = 0`)
+
+Ejemplo de hook para allowlist (`useAllowedRoutes.ts`):
+
+```ts
+import { useEffect, useMemo, useState } from "react";
+import { matchPath } from "react-router-dom";
+
+type AllowedRoute = {
+  id: string;
+  url: string;
+  nav_visible?: boolean;
+};
+
+export function useAllowedRoutes() {
+  const [routes, setRoutes] = useState<AllowedRoute[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch("/api/menus/routes", {
+          credentials: "include",
+        });
+        if (res.status === 401) throw new Error("401");
+        if (res.status === 403) throw new Error("403");
+        if (!res.ok) throw new Error(String(res.status));
+
+        const json = await res.json();
+        const data = Array.isArray(json?.data) ? json.data : [];
+        if (mounted) setRoutes(data);
+      } catch (e: any) {
+        if (!mounted) return;
+        if (e?.message === "401") setError("SESSION_EXPIRED");
+        else if (e?.message === "403") setError("FORBIDDEN");
+        else setError("UNKNOWN");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const allowedPatterns = useMemo(
+    () =>
+      routes
+        .map((r) => r.url)
+        .filter((u): u is string => typeof u === "string" && u.length > 0),
+    [routes],
+  );
+
+  const isAllowed = (pathname: string) => {
+    return allowedPatterns.some((pattern) => {
+      // Soporta patrones con params, p.ej. /admin/roles/editar/:id
+      return !!matchPath({ path: pattern, end: true }, pathname);
+    });
+  };
+
+  return {
+    loading,
+    error,
+    routes,
+    allowedPatterns,
+    isAllowed,
+  };
+}
+```
+
+Ejemplo de guard simple:
+
+```tsx
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAllowedRoutes } from "./hooks/useAllowedRoutes";
+
+export function ProtectedRoutes() {
+  const location = useLocation();
+  const { loading, error, isAllowed } = useAllowedRoutes();
+
+  if (loading) return null; // o spinner
+  if (error === "SESSION_EXPIRED") return <Navigate to="/login" replace />;
+  if (error === "FORBIDDEN") return <Navigate to="/no-autorizado" replace />;
+
+  return isAllowed(location.pathname) ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/no-autorizado" replace />
+  );
+}
+```
+
+Notas:
+
+- El guard debe basarse en `/menus/routes` (no en el sidebar).
+- Las rutas con `nav_visible: false` deben existir en el router, solo que no se renderizan en el menú.
 
 ---
 
@@ -630,14 +762,19 @@ await fetch("/api/usuarios/mi-establecimiento/bulk-delete", {
 });
 
 // Llenar select de roles según rol del usuario
-const hasRole = (roleId) => Array.isArray(user.roles) && user.roles.includes(roleId);
-const rolesEndpoint = hasRole(2) ? "/api/roles/select-operativos" : "/api/roles/select";
+const hasRole = (roleId) =>
+  Array.isArray(user.roles) && user.roles.includes(roleId);
+const rolesEndpoint = hasRole(2)
+  ? "/api/roles/select-operativos"
+  : "/api/roles/select";
 const rolesRes = await fetch(rolesEndpoint, { credentials: "include" });
 const rolesData = await rolesRes.json();
 const rolesOptions = rolesData.data; // [{ id_rol, nombre }]
 
 // (Opcional) refrescar roles activos desde backend
-const myRolesRes = await fetch("/api/usuarios/me/roles", { credentials: "include" });
+const myRolesRes = await fetch("/api/usuarios/me/roles", {
+  credentials: "include",
+});
 if (myRolesRes.ok) {
   const myRolesData = await myRolesRes.json();
   // myRolesData.data: [{ id_rol, nombre, estado, ... }]
@@ -722,7 +859,7 @@ await fetch(`/establecimientos/${id}`, {
 ### Manejo de respuestas
 
 - Éxito: el backend retorna `{ success: true, data: { id_establecimiento } }`.
-- Errores 422: leer `details` para mensajes específicos (duplicado de `nit`, fechas inválidas, etc.).
+- Errores 422: leer `errors[]` y mostrar `errors[].message` (duplicados/validaciones/etc.).
 - 404: establecimiento no encontrado (`message`).
 
 ### Flujo sugerido en UI
@@ -743,10 +880,10 @@ await fetch(`/establecimientos/${id}`, {
 
 - [ ] Configurar Fetch con `credentials: 'include'` para httpOnly cookies
 - [ ] Usar helper `request()` o `useApi()` para formato estándar
-- [ ] **Para errores 422**: Leer `data.details` del JSON
+- [ ] **Para errores 422**: Leer `data.errors[]` del JSON
 - [ ] Para errores 404: Leer `data.message` del JSON
-- [ ] Manejar sesión expirada (422 con details "Tu sesión ha expirado...")
-- [ ] Manejar cuenta desactivada (422 con details "Tu cuenta está desactivada...")
+- [ ] Manejar sesión expirada (422 con `errors[].message` = "Tu sesión ha expirado...")
+- [ ] Manejar cuenta desactivada (422 con `errors[].message` = "Tu cuenta está desactivada...")
 - [ ] Probar login con credenciales incorrectas
 - [ ] Probar recursos duplicados
 - [ ] Probar recursos no encontrados
@@ -757,14 +894,14 @@ await fetch(`/establecimientos/${id}`, {
 
 ### ❌ Error: "Los datos proporcionados no son válidos" (genérico)
 
-**Problema**: Estás leyendo `message` en lugar de `details` del JSON.
+**Problema**: Estás leyendo `message` en lugar de `errors[].message` (status 422).
 
 ```javascript
 // ❌ Incorrecto
 const msg = data.message; // "Los datos proporcionados no son válidos"
 
 // ✅ Correcto
-const msg = data.details; // "La contraseña es incorrecta"
+const msg = Array.isArray(data.errors) ? data.errors[0]?.message : null; // "La contraseña es incorrecta"
 ```
 
 ### ❌ Error: No puedo leer el mensaje de error

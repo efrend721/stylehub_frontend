@@ -1,6 +1,7 @@
 import { API_BASE, createHeaders, isApiResponse, ApiResponse } from '#/services/common/types';
 import { ApiError, ValidationErrorEntry } from './errors';
 import { notifyUnauthorized } from './authEvents';
+import { notifyForbidden } from './forbiddenEvents';
 
 export interface RequestOptions {
   token?: string;
@@ -21,6 +22,7 @@ type RawErrorShape = {
   mensaje?: unknown;
   details?: unknown;
   errors?: unknown;
+  source?: unknown;
 };
 
 function extractValidationErrors(raw: RawErrorShape): ValidationErrorEntry[] | undefined {
@@ -61,6 +63,12 @@ function resolveErrorMessage(status: number, raw: RawErrorShape): string {
   return message ?? details ?? error ?? `HTTP ${status}`;
 }
 
+function isSessionExpiredMessage(msg: string): boolean {
+  const m = msg.trim().toLowerCase();
+  // tolerante a tildes/variantes: "sesion" vs "sesión"
+  return m.includes('sesion ha expirado') || m.includes('sesión ha expirado') || m.includes('tu sesión ha expirado') || m.includes('tu sesion ha expirado');
+}
+
 export async function http<T = unknown>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { token, method = 'GET', body, headers } = opts;
   const mergedHeaders: Record<string, string> = { ...createHeaders(token), ...(headers ?? {}) };
@@ -83,6 +91,29 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
     const msg = errShape ? resolveErrorMessage(401, errShape) : 'No autenticado';
     notifyUnauthorized({ status: 401, message: msg });
   }
+
+  // 403 global (sólo navegación): si el backend bloquea menús/rutas, enviar al /403
+  if (res.status === 403 && !opts.silent) {
+    const isNavEndpoint = path === '/menus' || path === '/menus/routes';
+    if (isNavEndpoint) {
+      const errShape = raw && typeof raw === 'object' ? (raw as RawErrorShape) : undefined;
+      const msg = errShape ? resolveErrorMessage(403, errShape) : 'No autorizado';
+      const backendSource = errShape ? asNonEmptyString(errShape.source) : undefined;
+      const src = (backendSource === 'routes' || backendSource === 'menus')
+        ? backendSource
+        : (path === '/menus/routes' ? 'routes' : 'menus');
+      notifyForbidden({ status: 403, message: msg, source: src });
+    }
+  }
+
+  // Compatibilidad: algunos flujos legacy pueden enviar sesión expirada como 422 (errors[])
+  if (res.status === 422 && !opts.silent && raw && typeof raw === 'object') {
+    const errShape = raw as RawErrorShape;
+    const msg = resolveErrorMessage(422, errShape);
+    if (isSessionExpiredMessage(msg)) {
+      notifyUnauthorized({ status: 422, message: msg });
+    }
+  }
   
   // Si silent: true y hay error, retornar null
   if (opts.silent && !res.ok) {
@@ -97,7 +128,8 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
       const details = asNonEmptyString(errorObj.details);
       const errs = extractValidationErrors(errorObj);
       const msg = resolveErrorMessage(res.status, errorObj);
-      throw new ApiError(msg, res.status, details, errs);
+      const src = asNonEmptyString(errorObj.source);
+      throw new ApiError(msg, res.status, details, errs, src);
     }
   }
   
@@ -110,6 +142,7 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
     const anyRaw = raw as RawErrorShape;
     const details = asNonEmptyString(anyRaw.details);
     const errs = extractValidationErrors(anyRaw);
+    const src = asNonEmptyString(anyRaw.source);
 
     const msg =
       // si el wrapper ApiResponse viene con message, usarlo como base
@@ -117,7 +150,7 @@ export async function http<T = unknown>(path: string, opts: RequestOptions = {})
         ? api.message.trim()
         : resolveErrorMessage(res.status, anyRaw);
 
-    throw new ApiError(msg, res.status, details, errs);
+    throw new ApiError(msg, res.status, details, errs, src);
   }
   if (typeof api.data === 'undefined') {
     return undefined as unknown as T;
