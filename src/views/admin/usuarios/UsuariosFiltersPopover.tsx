@@ -8,11 +8,12 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import type { EstablecimientoSelect } from './useEstablecimientos';
 import type { RolSelect } from '#/views/admin/roles';
+import type { UsuariosSearchEstado } from '#/services/usuarios/usuariosService';
 
 export type UsuariosFilters = {
   est: string; // '' = todos
   rol: number | null; // null = todos
-  estado?: string;
+  estado?: UsuariosSearchEstado;
 };
 
 type Props = {
@@ -105,7 +106,7 @@ export default function UsuariosFiltersPopover({ anchorEl, open, onClose, onClea
             fullWidth
             value={filters.estado ?? ''}
             onChange={(e) => {
-              const v = String(e.target.value);
+              const v = String(e.target.value) as '' | UsuariosSearchEstado;
               setFilters({ ...filters, estado: v === '' ? undefined : v });
             }}
             slotProps={{

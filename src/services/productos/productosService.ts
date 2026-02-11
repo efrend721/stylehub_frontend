@@ -1,12 +1,13 @@
 import { http } from '#/services/apiClient/http';
 
-function omitNullish<T extends Record<string, unknown>>(payload: T): Partial<T> {
-  const out: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(payload)) {
+function omitNullish<T extends object>(payload: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const key of Object.keys(payload) as Array<keyof T>) {
+    const value = payload[key];
     if (value === null || value === undefined) continue;
     out[key] = value;
   }
-  return out as Partial<T>;
+  return out;
 }
 
 // Types

@@ -18,11 +18,19 @@ import UsuariosHeaderCard from './UsuariosHeaderCard';
 import UsuariosList from './UsuariosList';
 import { useAuth } from '#/contexts/AuthContext';
 import { hasRole } from '#/utils/auth/roleUtils';
+import type { UsuariosSearchEstado } from '#/services/usuarios/usuariosService';
+
+const ESTADOS_VALIDOS = ['0', '1', 'all', '*'] as const;
+function parseEstado(value: string | null): UsuariosSearchEstado | undefined {
+  if (!value) return undefined;
+  if ((ESTADOS_VALIDOS as readonly string[]).includes(value)) return value as UsuariosSearchEstado;
+  return undefined;
+}
 
 export default function AdminUsuariosPage() {
   const { user } = useAuth();
   const isRole2 = hasRole(user, 2);
-  const defaultEstado = undefined;
+  const defaultEstado: UsuariosSearchEstado | undefined = undefined;
 
   const theme = useTheme();
   const downSm = useMediaQuery(theme.breakpoints.down('sm'));
@@ -91,8 +99,7 @@ export default function AdminUsuariosPage() {
     const est = isRole2 ? '' : (searchParams.get('est') || '');
     const rol = searchParams.get('rol');
     const estadoParam = searchParams.get('estado');
-    const estadoRaw = estadoParam || undefined;
-    const estado = estadoRaw && ['0', '1', 'all', '*'].includes(estadoRaw) ? estadoRaw : defaultEstado;
+    const estado = parseEstado(estadoParam) ?? defaultEstado;
 
     const hasEstadoParam = estadoParam != null && estadoParam !== '';
 
