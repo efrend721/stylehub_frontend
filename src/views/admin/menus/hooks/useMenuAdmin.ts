@@ -153,8 +153,6 @@ export function useMenuAdmin() {
     const payload: Record<string, unknown> = {};
     const nextTitulo = groupTitulo?.trim();
     if (typeof nextTitulo === 'string' && nextTitulo !== editingNode.titulo) payload.titulo = nextTitulo;
-    const nextIdKey = groupIdKey?.trim();
-    if (nextIdKey && nextIdKey !== (editingNode.id_key ?? '')) payload.id_key = nextIdKey;
     if (Object.keys(payload).length === 0) { notify.info('No hay cambios para guardar'); return; }
     setActionLoadingId(editingNode.id_menu_item);
     try {
@@ -175,8 +173,6 @@ export function useMenuAdmin() {
     const nextIcon = itemIcon?.trim();
     const currentIcon = (typeof editingNode.icono === 'string' ? editingNode.icono : '') ?? '';
     if ((nextIcon || '') !== currentIcon) { if (nextIcon) payload.icono = nextIcon; }
-    const nextIdKey = itemIdKey?.trim();
-    if (nextIdKey && nextIdKey !== (editingNode.id_key ?? '')) payload.id_key = nextIdKey;
     if (Object.keys(payload).length === 0) { notify.info('No hay cambios para guardar'); return; }
     setActionLoadingId(editingNode.id_menu_item);
     try {

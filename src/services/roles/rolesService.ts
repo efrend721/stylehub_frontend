@@ -6,7 +6,8 @@ export interface IRolesService {
   getForSelect(scope?: 'all' | 'operativos', token?: string): Promise<RolSelect[]>;
   getById(id: number, token?: string): Promise<Rol>;
   create(payload: import('#/views/admin/roles').CreateRolPayload, token?: string): Promise<Rol>;
-  update(rol: Rol, menuItems?: number[], token?: string): Promise<unknown>;
+  update(rol: Rol, token?: string): Promise<unknown>;
+  updateMenus(id: number, menuItems: number[], token?: string): Promise<unknown>;
   deleteOne(id: number, token?: string): Promise<unknown>;
   deleteMultiple(ids: (string|number)[], token?: string): Promise<unknown[]>;
 }
@@ -28,14 +29,18 @@ const create = (payload: import('#/views/admin/roles').CreateRolPayload, token?:
   return http<Rol>('/roles', { method: 'POST', body: payload, token });
 };
 
-const update = (rol: Rol, menuItems?: number[], token?: string) => {
+const update = (rol: Rol, token?: string) => {
   const payload = {
     nombre: rol.nombre,
     descripcion: rol.descripcion,
-    estado: rol.estado,
-    menu_items: menuItems
+    estado: rol.estado
   };
   return http<unknown>(`/roles/${encodeURIComponent(String(rol.id_rol))}`, { method: 'PUT', body: payload, token });
+};
+
+const updateMenus = (id: number, menuItems: number[], token?: string) => {
+  const payload = { menu_items: menuItems };
+  return http<unknown>(`/roles/${encodeURIComponent(String(id))}/menus`, { method: 'PUT', body: payload, token });
 };
 
 const deleteOne = (id: number, token?: string) => {
@@ -52,6 +57,7 @@ export const RolesService: IRolesService = {
   getById,
   create,
   update,
+  updateMenus,
   deleteOne,
   deleteMultiple
 };

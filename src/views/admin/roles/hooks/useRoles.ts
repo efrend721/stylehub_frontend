@@ -95,8 +95,7 @@ export function useRoles() {
     if (!editRol) return;
     setSaving(true);
     try {
-      // Compatibilidad con nueva firma: (rol, menuItems?, token?)
-      await RolesService.update(editRol, undefined, token || undefined);
+      await RolesService.update(editRol, token || undefined);
       notify.success('Rol actualizado');
       setEditRol(null);
       await fetchRoles();

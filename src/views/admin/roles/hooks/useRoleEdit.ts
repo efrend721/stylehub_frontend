@@ -5,7 +5,7 @@ import { RolesService } from '#/services/roles/rolesService';
 import { MenusService } from '#/services/menus/menusService';
 import type { Rol } from '#/views/admin/roles';
 import type { RoleMenuItem } from '#/types/menu';
-import { setNodeAndDescendants, updateParentsBasedOnChildren, getAllAssignedIds } from '../utils/menuTree';
+import { setNodeAndDescendants, getAllAssignedIds } from '../utils/menuTree';
 
 export function useRoleEdit(roleId: number | undefined) {
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,9 @@ export function useRoleEdit(roleId: number | undefined) {
   };
 
   const handleMenuToggle = (menuId: number, checked: boolean) => {
-    setMenus((prev) => updateParentsBasedOnChildren(setNodeAndDescendants(prev, menuId, checked)));
+    // Importante (PBAC): no marcar padres automáticamente cuando se selecciona un hijo.
+    // Solo persistimos explícitamente los nodos seleccionados; los estados visuales (parcial) se resuelven en el UI.
+    setMenus((prev) => setNodeAndDescendants(prev, menuId, checked));
   };
 
   const save = async () => {
@@ -70,7 +72,11 @@ export function useRoleEdit(roleId: number | undefined) {
     setSaving(true);
     try {
       const assignedMenuIds = getAllAssignedIds(menus);
-      await RolesService.update(role, assignedMenuIds);
+      await RolesService.update(role);
+      await RolesService.updateMenus(Number(role.id_rol), assignedMenuIds);
+      const refreshedMenus = await MenusService.getRoleMenus(Number(role.id_rol));
+      setMenus(refreshedMenus);
+      initialSnapshotRef.current = buildSnapshot(role, refreshedMenus);
       notify.success('Rol actualizado correctamente');
     } catch (e) {
       notify.error(getErrorMessage(e, 'Error al guardar cambios'));

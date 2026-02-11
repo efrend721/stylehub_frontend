@@ -96,6 +96,7 @@ export function AdminPanel(props: {
                   }}
                   size="small"
                   disabled={isEditingGroup}
+                  helperText={isEditingGroup ? 'id_key no es editable (deriva permiso ui:menu:*)' : 'Define el permiso UI del item (ui:menu:*)'}
                 />
                 <TextField label="título" placeholder="Ingrese título" value={groupTitulo} onChange={(e) => setGroupTitulo(e.target.value)} size="small" />
               </Stack>
@@ -164,6 +165,7 @@ export function AdminPanel(props: {
                     size="small"
                     disabled={isEditingItem}
                     fullWidth
+                    helperText={isEditingItem ? 'id_key no es editable (deriva permiso ui:menu:*)' : 'Define el permiso UI del item (ui:menu:*)'}
                   />
                 </Grid>
 

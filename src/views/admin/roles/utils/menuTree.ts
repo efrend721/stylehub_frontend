@@ -48,7 +48,9 @@ export const updateParentsBasedOnChildren = (items: RoleMenuItem[]): RoleMenuIte
 export const getAllAssignedIds = (items: RoleMenuItem[]): number[] => {
   let ids: number[] = [];
   items.forEach((item) => {
-    if (item.asignado) ids.push(item.id_menu_item);
+    const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+    // PBAC: persistir asignación a nivel de hoja (items finales). Los nodos contenedores se derivan.
+    if (item.asignado && !hasChildren) ids.push(item.id_menu_item);
     if (item.children) ids = ids.concat(getAllAssignedIds(item.children));
   });
   return ids;

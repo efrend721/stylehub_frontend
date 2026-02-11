@@ -1,0 +1,19 @@
+{
+	"servers": {
+		"my-mcp-server-4b879bb0": {
+			"type": "stdio",
+			"command": "node",
+			"args": ["../../MySQL_MCP_server/mcp-dbs/dist/index.js"],
+			"env": {
+				"DB_TYPE": "mysql",
+				"DB_HOST": "192.168.1.10",
+				"DB_PORT": "3306",
+				"DB_NAME": "stylehub_db",
+				"DB_USER": "systems",
+				"DB_PASSWORD": "Admin1234!",
+				"ALLOW_ALL_SQL": "true"
+			}
+		}
+	},
+	"inputs": []
+}

@@ -30,15 +30,9 @@ if (Array.isArray(data.errors)) {
 
 ---
 
-## 📊 Resumen Rápido por Status Code
-
-| Status                     | Campo del Mensaje | Uso            |
 | -------------------------- | ----------------- | -------------- |
 | **401** (No autenticado)   | `message`         | `data.message` |
 | **403** (No autorizado)    | `message`         | `data.message` |
-| **422** (Validación)       | `errors[]`        | `data.errors`  |
-| **404** (No encontrado)    | `message`         | `data.message` |
-| **500** (DB / Interno)     | `message`         | `data.message` |
 | **503** (DB no disponible) | `error`           | `data.error`   |
 
 > Nota PBAC: cuando el backend bloquea por permisos (PEP), las respuestas 401/403 vienen con este formato:
@@ -48,6 +42,37 @@ if (Array.isArray(data.errors)) {
 >   "success": false,
 >   "error": "No autorizado",
 >   "message": "No tienes permisos para este endpoint",
+>   "timestamp": "..."
+> }
+> ```
+>
+> Backend cambió el manejo del **403** en el caso de **`/menus/routes`** (allowlist del router) para que el frontend pueda mostrar un mensaje “de aplicación” cuando el usuario ni siquiera puede cargar rutas.
+>
+> **Qué cambia**
+>
+> - En general, los **403** del PBAC siguen igual:
+>   - `error`: "No autorizado"
+>   - `message`: "No tienes permisos para este endpoint"
+> - Pero si el **403** viene desde **`GET /menus/routes`**, el backend ahora incluye:
+>   - `source`: "routes"
+>   - y el `message` cambia a: **"No tienes permisos para acceder a esta aplicación"**
+>
+> **Cómo usarlo en frontend**
+>
+> - Si recibes **403** y el JSON trae `source === "routes"`:
+>   - Mostrar pantalla/bloqueo global (ej. “Acceso denegado a la aplicación”)
+>   - No intentar renderizar router dinámico con allowlist vacía
+> - Si recibes **403** sin `source`:
+>   - Tratarlo como “no autorizado para ese módulo/pantalla” (mensaje normal por endpoint)
+>
+> **Ejemplo de payload (403 desde `/menus/routes`)**
+>
+> ```json
+> {
+>   "success": false,
+>   "error": "No autorizado",
+>   "message": "No tienes permisos para acceder a esta aplicación",
+>   "source": "routes",
 >   "timestamp": "..."
 > }
 > ```
@@ -95,12 +120,12 @@ if (!res.ok) {
     ? data.errors.map((e) => e.message).join("\n")
     : data.message || data.error || "Error de validación";
   toast.error(mensaje);
-}
-```
 
 ### 3. Login - Cuenta Desactivada
 
+
 ```javascript
+
 const res = await fetch("/api/auth/login", {
   method: "POST",
   credentials: "include",
@@ -514,6 +539,26 @@ Objetivo:
 
 - `GET /menus` → sidebar (solo `nav_visible = 1`)
 - `GET /menus/routes` → allowlist del router (incluye `nav_visible = 0`)
+
+### 1.1) Asignación de menús (PBAC) por rol y por usuario
+
+En PBAC no existe una tabla “rol → menú” como fuente de verdad.
+Lo que el sidebar muestra sale de permisos efectivos (roles + overrides por usuario) y del mapeo `menus_items_permisos`.
+
+- Asignación por rol (admin):
+  - `GET /roles/:id/menus` (árbol con `asignado`)
+  - `PUT /roles/:id/menus` con `{ "menu_items": number[] }`
+
+- Asignación por usuario (admin):
+  - `GET /usuarios/:usuario_acceso/menus` (árbol con `asignado`)
+  - `PUT /usuarios/:usuario_acceso/menus` con:
+    - `{ "mode": "merge", "menu_items": number[] }` → agrega permisos (no restringe los heredados)
+    - `{ "mode": "replace", "menu_items": number[] }` → whitelist: permite solo lo seleccionado dentro del universo mapeado a menús y deniega el resto (override fuerte)
+
+Recomendación:
+
+- Para sidebar: siempre consumir `GET /menus`.
+- Usar endpoints de asignación solo en pantallas de administración.
 
 Ejemplo de hook para allowlist (`useAllowedRoutes.ts`):
 

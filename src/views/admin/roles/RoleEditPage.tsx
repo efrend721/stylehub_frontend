@@ -105,6 +105,10 @@ const RoleEditPage = () => {
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
               Seleccione los menús a los que este rol tendrá acceso.
             </Typography>
+            <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 2 }}>
+              Nota (PBAC): al guardar se sincronizan permisos del rol. Cada opción (type: "item" con url)
+              se asigna de forma individual.
+            </Typography>
             <Divider sx={{ mb: 2 }} />
             
             <MenuTree items={menus} onToggle={handleMenuToggle} />
