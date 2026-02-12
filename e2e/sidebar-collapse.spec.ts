@@ -1,11 +1,39 @@
 import { test, expect } from '@playwright/test';
 
 test('sidebar group menus expand/collapse', async ({ page }) => {
+  // Ensure the drawer starts open (otherwise group labels/buttons may be hidden)
+  await page.addInitScript(() => {
+    const key = 'berry-config-vite-js';
+    const value = {
+      fontFamily: "'Roboto', sans-serif",
+      borderRadius: 8,
+      collapsibleGroupMenus: true,
+      customGroupIcons: true,
+      miniDrawer: false
+    };
+    localStorage.setItem(key, JSON.stringify(value));
+  });
+
   // Mock auth so AuthGuard allows MainLayout rendering
   await page.route('**/auth/me*', async (route) => {
+    const req = route.request();
+    const origin = req.headers()['origin'] ?? 'http://localhost';
+    const baseHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      'Access-Control-Allow-Headers': req.headers()['access-control-request-headers'] ?? 'content-type, authorization'
+    };
+
+    if (req.method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: baseHeaders, body: '' });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: baseHeaders,
       body: JSON.stringify({
         success: true,
         data: {
@@ -26,11 +54,50 @@ test('sidebar group menus expand/collapse', async ({ page }) => {
     });
   });
 
-  // Mock menus so the sidebar is deterministic
-  await page.route('**/menus*', async (route) => {
+  // Mock /menus/routes (flat allowlist) just in case something prefetches it
+  await page.route(/\/menus\/routes(?:\?.*)?$/, async (route) => {
+    const req = route.request();
+    const origin = req.headers()['origin'] ?? 'http://localhost';
+    const baseHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      'Access-Control-Allow-Headers': req.headers()['access-control-request-headers'] ?? 'content-type, authorization'
+    };
+
+    if (req.method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: baseHeaders, body: '' });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: baseHeaders,
+      body: JSON.stringify({ success: true, data: [] })
+    });
+  });
+
+  // Mock /menus so the sidebar is deterministic
+  await page.route(/\/menus(?:\?.*)?$/, async (route) => {
+    const req = route.request();
+    const origin = req.headers()['origin'] ?? 'http://localhost';
+    const baseHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      'Access-Control-Allow-Headers': req.headers()['access-control-request-headers'] ?? 'content-type, authorization'
+    };
+
+    if (req.method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: baseHeaders, body: '' });
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: baseHeaders,
       body: JSON.stringify({
         success: true,
         data: [
@@ -46,19 +113,6 @@ test('sidebar group menus expand/collapse', async ({ page }) => {
                 url: '/dashboard/default'
               }
             ]
-          },
-          {
-            id: 'logistica',
-            title: 'Logística',
-            type: 'group',
-            children: [
-              {
-                id: 'logistica-reportes',
-                title: 'Reportes',
-                type: 'item',
-                url: '/logistica/reportes'
-              }
-            ]
           }
         ]
       })
@@ -66,12 +120,18 @@ test('sidebar group menus expand/collapse', async ({ page }) => {
   });
 
   await page.goto('/dashboard/default');
-  const sidebarNav = page.getByRole('navigation', { name: 'mailbox folders' });
 
-  const dashboardGroupButton = sidebarNav.getByRole('button', { name: 'Dashboard' }).first();
+  // Ensure auth check ran; if not authenticated the app redirects to /login and the drawer never renders.
+  await page.waitForResponse((res) => res.url().includes('/auth/me') && res.status() === 200, { timeout: 10000 });
+  await expect(page.locator('input[name="usuario_acceso"]')).toHaveCount(0);
+
+  const drawerPaper = page.locator('.MuiDrawer-paper').first();
+  await expect(drawerPaper).toBeVisible();
+
+  const dashboardGroupButton = drawerPaper.getByRole('button', { name: 'Dashboard' }).first();
   await expect(dashboardGroupButton).toBeVisible();
 
-  const dashboardChild = sidebarNav.getByText('Inicio', { exact: true });
+  const dashboardChild = drawerPaper.getByText('Inicio', { exact: true });
 
   // Default should be collapsed (children unmounted)
   await expect(dashboardChild).toHaveCount(0);

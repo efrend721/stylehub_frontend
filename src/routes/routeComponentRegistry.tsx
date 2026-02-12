@@ -19,8 +19,7 @@ const AdminConfiguracion = Loadable(lazy(() => import('#/views/admin/configuraci
 // sys config
 const SysConfigEstablecimientos = Loadable(lazy(() => import('#/views/sysConfig/establecimientos')));
 
-// auditoría y reportes
-const AuditLogs = Loadable(lazy(() => import('#/views/audit/logs')));
+// reportes
 const Reportes = Loadable(lazy(() => import('#/views/reportes')));
 
 // gestión de productos
@@ -61,9 +60,7 @@ export function getRouteElementByKey(componentKey: string): ReactElement | null 
     case 'establecimiento':
       return <SysConfigEstablecimientos />;
 
-    // auditoría/reportes
-    case 'logs-sistema':
-      return <AuditLogs />;
+    // reportes
     case 'reportes':
       return <Reportes />;
     case 'reporte':

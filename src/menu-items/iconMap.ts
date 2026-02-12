@@ -111,9 +111,7 @@ export function getGroupIconByTitle(title?: string | null): IconComponent {
   if (t.includes('dashboard') || t.includes('panel')) return createWrappedIcon(IconDashboard, 'dashboard');
   if (t.includes('venta')) return createWrappedIcon(IconShoppingCart, 'shopping-cart');
   if (t.includes('gestion de usuario') || t.includes('usuarios')) return createWrappedIcon(IconUsers, 'users');
-  if (t.includes('auditoria')) return createWrappedIcon(IconReport, 'report');
   if (t.includes('configuracion') || t.includes('sistema') || t.includes('ajustes')) return createWrappedIcon(IconSettings, 'settings');
-  if (t.includes('logistica') || t.includes('envio') || t.includes('transporte')) return createWrappedIcon(IconTruck, 'truck');
   if (t.includes('gestion')) return createWrappedIcon(IconActivity, 'activity');
   // Fallback neutral icon
   return createWrappedIcon(IconWindmill, 'windmill');
