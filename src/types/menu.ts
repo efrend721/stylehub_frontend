@@ -2,7 +2,10 @@
 import type { IconComponent } from '#/menu-items/iconMap';
 
 export type BackendMenuItem = {
-  id: string;
+  // Nota: algunos endpoints devuelven `id` (id_key) y otros devuelven `id_key` + `id_menu_item`.
+  // Mantenemos compatibilidad aceptando `id` como string/number y `id_key` opcional.
+  id: string | number;
+  id_key?: string | null;
   title: string | null;
   type: 'group' | 'item' | 'collapse';
   icon?: string | null;

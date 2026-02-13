@@ -15,6 +15,11 @@ export interface User {
   id_rol: number;
   // PBAC / multirol (compatibilidad: el backend puede enviar roles[])
   roles?: number[];
+  // Scopes/permisos efectivos (migración productos:* -> articulos:*)
+  // El backend puede elegir distintos nombres; mantenemos opcionalidad.
+  scopes?: string[];
+  permisos?: string[];
+  permissions?: string[];
   id_establecimiento: string;
   estado: number;
   fecha_creacion: string;
@@ -84,6 +89,35 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function extractUserFromMeResponse(payload: unknown): User | null {
+  if (!payload) return null;
+
+  // http() unwraps ApiResponse and returns `data`, so common shape is { user: User }
+  if (typeof payload === 'object') {
+    const p = payload as Record<string, unknown>;
+    const maybeUser = p.user;
+    if (maybeUser && typeof maybeUser === 'object') {
+      return maybeUser as User;
+    }
+    // Fallback: some callers might pass the full ApiResponse
+    const data = p.data;
+    if (data && typeof data === 'object') {
+      const d = data as Record<string, unknown>;
+      if (d.user && typeof d.user === 'object') return d.user as User;
+    }
+  }
+
+  // Sometimes backend may return the user directly
+  if (typeof payload === 'object') {
+    const p = payload as Record<string, unknown>;
+    if (typeof p.id_usuario_uuid === 'string' && typeof p.usuario_acceso === 'string') {
+      return payload as User;
+    }
+  }
+
+  return null;
+}
+
 // Auth Provider Component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -98,7 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkAuth = async () => {
       try {
         // Llamar al endpoint /auth/me que usa la cookie httpOnly automáticamente
-        const user = (await AuthService.me()) as User | null;
+        const mePayload = await AuthService.me();
+        const user = extractUserFromMeResponse(mePayload);
         // Si no hay usuario (sesión no activa), establecer como no autenticado
         if (!user) {
           setState({

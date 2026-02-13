@@ -11,6 +11,24 @@ function normalizePath(pathname: string): string {
   return p;
 }
 
+function inferComponentKeyFromUrl(url: string): string | null {
+  const u = normalizePath(url);
+  if (u === '/dashboard/default') return 'dashboard-default';
+
+  const last = u.split('/').filter(Boolean).pop() ?? '';
+  if (!last) return null;
+
+  switch (last) {
+    case 'articulo':
+    case 'articulos':
+    case 'producto':
+    case 'productos':
+      return 'articulos';
+    default:
+      return last;
+  }
+}
+
 export default function DynamicRouteRenderer() {
   const location = useLocation();
   const { routes, loading } = useAllowedRoutes();
@@ -33,10 +51,15 @@ export default function DynamicRouteRenderer() {
     return <Navigate to="/403" replace />;
   }
 
-  const element = getRouteElementByKey(match.id);
+  const element = getRouteElementByKey(String(match.id));
   if (!element) {
+    // Ruta declarada pero el backend no entregó un id_key usable.
+    // Fallback: inferir desde la URL para evitar rebote al dashboard.
+    const inferredKey = inferComponentKeyFromUrl(match.url);
+    const inferredElement = inferredKey ? getRouteElementByKey(inferredKey) : null;
+    if (inferredElement) return inferredElement;
+
     // Ruta declarada pero aún no implementada en el registry.
-    // No mostramos algo “mágico”; mejor fallback seguro.
     return <Navigate to="/dashboard/default" replace />;
   }
 

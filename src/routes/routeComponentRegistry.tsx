@@ -23,12 +23,12 @@ const SysConfigEstablecimientos = Loadable(lazy(() => import('#/views/sysConfig/
 const Reportes = Loadable(lazy(() => import('#/views/reportes')));
 
 // gestión de productos
-const TipoProducto = Loadable(lazy(() => import('#/views/gestionProductos/tipoProducto')));
-const CategoriaProducto = Loadable(lazy(() => import('#/views/gestionProductos/categoriaProducto')));
+const TipoArticulo = Loadable(lazy(() => import('#/views/gestionArticulos/tipoArticulo')));
+const CategoriaArticulo = Loadable(lazy(() => import('#/views/gestionArticulos/categoriaArticulo')));
 
 // catálogo
 const Proveedores = Loadable(lazy(() => import('#/views/catalogo/proveedores')));
-const Productos = Loadable(lazy(() => import('#/views/catalogo/productos')));
+const Articulos = Loadable(lazy(() => import('#/views/catalogo/articulos')));
 
 export function getRouteElementByKey(componentKey: string): ReactElement | null {
   switch (componentKey) {
@@ -68,15 +68,16 @@ export function getRouteElementByKey(componentKey: string): ReactElement | null 
     case 'reportedinamico':
       return <Reportes />;
 
-    // productos
+    // inventario
     case 'tipoproducto':
-      return <TipoProducto />;
+      return <TipoArticulo />;
     case 'categoria':
-      return <CategoriaProducto />;
+      return <CategoriaArticulo />;
     case 'proveedor':
       return <Proveedores />;
     case 'productos':
-      return <Productos />;
+    case 'articulos':
+      return <Articulos />;
 
     default:
       return null;

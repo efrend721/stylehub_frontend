@@ -67,8 +67,11 @@ function inflate(item: BackendMenuItem, overrideGroupIcons: boolean): UIMenuItem
     resolvedIcon = getIcon(item.icon ?? undefined);
   }
 
+  const rawId = (item as BackendMenuItem & { id_key?: unknown }).id_key ?? item.id;
+  const stableId = typeof rawId === 'string' ? rawId.trim() : String(rawId ?? '').trim();
+
   const uiItem: UIMenuItem = {
-    id: item.id,
+    id: stableId,
     title: item.title,
     type: item.type,
     icon: resolvedIcon,

@@ -39,7 +39,12 @@ function extractAllowedRoutes(items: BackendMenuItem[]): AllowedRoute[] {
       const isExternal = toBool(it.external, false);
       return !isExternal && url.startsWith('/');
     })
-    .map((it) => ({ id: it.id, url: normalizePath(String(it.url)) }));
+    .map((it) => {
+      const rawKey = (it as BackendMenuItem & { id_key?: unknown }).id_key ?? it.id;
+      const id = typeof rawKey === 'string' ? rawKey.trim() : String(rawKey ?? '').trim();
+      return { id, url: normalizePath(String(it.url)) };
+    })
+    .filter((r) => r.id !== '');
 }
 
 export function useAllowedRoutes(): HookState {
